@@ -1,0 +1,175 @@
+# ======================
+# Visual Studio специфичные файлы
+# ======================
+.vs/
+.vscode/
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.opendb
+*.sln.docstates
+*.slnx
+*.sql
+*.tmp.vs
+
+# ======================
+# Папки сборки (все проекты)
+# ======================
+**/Debug/
+**/Release/
+**/x64/
+**/x86/
+**/build/
+**/out/
+**/bin/
+**/obj/
+**/Win32/
+**/ARM/
+**/ARM64/
+
+# ======================
+# Файлы компиляции и линковки
+# ======================
+*.exe
+*.exe.config
+*.dll
+*.lib
+*.obj
+*.o
+*.a
+*.so
+*.dylib
+*.pdb
+*.ilk
+*.idb
+*.ipdb
+*.iobj
+*.exp
+*.map
+*.manifest
+*.res
+*.resources
+*.tlb
+*.tlh
+*.tmp
+*.tmp_obj
+
+# ======================
+# IntelliSense и кэш
+# ======================
+*.ipch
+*.ncb
+*.suo
+*.sbr
+*.bsc
+*.vcxproj.filters
+*.vcxproj.user
+*.vcxproj.vspscc
+
+# ======================
+# Отладочные файлы
+# ======================
+*.pdb
+*.dbg
+*.dmp
+*.stackdump
+*.gcno
+*.gcda
+*.gcov
+
+# ======================
+# Логи и временные файлы
+# ======================
+*.log
+*.cache
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+*.swp
+*.swo
+*~
+*.lock
+*.tmp
+
+# ======================
+# CMake файлы
+# ======================
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+CMakeScripts/
+*.cmake
+!CMakeLists.txt
+
+# ======================
+# Файлы упаковки и архивы
+# ======================
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+*.bz2
+
+# ======================
+# Системные файлы
+# ======================
+Thumbs.db
+Desktop.ini
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+*.db
+
+# ======================
+# Файлы покрытия кода
+# ======================
+*.coverage
+*.coveragexml
+*.trx
+TestResults/
+
+# ======================
+# Файлы профилирования
+# ======================
+*.vsp
+*.vspscc
+*.psess
+*.vspx
+*.sap
+*.psess
+*.vspf
+
+# ======================
+# Файлы установщиков
+# ======================
+*.msi
+*.msm
+*.msp
+*.cab
+*.nupkg
+
+# ======================
+# Документация (сгенерированная)
+# ======================
+*.chm
+*.epub
+*.dox
+*.tag
+*.xml
+!*.xml
+
+# ======================
+# Файлы VS Code
+# ======================
+.vscode/
+*.code-workspace
