@@ -456,15 +456,8 @@ void task_6()
 
 }
 
-takecard(int *hand, int *cards, )
-void Indus_ai(int hand,)
+void takecard(int* hand, int* cards)
 {
-    if ((rand() % 10) + 1 > 4)
-    {
-        if (hand < 14)
-            takecard()
-    }
-
 
 }
 int arrsum(int arr[], int len)
@@ -536,6 +529,7 @@ void game(int *player1_bank, int bet, int *dealer_bank)
                 game_end = true;
                 player1_win = true;
             }
+            
             break;
         case 2:
             if (i > 0)
@@ -545,6 +539,12 @@ void game(int *player1_bank, int bet, int *dealer_bank)
             }
             else
             {
+                
+                bet *= 2;
+                game_bank == 4 * bet;
+                *player1_bank -= bet;
+                *dealer_bank -= bet;
+
                 i++;
                 k++;
                 player1_hand[i] = cards[k];
@@ -560,7 +560,11 @@ void game(int *player1_bank, int bet, int *dealer_bank)
                 }
                 else
                 {
-                    Indus_ai()
+                    j++;
+                    k++;
+                    dealer_hand[j] = cards[k];
+                    if ((arrsum(dealer_hand, j + 1) == 21) || (arrsum(dealer_hand, j + 1) > (arrsum(player1_hand, i + 1)))
+
                 }
                 break;
             }
@@ -638,8 +642,6 @@ void task_7()
             break;
         case 4:
             game(&player1_bank, bet, &dealer_bank);
-
-            
         }
 
 
