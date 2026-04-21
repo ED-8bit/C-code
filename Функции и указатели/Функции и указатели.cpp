@@ -3,6 +3,7 @@
 #include <cctype>
 #include <cmath>
 #include <cstdlib>
+#include <windows.h>
 using namespace std;
 /*
 void cube(int *n, int num);
@@ -116,7 +117,7 @@ int menu()
     cout << "4. Функция для выставления нижнего регистра строки\n";
     cout << "5. Функции для работы с дробями\n";
     cout << "6. Функция для возврата простых делителей\n";
-    cout << "7. БЛЕКДЖЕК!\n";
+    cout << "7. ИГРА в 21\n";
     cout << "8. Функция для поиска N члена Фибоначчи\n";
     cout << "9. Функция для вычисления суммы цифр целого числа\n";
     cout << "10. Функция для возврата числа в обратном порядке\n";
@@ -456,9 +457,17 @@ void task_6()
 
 }
 
-void takecard(int* hand, int* cards)
+bool takecard(int hand[], int &j, int cards[], int &k)
 {
-
+    if (k > 0)
+    {
+        hand[j] = cards[k - 1];
+        j++;
+        k--;
+        return true;
+    }
+    else
+        return false;
 }
 int arrsum(int arr[], int len)
 {
@@ -487,112 +496,112 @@ void game(int *player1_bank, int bet, int *dealer_bank)
     bool dealer_win = false, player1_win = false, game_end = false;
     int cards[36] = { 2, 3, 4, 6, 7, 8, 9, 10, 11,    2, 3, 4, 6, 7, 8, 9, 10, 11,    2, 3, 4, 6, 7, 8, 9, 10, 11,    2, 3, 4, 6, 7, 8, 9, 10, 11 };
     int player1_hand[15], dealer_hand[15];
-    int i = 0, j = 0, k = 0, n, choice;
+    int i = 0, j = 0, k = 36, n, choice;
     
-   
     *player1_bank -= bet;
     *dealer_bank -= bet;
     game_bank += 2*bet;
 
+    
+
+    shake(cards, 36);
+    takecard(player1_hand, i, cards, k);
+    takecard(dealer_hand, j, cards, k);
+    
     do
     {
         system("cls");
         cout << "Ваш баланс: " << *player1_bank << "   Банк игры: " << game_bank << "\n\n";
-        shake(cards, 36);
-
-
-        player1_hand[i] = cards[k];
-        cout << "У вас на руке " << arrsum(player1_hand,i+1) << " очков\n";
-        k++;
-        dealer_hand[j] = cards[k];
-        cout << "У дилера на руке " << arrsum(dealer_hand, 1) << " очков\n\n";
-
+        cout << "У вас на руке " << arrsum(player1_hand, i) << " очков\n";
+        cout << "У дилера на руке " << arrsum(dealer_hand, j) << " очков\n\n";
+        
         cout << "1. Взять ещё карту\n";
-        cout << "2. Дабл\n";
-        cout << "3. Хватит\n";
+        cout << "2. Хватит\n";
         cout << "CHOICE? : ";
         cin >> choice;
 
         switch (choice)
         {
         case 1:
-            i++;
-            k++;
-            player1_hand[i] = cards[k];
-            if (arrsum(player1_hand, i + 1) > 21)
+            takecard(player1_hand, i, cards, k);
+            if (arrsum(player1_hand, i) > 21)
             {
+                system("cls");
+                cout << "Ваш баланс: " << *player1_bank << "   Банк игры: " << game_bank << "\n\n";
+                cout << "У вас на руке " << arrsum(player1_hand, i) << " очков\n";
+                cout << "У дилера на руке " << arrsum(dealer_hand, j) << " очков\n\n";
                 game_end = true;
                 dealer_win = true;
             }
-            if (arrsum(player1_hand, i + 1) == 21)
+            //if (arrsum(player1_hand, i) == 21)
+            //{
+            //    game_end = true;
+            //    player1_win = true;
+            //}
+            break;
+        case 2:  
+            while ((arrsum(dealer_hand, j) < arrsum(player1_hand, i)) || (arrsum(dealer_hand, j) < 17))
+            {
+                Sleep(1500);
+                takecard(dealer_hand, j, cards, k);
+                system("cls");
+                cout << "Ваш баланс: " << *player1_bank << "   Банк игры: " << game_bank << "\n\n";
+                cout << "У вас на руке " << arrsum(player1_hand, i) << " очков\n";
+                cout << "У дилера на руке " << arrsum(dealer_hand, j) << " очков\n\n";
+
+                cout << "Дилер берет карту...\n";
+
+                if (arrsum(dealer_hand, j) > 21)
+                    break;
+                
+            }
+            if (arrsum(dealer_hand, j) > 21)
             {
                 game_end = true;
                 player1_win = true;
             }
+            else if (arrsum(dealer_hand, j) == arrsum(player1_hand, i))
+            {
+                game_end = true;
+                dealer_win = true;
+                player1_win = true;
+
+            }
+            else if (arrsum(dealer_hand, j) > arrsum(player1_hand, i))
+            {
+                game_end = true;
+                dealer_win = true;
+                
+            }
+            
             
             break;
-        case 2:
-            if (i > 0)
-            {
-                cout << "Дабл возможен только первым ходом";
-                break;
-            }
-            else
-            {
-                
-                bet *= 2;
-                game_bank == 4 * bet;
-                *player1_bank -= bet;
-                *dealer_bank -= bet;
-
-                i++;
-                k++;
-                player1_hand[i] = cards[k];
-                if (arrsum(player1_hand, i + 1) == 21)
-                {
-                    game_end = true;
-                    player1_win = true;
-                }
-                else if (arrsum(player1_hand, i + 1) > 21)
-                {
-                    game_end = true;
-                    dealer_win = true;
-                }
-                else
-                {
-                    j++;
-                    k++;
-                    dealer_hand[j] = cards[k];
-                    if ((arrsum(dealer_hand, j + 1) == 21) || (arrsum(dealer_hand, j + 1) > (arrsum(player1_hand, i + 1)))
-
-                }
-                break;
-            }
-                
-        case 3:
-            break;
-                
         }
 
 
         
-        system("pause");
+        
     } while (game_end != true);
-    
 
+    if (dealer_win && !player1_win)
+        cout << "Вы проиграли...\n\n";
+    else if (player1_win && !dealer_win)
+    {
+        cout << "Вы победили! \n\n";
+        *player1_bank += 2 * bet;
+    }
+    else if (player1_win && dealer_win)
+    {
+        cout << "Ничья. \n\n";
+        *player1_bank += bet;
+    }
+        
 
-
-
-
-
-
-
-
-
+    system("pause");
 }
 void task_7()
 {
-    int player1_bank = 2000, dealer_bank = 2000000, min_bet = 100, max_bet = 10000, bet = 500;
+    int player1_bank = 2000, dealer_bank = 2000000, min_bet = 100, max_bet = 10000, bet = 1000;
     int choice;
 
     cout << "** Игра в '21' **\n\n";
@@ -641,7 +650,14 @@ void task_7()
             bet = 500;
             break;
         case 4:
-            game(&player1_bank, bet, &dealer_bank);
+            if (bet <= player1_bank)
+                game(&player1_bank, bet, &dealer_bank);
+            else
+            {
+                cout << "Кошелек исхудал";
+                Sleep(1000);
+            }
+                
         }
 
 
