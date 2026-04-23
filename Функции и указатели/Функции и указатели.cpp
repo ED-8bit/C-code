@@ -140,7 +140,19 @@ void arrayview(int arr[], int n) //Отображение массива
     }
     cout << "]\n";
 }
+int countnums(int number)
+{
 
+    if (number == 0) return 1;
+    int count = 0;
+
+    number = abs(number);
+    while (number > 0) {
+        number /= 10;
+        count++;
+    }
+    return count;
+}
 
 double Dohod(double bank, double bet, int days)
 {
@@ -511,7 +523,7 @@ void game(int *player1_bank, int bet, int *dealer_bank)
     do
     {
         system("cls");
-        cout << "Ваш баланс: " << *player1_bank << "   Банк игры: " << game_bank << "\n\n";
+        cout << "Ваш баланс: " << *player1_bank << '$' << "   Банк игры: " << game_bank << '$' << "\n\n";
         cout << "У вас на руке " << arrsum(player1_hand, i) << " очков\n";
         cout << "У дилера на руке " << arrsum(dealer_hand, j) << " очков\n\n";
         
@@ -527,17 +539,13 @@ void game(int *player1_bank, int bet, int *dealer_bank)
             if (arrsum(player1_hand, i) > 21)
             {
                 system("cls");
-                cout << "Ваш баланс: " << *player1_bank << "   Банк игры: " << game_bank << "\n\n";
+                cout << "Ваш баланс: " << *player1_bank << '$' << "   Банк игры: " << game_bank << '$' << "\n\n";
                 cout << "У вас на руке " << arrsum(player1_hand, i) << " очков\n";
                 cout << "У дилера на руке " << arrsum(dealer_hand, j) << " очков\n\n";
                 game_end = true;
                 dealer_win = true;
             }
-            //if (arrsum(player1_hand, i) == 21)
-            //{
-            //    game_end = true;
-            //    player1_win = true;
-            //}
+            
             break;
         case 2:  
             while ((arrsum(dealer_hand, j) < arrsum(player1_hand, i)) || (arrsum(dealer_hand, j) < 17))
@@ -545,7 +553,7 @@ void game(int *player1_bank, int bet, int *dealer_bank)
                 Sleep(1500);
                 takecard(dealer_hand, j, cards, k);
                 system("cls");
-                cout << "Ваш баланс: " << *player1_bank << "   Банк игры: " << game_bank << "\n\n";
+                cout << "Ваш баланс: " << *player1_bank << '$' << "   Банк игры: " << game_bank << '$' << "\n\n";
                 cout << "У вас на руке " << arrsum(player1_hand, i) << " очков\n";
                 cout << "У дилера на руке " << arrsum(dealer_hand, j) << " очков\n\n";
 
@@ -584,7 +592,10 @@ void game(int *player1_bank, int bet, int *dealer_bank)
     } while (game_end != true);
 
     if (dealer_win && !player1_win)
+    {
         cout << "Вы проиграли...\n\n";
+        *dealer_bank += 2*bet;
+    } 
     else if (player1_win && !dealer_win)
     {
         cout << "Вы победили! \n\n";
@@ -594,6 +605,7 @@ void game(int *player1_bank, int bet, int *dealer_bank)
     {
         cout << "Ничья. \n\n";
         *player1_bank += bet;
+        *dealer_bank += bet;
     }
         
 
@@ -601,7 +613,7 @@ void game(int *player1_bank, int bet, int *dealer_bank)
 }
 void task_7()
 {
-    int player1_bank = 2000, dealer_bank = 2000000, min_bet = 100, max_bet = 10000, bet = 1000;
+    int player1_bank = 2000, dealer_bank = 50000, min_bet = 100, max_bet = 10000, bet = 1000, bet_step = 100;
     int choice;
 
     cout << "** Игра в '21' **\n\n";
@@ -611,20 +623,21 @@ void task_7()
     do
     {
         system("cls");
-        cout << "Ваш баланс: " << player1_bank << "   Ваша ставка: " << bet << "   Минимальная ставка: " << min_bet << "   Максимальная ставка: " << max_bet << "\n\n";
+        cout << "Ваш баланс: " << player1_bank << '$' << "   Ваша ставка: " << bet << '$' << "   Шаг ставки: " << bet_step << "$\n\n" << "Минимальная ставка: " << min_bet << '$' << "   Максимальная ставка: " << max_bet << '$' << "\n\n";
         cout << "1. Увеличить ставку\n";
         cout << "2. Уменьшить ставку\n";
-        cout << "3. Сбросить ставку\n";
-        cout << "4. Начать игру\n";
+        cout << "3. Изменить шаг ставки\n";
+        cout << "4. Сбросить ставку\n";
+        cout << "5. Начать игру\n";
         cout << "0. Выйти\n";
         cout << "CHOICE? : ";
         cin >> choice;
         switch (choice)
         {
         case 1:
-            if (bet <= max_bet - 100)
+            if (bet <= max_bet - bet_step)
             {
-                bet += 100;
+                bet += bet_step;
                 break;
             }
             else
@@ -635,9 +648,9 @@ void task_7()
             }
                 
         case 2:
-            if (bet >= min_bet + 100)
+            if (bet >= min_bet + bet_step)
             {
-                bet -= 100;
+                bet -= bet_step;
                 break;
             }
             else
@@ -647,15 +660,29 @@ void task_7()
                 break;
             }
         case 3:
-            bet = 500;
+            system("cls");
+            cout << "Введите размер шага ставки: ";
+            cin >> bet_step;
             break;
         case 4:
-            if (bet <= player1_bank)
+            bet = 500;
+            break;
+        case 5:
+            if (bet <= player1_bank &&  bet <= dealer_bank)
                 game(&player1_bank, bet, &dealer_bank);
             else
             {
-                cout << "Кошелек исхудал";
-                Sleep(1000);
+                if (bet > player1_bank)
+                {
+                    cout << "Ваш кошелек исхудал";
+                    Sleep(1000);
+                }
+                else
+                {
+                    cout << "У Дилера не хватает денег на ставку(";
+                    Sleep(1000);
+                }
+                
             }
                 
         }
@@ -676,13 +703,65 @@ void task_7()
 
 }
 
+int Fib_n(int n)
+{
+    if (n - 1 > 1)
+    {
+        int i, answer;
+        int* fibs = new int[n];
+        fibs[0] = 0;
+        fibs[1] = 1;
+        for (i = 2; i < n; i++)
+            fibs[i] = fibs[i - 1] + fibs[i - 2];
+        answer = fibs[n - 1];
+        delete fibs;
+        return answer;
+    }
+    else
+    {
+        if (n - 1 == 0)
+            return 0;
+        else if
+            (n - 1 == 1)
+            return 1;
+    }
+    
+
+}
 void task_8()
 {
+    int i;
+    cout << "Введите номер члена последовательности Фибоначчи: ";
+    cin >> i;
+    cout << "Он равен " << Fib_n(i) << "\n\n";
+}
+
+int SumOfNums(int n)
+{
+    int answer = 0, del_k = 1, i;
+    n = abs(n);
+    for (i = 0; i < countnums(n) - 1 ; i++)
+        del_k *= 10;
+    answer = n % 10;
+    n = n / 10;
+    if (del_k == 1)
+    {
+        return answer;
+    }
+    else
+        answer += SumOfNums(n);
+    
+
+    //29343 10000 (2) 9343 1000 (9) 343 100 (3) 43 10 (4) 3 1 (3) 
+
 
 }
 void task_9()
 {
-
+    int n;
+    cout << "Введите целое число: ";
+    cin >> n;
+    cout << "Сумма его цифр: " << SumOfNums(n) << "\n\n";
 }
 void task_10()
 {
