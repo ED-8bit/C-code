@@ -763,6 +763,11 @@ void task_9()
     cin >> n;
     cout << "Сумма его цифр: " << SumOfNums(n) << "\n\n";
 }
+
+int int_reverse(int n)
+{
+
+}
 void task_10()
 {
 
