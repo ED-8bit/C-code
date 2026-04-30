@@ -459,7 +459,7 @@ int prime_dels(int num, int* arr)
 }
 void task_6()
 {
-    int i, num, arr[20], c;
+    int num, arr[20], c;
     cout << "Введите число: ";
     cin >> num;
     c = prime_dels(num, arr);
@@ -507,7 +507,7 @@ void game(int *player1_bank, int bet, int *dealer_bank)
     bool dealer_win = false, player1_win = false, game_end = false;
     int cards[36] = { 2, 3, 4, 6, 7, 8, 9, 10, 11,    2, 3, 4, 6, 7, 8, 9, 10, 11,    2, 3, 4, 6, 7, 8, 9, 10, 11,    2, 3, 4, 6, 7, 8, 9, 10, 11 };
     int player1_hand[15], dealer_hand[15];
-    int i = 0, j = 0, k = 36, n, choice;
+    int i = 0, j = 0, k = 36, choice;
     
     *player1_bank -= bet;
     *dealer_bank -= bet;
@@ -763,9 +763,25 @@ void task_9()
     cout << "Сумма его цифр: " << SumOfNums(n) << "\n\n";
 }
 
+
 int int_reverse(int n)
 {
 
+    if ((n >= -9) && (n <= 9))
+        return n;
+    else
+    { 
+        int sign, last_digit = abs(n) % 10, remaining = abs(n) / 10, power = 1;
+
+        sign = (n < 0) ? -1 : 1;
+        
+        for (int i = 0; i < countnums(remaining); i++) {
+            power *= 10;
+        }
+
+        return sign * (last_digit * power + int_reverse(remaining));
+
+    }
 }
 void task_10()
 {
@@ -775,15 +791,64 @@ void task_10()
     cout << "Число в обратном порядке: " << int_reverse(n) << "\n\n";
 }
 
+bool brackets_check(const char* str, int balance)
+{
+    if (*str == '.')
+    {
+        return !balance;
+    }
+    else
+    {
+        if (*str == '(')
+            balance++;
+        else if (*str == ')')
+        {
+            balance--;
+            if (balance < 0)
+                return 0;
+        }
 
+        return brackets_check(str + 1, balance);
+
+    }
+}
 void task_11()
+{
+    char str[80];
+    cout << "Введите строку для проверки, конец обозначьте точкой: ";
+    cin.ignore();
+    cin.getline(str, 80);
+    if (brackets_check(str, 0))
+        cout << "Корректно\n";
+    else
+        cout << "Ошибка в структуре\n";
+    
+
+}
+
+
+
+
+void arr_init(int *arr)
+{
+
+}
+void arr_delete(int *arr)
+{
+
+}
+void arr_enter(int *arr, int id)
 {
 
 }
 void task_12()
 {
+    cout << "** Редактор массива **\n";
 
 }
+
+
+
 void task_13()
 {
 
