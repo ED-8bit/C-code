@@ -142,7 +142,6 @@ void arrayview(int arr[], int n) //Отображение массива
 }
 int countnums(int number)
 {
-
     if (number == 0) return 1;
     int count = 0;
 
@@ -752,7 +751,7 @@ int SumOfNums(int n)
         answer += SumOfNums(n);
     
 
-    //29343 10000 (2) 9343 1000 (9) 343 100 (3) 43 10 (4) 3 1 (3) 
+    // 29343 / 10000 = 2 --> 9343 / 1000 = 9 --> 343 / 100 = 3 --> 43 / 10 = 4 --> 3 / 1 = 3
 
 
 }
@@ -770,8 +769,13 @@ int int_reverse(int n)
 }
 void task_10()
 {
-
+    int n;
+    cout << "Введите целое число: ";
+    cin >> n;
+    cout << "Число в обратном порядке: " << int_reverse(n) << "\n\n";
 }
+
+
 void task_11()
 {
 
@@ -838,6 +842,26 @@ int main()
         case 9:
             system("cls");
             task_9();
+            system("pause");
+            break;
+        case 10:
+            system("cls");
+            task_10();
+            system("pause");
+            break;
+        case 11:
+            system("cls");
+            task_11();
+            system("pause");
+            break;
+        case 12:
+            system("cls");
+            task_12();
+            system("pause");
+            break;    
+        case 13:
+            system("cls");
+            task_13();
             system("pause");
             break;
         case 0: 
