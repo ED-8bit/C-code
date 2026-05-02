@@ -843,8 +843,50 @@ void arr_enter(int *arr, int id)
 }
 void task_12()
 {
-    cout << "** Редактор массива **\n";
+    bool initialaized = false, exit = false;
+    int choice, size, n;
+    do
+    {
+        if (!initialaized)
+        {
+            system("cls");
+            cout << "** Инициализация **\n\n";
+            cout << "Введите размер: ";
+            cin >> size;
+            int* arr = new int[size];
+            initialaized = true;
+        }
 
+        cout << "** Редактор массива **\n\n";
+        cout << "1. Инициализация\n";
+        cout << "2. Заполнение массива\n";
+        cout << "3. Вывод данных\n";
+        cout << "4. Очистка памяти\n";
+        cout << "0. Выход\n";
+        cout << "Выберите действие: ";
+        cin >> choice;
+        switch (choice)
+        {
+        case 1:
+            break;
+        case 2:
+            system("cls");
+            cout << "Введите номер элемента: "; cin >> n;
+            n - 1);
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        case 0:
+            exit = true;
+            break;
+        default:
+            cout << "Ошибка";
+            break;
+        }
+    } while (!exit);
+    
 }
 
 
