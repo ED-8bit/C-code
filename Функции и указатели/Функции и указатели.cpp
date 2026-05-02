@@ -2,6 +2,7 @@
 #include <cstring>
 #include <cctype>
 #include <cmath>
+#include <stdio.h>
 #include <cstdlib>
 #include <windows.h>
 using namespace std;
@@ -827,37 +828,80 @@ void task_11()
 }
 
 
+int* arr = nullptr;
+int arr_size = 0;
+bool initialized = false;
 
-
-void arr_init(int *arr)
+int* arr_init(int size)
 {
+    int* arr = (int*)malloc(size * sizeof(int));
+
+    if (arr == NULL)
+    {
+        cout << "Ошибка инициализации\n";
+        return NULL;
+    }
+
+    return arr;
+
 
 }
 void arr_delete(int *arr)
-{
-
+{ 
+    if (arr != NULL)
+    {
+        free(arr);
+        cout << "Память очищена\n";
+    }
+    else
+    {
+        cout << "Массив не был инициализирован\n";
+    }
 }
-void arr_enter(int *arr, int id)
+void arr_enter(int *arr, int id, int size)
 {
+    if (arr == NULL)
+    {
+        cout << "Массив не инициализирован\n";
+        return;
+    }
 
+    if (id < 0 || id >= size)
+    {
+        cout << "Ошибка: индекс вне диапазона (0-" << size - 1 << ")\n";
+        return;
+    }
+
+    int value;
+    cout << "Введите значение для элемента [" << id << "]: ";
+    cin >> value;
+    arr[id] = value;
+    cout << "Значение установлено\n";
+}
+void arr_output(int* arr, int size)
+{
+    if (arr == NULL)
+    {
+        cout << "Массив не инициализирован\n";
+        return;
+    }
+
+    cout << "\nСодержимое массива:\n";
+    for (int i = 0; i < size; i++)
+    {
+        cout << "arr[" << i << "] = " << arr[i] << "\n";
+    }
+    cout << endl;
 }
 void task_12()
 {
-    bool initialaized = false, exit = false;
+    bool exit = false;
     int choice, size, n;
+    int *arr;
     do
     {
-        if (!initialaized)
-        {
-            system("cls");
-            cout << "** Инициализация **\n\n";
-            cout << "Введите размер: ";
-            cin >> size;
-            int* arr = new int[size];
-            initialaized = true;
-        }
-
-        cout << "** Редактор массива **\n\n";
+        system("cls");
+        cout << "\n** Редактор массива **\n\n";
         cout << "1. Инициализация\n";
         cout << "2. Заполнение массива\n";
         cout << "3. Вывод данных\n";
@@ -868,17 +912,67 @@ void task_12()
         switch (choice)
         {
         case 1:
+            system("cls");
+            if (initialized)
+            {
+                cout << "Массив уже инициализирован. Очистите память перед повторной инициализацией.\n";
+                break;
+            }
+            cout << "Введите размер массива: ";
+            cin >> size;
+            if (size <= 0)
+            {
+                cout << "Размер должен быть положительным числом\n";
+                break;
+            }
+            arr = arr_init(size);
+            if (arr != NULL)
+            {
+                arr_size = size;
+                initialized = true;
+                cout << "Массив успешно инициализирован размером " << size << "\n";
+            }
             break;
         case 2:
             system("cls");
-            cout << "Введите номер элемента: "; cin >> n;
-            n - 1);
+            if (!initialized)
+            {
+                cout << "Сначала инициализируйте массив (пункт 1)\n";
+                break;
+            }
+            cout << "Введите номер элемента (1-" << arr_size << "): ";
+            cin >> n;
+            arr_enter(arr, n - 1, arr_size);
             break;
         case 3:
+            system("cls");
+            if (!initialized)
+            {
+                cout << "Сначала инициализируйте массив (пункт 1)\n";
+                break;
+            }
+            arr_output(arr, arr_size);
             break;
         case 4:
+            system("cls");
+            if (initialized && arr != NULL)
+            {
+                arr_delete(arr);
+                arr = NULL;
+                arr_size = 0;
+                initialized = false;
+            }
+            else
+            {
+                cout << "Массив не был инициализирован\n";
+            }
             break;
         case 0:
+            if (initialized && arr != NULL)
+            {
+                arr_delete(arr);
+                arr = NULL;
+            }
             exit = true;
             break;
         default:
