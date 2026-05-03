@@ -827,160 +827,197 @@ void task_11()
 
 }
 
-
-int* arr = nullptr;
-int arr_size = 0;
-bool initialized = false;
-
-int* arr_init(int size)
+const int empt = -2147483648;
+bool arr_init(int*& arr, int size)
 {
-    int* arr = (int*)malloc(size * sizeof(int));
-
-    if (arr == NULL)
+    if (arr != nullptr)
     {
         cout << "Ошибка инициализации\n";
-        return NULL;
-    }
-
-    return arr;
-
-
-}
-void arr_delete(int *arr)
-{ 
-    if (arr != NULL)
-    {
-        free(arr);
-        cout << "Память очищена\n";
-    }
+        Sleep(500);
+        return false;
+    } 
     else
     {
-        cout << "Массив не был инициализирован\n";
+        arr = new int[size];
+        for (int i = 0; i < size; i++) {
+            arr[i] = -2147483648;
+        }
+        return true;
+    }
+        
+}
+void arr_delete(int*& arr)
+{ 
+    if (arr != nullptr)
+    {
+        delete[] arr;
+        arr = nullptr;
+        cout << "\nОчищено";
+        Sleep(500);
+    }
+    return;
+}
+void arr_enter(int*& arr, int id, int size)
+{
+    int choice = 0, n;
+    if (id < 0)
+    {
+        cout << "Индекс не может быть отрицательным!";
+        Sleep(500);
+        return;
+    } 
+    else if (id > size)
+    {
+        cout << "Индекс не может выходить за пределы массива!";
+        Sleep(500);
+        return;
+    }  
+    else
+    {
+        if (arr[id] == empt)
+        {
+            cout << "Введите int значение для вставки: ";
+            cin >> n;
+            arr[id] = n;
+            return;
+        }
+        else
+        {
+            while ((choice != 1) && (choice != 2))
+            {
+                system("cls");
+                cout << "Индекс " << id << " уже заполнен\n";
+                cout << "Значение: " << arr[id];
+                cout << "\n\nХотите заменить?\n";
+                cout << "1. Заменить\n";
+                cout << "2. Отмена\n";
+                cout << "Выберите действие: ";
+                cin >> choice;
+                switch (choice)
+                {
+                case 1:
+                    cout << "Введите int значение для замены: ";
+                    cin >> n;
+                    arr[id] = n;
+                    return;
+                    break;
+                case 2:
+                    return;
+                    break;
+                default:
+                    cout << "Ошибка";
+                    Sleep(500);
+                    break;
+                }
+            
+            }
+
+        }
     }
 }
-void arr_enter(int *arr, int id, int size)
+void arr_output(int*& arr, int size)
 {
-    if (arr == NULL)
+    int i;
+    for (i = 0; i < size; i++)
     {
-        cout << "Массив не инициализирован\n";
-        return;
+        if ((arr[i] != empt) && (i + 1 != size))
+            cout << arr[i] << ", ";
+        else if ((arr[i] != empt) && (i + 1 == size))
+            cout << arr[i];
+        else if ((arr[i] == empt) && (i + 1 != size))
+            cout << "пусто, ";
+        else if ((arr[i] == empt) && (i + 1 == size))
+            cout << "пусто";
     }
-
-    if (id < 0 || id >= size)
-    {
-        cout << "Ошибка: индекс вне диапазона (0-" << size - 1 << ")\n";
-        return;
-    }
-
-    int value;
-    cout << "Введите значение для элемента [" << id << "]: ";
-    cin >> value;
-    arr[id] = value;
-    cout << "Значение установлено\n";
-}
-void arr_output(int* arr, int size)
-{
-    if (arr == NULL)
-    {
-        cout << "Массив не инициализирован\n";
-        return;
-    }
-
-    cout << "\nСодержимое массива:\n";
-    for (int i = 0; i < size; i++)
-    {
-        cout << "arr[" << i << "] = " << arr[i] << "\n";
-    }
-    cout << endl;
+    return;
 }
 void task_12()
 {
-    bool exit = false;
-    int choice, size, n;
-    int *arr;
+    int* arr = nullptr;
+    int choice, size, id;
+    bool ext = false, inited = false;
+
     do
     {
         system("cls");
         cout << "\n** Редактор массива **\n\n";
         cout << "1. Инициализация\n";
-        cout << "2. Заполнение массива\n";
+        cout << "2. Ввод данных\n";
         cout << "3. Вывод данных\n";
         cout << "4. Очистка памяти\n";
         cout << "0. Выход\n";
         cout << "Выберите действие: ";
         cin >> choice;
+
         switch (choice)
         {
         case 1:
-            system("cls");
-            if (initialized)
+            if (!inited)
             {
-                cout << "Массив уже инициализирован. Очистите память перед повторной инициализацией.\n";
-                break;
-            }
-            cout << "Введите размер массива: ";
-            cin >> size;
-            if (size <= 0)
-            {
-                cout << "Размер должен быть положительным числом\n";
-                break;
-            }
-            arr = arr_init(size);
-            if (arr != NULL)
-            {
-                arr_size = size;
-                initialized = true;
-                cout << "Массив успешно инициализирован размером " << size << "\n";
-            }
-            break;
-        case 2:
-            system("cls");
-            if (!initialized)
-            {
-                cout << "Сначала инициализируйте массив (пункт 1)\n";
-                break;
-            }
-            cout << "Введите номер элемента (1-" << arr_size << "): ";
-            cin >> n;
-            arr_enter(arr, n - 1, arr_size);
-            break;
-        case 3:
-            system("cls");
-            if (!initialized)
-            {
-                cout << "Сначала инициализируйте массив (пункт 1)\n";
-                break;
-            }
-            arr_output(arr, arr_size);
-            break;
-        case 4:
-            system("cls");
-            if (initialized && arr != NULL)
-            {
-                arr_delete(arr);
-                arr = NULL;
-                arr_size = 0;
-                initialized = false;
+                cout << "\nВведите размер массива: ";
+                cin >> size;
+                if (arr_init(arr, size))
+                    inited = true;
             }
             else
             {
-                cout << "Массив не был инициализирован\n";
+                cout << "Массив уже инициализирован";
+                Sleep(500);
+            }
+            break;
+        case 2:
+            if (inited)
+            {
+                cout << "\nВведите индекс элемента: ";
+                cin >> id;
+                arr_enter(arr, id, size);
+            }
+            else
+            {
+                cout << "\nМассив не инициализирован";
+                Sleep(500);
+            }   
+            break;
+        case 3:
+            if (inited)
+            {
+                cout << "\n";
+                arr_output(arr, size);
+                cout << '\n' << '\n';
+                system("pause");
+            }
+            else
+            {
+                cout << "\nМассив не инициализирован";
+                Sleep(500);
+            }
+            break;
+        case 4:
+            if (inited)
+            {
+                arr_delete(arr);
+                inited = false;
+            }
+            else
+            {
+                cout << "\nМассив не инициализирован";
+                Sleep(500);
             }
             break;
         case 0:
-            if (initialized && arr != NULL)
+            if (inited)
             {
                 arr_delete(arr);
-                arr = NULL;
+                inited = false;
             }
-            exit = true;
+            ext = true;
             break;
         default:
-            cout << "Ошибка";
-            break;
+            cout << "\nОшибка ввода";
+            Sleep(500);
         }
-    } while (!exit);
-    
+    } while (ext == false);
+    cout << "\n\n";
 }
 
 
