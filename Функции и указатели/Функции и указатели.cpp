@@ -846,6 +846,23 @@ bool arr_init(int*& arr, int size)
     }
         
 }
+bool arr_random_init(int*& arr, int size, int minmax)
+{
+    if (arr != nullptr)
+    {
+        cout << "Ошибка инициализации\n";
+        Sleep(500);
+        return false;
+    }
+    else
+    {
+        arr = new int[size];
+        for (int i = 0; i < size; i++) {
+            arr[i] = (rand() % ((2 * minmax) + 1)) - minmax;
+        }
+        return true;
+    }
+}
 void arr_delete(int*& arr)
 { 
     if (arr != nullptr)
@@ -915,9 +932,30 @@ void arr_enter(int*& arr, int id, int size)
         }
     }
 }
+int arr_sumof5dels(int*& arr, int size)
+{
+    int i, sum = 0;
+    for (i = 0; i < size; i++)
+    {
+        if ((arr[i] > 0) && (arr[i] % 5 == 0))
+            sum += arr[i];
+    }
+    return sum;
+}
+void arr_replace_biggest(int*& arr, int size, int n)
+{
+    int i, biggest;
+    for (i = 1; i < size; i++)
+    {
+        if (arr[i - 1] <= arr[i])
+            biggest = i;
+    }
+    arr[biggest] = n;
+}
 void arr_output(int*& arr, int size)
 {
     int i;
+    cout << "[";
     for (i = 0; i < size; i++)
     {
         if ((arr[i] != empt) && (i + 1 != size))
@@ -929,6 +967,7 @@ void arr_output(int*& arr, int size)
         else if ((arr[i] == empt) && (i + 1 == size))
             cout << "пусто";
     }
+    cout << "]";
     return;
 }
 void task_12()
@@ -1019,12 +1058,26 @@ void task_12()
     } while (ext == false);
     cout << "\n\n";
 }
-
-
-
 void task_13()
 {
-
+    srand(time(0));
+    int* x = nullptr;
+    int* y = nullptr;
+    int sum;
+    arr_random_init(x, 20, 100);
+    arr_random_init(y, 10, 100);
+    cout << "Массив X\n";
+    arr_output(x, 20);
+    cout << "\n\nМассив Y\n";
+    arr_output(y, 10);
+    sum = arr_sumof5dels(x, 20);
+    cout << "\n\nСумма положительных кратных 5: " << sum << '\n';
+    arr_replace_biggest(y, 10, sum);
+    cout << "Новый Массив Y\n";
+    arr_output(y, 10);
+    arr_delete(x);
+    arr_delete(y);
+    cout << "\n\n";
 }
 
 int main()
