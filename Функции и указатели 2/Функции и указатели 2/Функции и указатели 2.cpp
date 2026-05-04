@@ -6,10 +6,11 @@
 #include <cmath>
 #include <stdio.h>
 #include <cstdlib>
-#include <windows.h>
+
 using namespace std;
 
 double pi = 3.14159;
+
 
 double calculateArea(double a)
 {
@@ -120,11 +121,12 @@ void swapValues(double* a, double* b)
     *a = *b;
     *b = temp;
 }
-void swapValues(char **str1, char **str2)
+void swapValues(char *str1, char *str2)
 {
-    char* temp = *str1;
-    *str1 = *str2;
-    *str2 = temp;
+    char temp[80];
+    strcpy_s(temp, 80, str1);
+    strcpy_s(str1, 80, str2);
+    strcpy_s(str2, 80, temp);
 }
 void ints()
 {
@@ -160,14 +162,13 @@ void Cstrings()
     cin.getline(str1, 80);
     cout << "Введите строку 2: ";
     cin.getline(str2, 80);
-    swapValues(&str1, &str2);
-    cout << "\nstr1 -> " << *str1;
-    cout << "\nstr2 -> " << *str2;
+    swapValues(str1, str2);
+    cout << "\nstr1 -> " << str1;
+    cout << "\nstr2 -> " << str2;
     cout << "\n\n";
     system("pause");
 
 }
-
 void task_2()
 {
     int n;
@@ -201,13 +202,107 @@ void task_2()
     } while (n != 0);
 }
 
+void arrayview(int arr[], int n) //Отображение массива
+{
+    int i;
+    cout << "[";
+    for (i = 0; i < n; i++)
+    {
+        if (i != n - 1) cout << arr[i] << ',' << ' ';
+        else cout << arr[i];
+    }
+    cout << "]\n";
+}
+void analyzeArray(int* arr, int size, int& min, int& max)
+{
+    int i;
+    min = arr[0];
+    max = arr[0];
+    for (i = 0; i < size; i++)
+    {
+        if (arr[i] >= max)
+            max = arr[i];
+        if (arr[i] <= min)
+            min = arr[i];
+    }
+}
+void analyzeArray(int* arr, int size, int& min, int& max, int& sum)
+{
+    int i;
+    min = arr[0];
+    max = arr[0];
+    for (i = 0; i < size; i++)
+    {
+        if (arr[i] >= max)
+            max = arr[i];
+        if (arr[i] <= min)
+            min = arr[i];
+        sum += arr[i];
+    }
+}
+void analyze(bool ext)
+{
+    system("cls");
+    int arr[80];
+    int i, j, c = 0, b, size, min, max, sum = 0;
+    cout << "Введите размер массива: ";
+    cin >> size;
+    system("cls");
+    for (i = 0; i < size; i++)
+    {
+        cout << "[";
+        for (j = 0; j < c; j++)
+        {
+            cout << arr[j] << ',' << ' ';
+        }
+        cout << ']';
+        cout << "\nВведите элемент: "; cin >> b;
+        arr[j] = b;
+        c += 1;
+        system("cls");
+    }
+    arrayview(arr, size);
+    if (ext)
+        analyzeArray(arr, size, min, max, sum);
+    else
+        analyzeArray(arr, size, min, max);
+
+    cout << "Минимум: " << min;
+    cout << "\nМаксимум: " << max;
+    if (ext)
+        cout << "\nСумма: "<< sum;
+
+    cout << "\n\n";
+    system("pause");
+    
+}
 void task_3()
 {
-
+    int n;
+    do
+    {
+        system("cls");
+        cout << "** Меню **\n";
+        cout << "1. Найти экстремумы\n";
+        cout << "2. Найти экстремумы и сумму элементов\n";
+        cout << "0. Назад\n";
+        cout << "Выберите функцию: ";
+        cin >> n;
+        switch (n)
+        {
+        case 1:
+            system("cls");
+            analyze(false);
+            break;
+        case 2:
+            system("cls");
+            analyze(true);
+            break;
+        case 0:
+            break;
+        }
+    } while (n != 0);
 }
-
-
-
 
 
 int menu()
