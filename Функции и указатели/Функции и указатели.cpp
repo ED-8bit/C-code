@@ -384,24 +384,27 @@ void dr_sum(int *dr1, int *dr2, int *res)
 }
 void dr_compact(int* dr)
 {
-    int* drc = dr;
+    int drz;
+    int drc;
+    drc = *dr;
     dr++;
-    int* drz = dr;
-    int i;
+    drz = *dr;
 
-    if (*drc == *drz)
+    if (drc == drz)
     {
-        *drc = 1;
-        *drz = 1;
+        *dr = 1;
+        dr--;
+        *dr = 1;
+
     }
     else
     {
-        
-        *drc /= NOD(*drc, *drz);
-        *drz /= NOD(*drc, *drz);
-        
-        
+        int nod = NOD(drc, drz);
+        *dr /= nod;
+        dr--;
+        *dr /= nod;
     }
+
         
     
 }
@@ -454,9 +457,9 @@ void task_5()
     dr_del(dr1, dr2, res);
     dr_sum(dr1, dr2, res2);
     dr_mult(dr1, dr2, res3);
-    //dr_compact(res);
-    //dr_compact(res2);
-    //dr_compact(res3);
+    dr_compact(res);
+    dr_compact(res2);
+    dr_compact(res3);
     cout << "Деление: ";
     dr_view(res);
     cout << "\nСумма: ";
