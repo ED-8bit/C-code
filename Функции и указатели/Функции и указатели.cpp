@@ -299,6 +299,34 @@ do
 } while (nod == 0);
 return nod;
 }
+int NOK(int n1, int n2)
+{
+    int min, max, i = 1, nok = 0;
+    if (n1 == 0 || n2 == 0)
+    {
+        return 0;
+    }
+    if (n1 > n2)
+    {
+        max = n1;
+        min = n2;
+    }
+    else if (n2 > n1)
+    {
+        max = n2;
+        min = n1;
+    }
+    else if (n1 == n2)
+    {
+        return n1;
+    }
+
+    nok = max * i;
+    for (i; nok % min != 0; i++)
+        nok = max * i;
+    return nok;
+    
+}
 void dr_del(int* dr1, int* dr2, int* res)
 {
     dr2++;
@@ -318,68 +346,40 @@ void dr_mult(int* dr1, int* dr2, int* res)
 }
 void dr_sum(int *dr1, int *dr2, int *res)
 {
-    int temp;
-    int* t;
-    t = dr1;
-    t++;
-    cout << *t;
+    int temp1, temp2, nok;
+    dr1++;
     dr2++;
-    cout << *dr2;
-
-    if (*t == *dr2)
+    //Z
+    
+    if (*dr1 == *dr2)
     {
-        t--;
+        dr1--;
         dr2--;
-        *res = *t + *dr2;
+        *res = *dr1 + *dr2;
         res++;
-        t++;
-        *res = *t;
+        dr1++;
+        dr2++;
+        *res = *dr1;
     }
     else
     {
-        if ((*t > *dr2) && (*t % *dr2 == 0))
-        {        
-            temp = *t / *dr2;
-            *dr2 = temp;
-            dr2--;
-            t--;
-            *dr2 *= temp;
-            *res = *t + *dr2;
-            res++;
-            t++;
-            *res = *t;
-        }
-        else if ((*dr2 > *t) && (*dr2 % *t == 0))
-        {
-            temp = *dr2 / *t;
-            *dr1 = temp;
-            t--;
-            dr2--;
-            *t *= temp;
-            *res = *t + *dr2;
-            res++;
-            dr2++;
-            *res = *dr2;
-        }
-        else
-        {
-            temp = *dr1;
-
-            *t *= *dr2;
-            t--;
-            *t *= *dr2;
-            t++;
-
-            *dr2 *= temp;
-            dr2--;
-            *dr2 *= temp;
-            dr2++;
-   
-            *res = *t + *dr2;
-            res++;
-            t++;
-            *res = *t;
-        }
+        nok = NOK(*dr1, *dr2);
+        
+        temp1 = (nok / *dr1);
+        *dr1 *= temp1;
+        dr1--;
+        *dr1 *= temp1;
+       
+        temp2 = (nok / *dr2);
+        *dr2 *= temp2;
+        dr2--;
+        *dr2 *= temp2;
+        
+        *res = *dr1 + *dr2;
+        res++;
+        dr1++;
+        dr2++;
+        *res = *dr1;
     }
 }
 void dr_compact(int* dr)
@@ -452,14 +452,11 @@ void task_5()
     cout << '\n' << '\n' << "Результат: \n";
     
     dr_del(dr1, dr2, res);
-    cout << dr1[0] << dr2[0];
     dr_sum(dr1, dr2, res2);
-    cout << dr1[0] << dr2[0];
     dr_mult(dr1, dr2, res3);
-    cout << dr1[0] << dr2[0];
-    dr_compact(res);
+    //dr_compact(res);
     //dr_compact(res2);
-    dr_compact(res3);
+    //dr_compact(res3);
     cout << "Деление: ";
     dr_view(res);
     cout << "\nСумма: ";
