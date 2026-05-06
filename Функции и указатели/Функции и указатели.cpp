@@ -262,60 +262,102 @@ void task_4()
     cout << '\n' << str << '\n' << '\n';
 }
 
+int NOD(int n1, int n2)
+
+{
+int min, max, ost, nod = 0;
+if (n1 == 0 || n2 == 0)
+{
+	return 0;
+}
+if (n1 > n2)
+{
+	max = n1;
+	min = n2;
+}
+else if (n2 > n1)
+{
+	max = n2;
+	min = n1;
+}
+else if (n1 == n2)
+{
+	return n1;
+}
+
+do
+{
+    if (max % min == 0)
+    {
+        nod = min;
+    }
+	else
+	{
+		ost = max % min;
+		max = min;
+		min = ost;
+	}
+} while (nod == 0);
+return nod;
+}
 void dr_del(int* dr1, int* dr2, int* res)
 {
     dr2++;
     *res = (*dr1) * (*dr2);
-    *res++;
-    *dr1++;
-    *dr2--;
+    res++;
+    dr1++;
+    dr2--;
     *res = (*dr1) * (*dr2);
 }
 void dr_mult(int* dr1, int* dr2, int* res)
 {
     *res = (*dr1) * (*dr2);
-    *res++;
-    *dr1++;
-    *dr2++;
+    res++;
+    dr1++;
+    dr2++;
     *res = (*dr1) * (*dr2);
 }
 void dr_sum(int *dr1, int *dr2, int *res)
 {
     int temp;
-    dr1++;
+    int* t;
+    t = dr1;
+    t++;
+    cout << *t;
     dr2++;
+    cout << *dr2;
 
-    if (*dr1 == *dr2)
+    if (*t == *dr2)
     {
-        dr1--;
+        t--;
         dr2--;
-        *res = *dr1 + *dr2;
+        *res = *t + *dr2;
         res++;
-        dr1++;
-        *res = *dr1;
+        t++;
+        *res = *t;
     }
     else
     {
-        if ((*dr1 > *dr2) && (*dr1 % *dr2 == 0))
+        if ((*t > *dr2) && (*t % *dr2 == 0))
         {        
-            temp = *dr1 / *dr2;
+            temp = *t / *dr2;
             *dr2 = temp;
             dr2--;
-            dr1--;
+            t--;
             *dr2 *= temp;
-            *res = *dr1 + *dr2;
+            *res = *t + *dr2;
             res++;
-            dr1++;
-            *res = *dr1;
+            t++;
+            *res = *t;
         }
-        else if ((*dr2 > *dr1) && (*dr2 % *dr1 == 0))
+        else if ((*dr2 > *t) && (*dr2 % *t == 0))
         {
-            temp = *dr2 / *dr1;
+            temp = *dr2 / *t;
             *dr1 = temp;
-            dr1--;
+            t--;
             dr2--;
-            *dr1 *= temp;
-            *res = *dr1 + *dr2;
+            *t *= temp;
+            *res = *t + *dr2;
             res++;
             dr2++;
             *res = *dr2;
@@ -324,54 +366,42 @@ void dr_sum(int *dr1, int *dr2, int *res)
         {
             temp = *dr1;
 
-            *dr1 *= *dr2;
-            dr1--;
-            *dr1 *= *dr2;
-            dr1++;
+            *t *= *dr2;
+            t--;
+            *t *= *dr2;
+            t++;
 
             *dr2 *= temp;
             dr2--;
             *dr2 *= temp;
             dr2++;
    
-            *res = *dr1 + *dr2;
-            *res++;
-            dr1++;
-            *res = *dr1;
+            *res = *t + *dr2;
+            res++;
+            t++;
+            *res = *t;
         }
     }
 }
-void dr_compact(int* drc)
+void dr_compact(int* dr)
 {
-    int* drz;
+    int* drc = dr;
+    dr++;
+    int* drz = dr;
     int i;
-    drz = drc;
-    drz++;
 
-    if (*drc > *drz)
-    {
-        for (i = *drz; *drc % *drz != 0; i--)
-        {
-            if (i == 0)
-                break;
-        }
-        *drz /= i;
-        *drc /= i;
-    }
-    else if (*drc < *drz)
-    {
-        for (i = *drc; *drz % *drc != 0; i--)
-        {
-            if (i == 0)
-                break;
-        }
-        *drz /= i;
-        *drc /= i;
-    }
-    else if (*drc == *drz)
+    if (*drc == *drz)
     {
         *drc = 1;
         *drz = 1;
+    }
+    else
+    {
+        
+        *drc /= NOD(*drc, *drz);
+        *drz /= NOD(*drc, *drz);
+        
+        
     }
         
     
@@ -408,7 +438,7 @@ void dr_view(int dr[2])
 }
 void task_5()
 {
-    int dr1[2], dr2[2], res[2];
+    int dr1[2], dr2[2], res[2], res2[2], res3[2];
     cout << "Первая дробь: \n";
     dr_ch_enter(dr1);
     dr_zn_enter(dr1);
@@ -423,8 +453,20 @@ void task_5()
     cout << '\n' << '\n' << "Результат: \n";
     
     dr_del(dr1, dr2, res);
+    cout << dr1[0] << dr2[0];
+    dr_sum(dr1, dr2, res2);
+    cout << dr1[0] << dr2[0];
+    dr_mult(dr1, dr2, res3);
+    cout << dr1[0] << dr2[0];
     dr_compact(res);
+    //dr_compact(res2);
+    dr_compact(res3);
+    cout << "Деление: ";
     dr_view(res);
+    cout << "\nСумма: ";
+    dr_view(res2);
+    cout << "\nПроизведение: ";
+    dr_view(res3);
     cout << "\n\n";
     
 }
