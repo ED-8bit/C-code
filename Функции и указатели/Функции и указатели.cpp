@@ -261,7 +261,6 @@ void task_4()
     str_tolower(str);
     cout << '\n' << str << '\n' << '\n';
 }
-
 int NOD(int n1, int n2)
 
 {
