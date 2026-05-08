@@ -128,7 +128,16 @@ struct routes
     char name[80];
     char dest[80];
     int route_n;
-}aeroflot[Aeroflot_size];
+};
+
+routes aeroflot[Aeroflot_size] = {
+        {"Airbus", "Stambul", 85},
+        {"Boeing", "Moscow", 92},
+        {"RyanAIR", "Sochi", 78},
+        {"BELUGA", "Chechnya", 95},
+        {"B2", "London", 88}
+};
+
 
 void aeroflot_init()
 {
@@ -153,10 +162,27 @@ char aeroflot_menu()
     return tolower(ch);
 }
 
+void sort_struct_arr(routes *route, int size)
+{
+    int i, j, current_char, new_char, step, max = 0;
+    char current_colony, new_colony;
+
+    for (int i = 0; i < size - 1; i++)
+    {
+        for (int j = 0; j < size - i - 1; j++)
+        {
+            
+            if (strcmp(route[j].dest, route[j + 1].dest) > 0)
+            {
+                swap(route[j], route[j + 1]);
+            }
+        }
+    }
+}
 void aeroflot_input(int i)
 {
     cout << "Номер рейса: "; cin >> aeroflot[i].route_n;
-    cout << "Название самолета: "; cin >> aeroflot[i].name;
+    cout << "Тип самолета: "; cin >> aeroflot[i].name;
     cout << "Пункт назначения: "; cin >> aeroflot[i].dest;
     
 }
@@ -175,12 +201,12 @@ void aeroflot_enter()
 void aeroflot_update()
 {
     int i;
-    int route;
+    char name[80];
     cout << '\n';
-    cout << "Введите номер рейса: ";
-    cin >> route;
+    cout << "Введите тип самолета: ";
+    cin >> name;
     for (i = 0; i < Aeroflot_size; i++)
-        if (route != aeroflot[i].route_n)
+        if (!strcmp(name , aeroflot[i].name))
             break;
     if (i == Aeroflot_size)
     {
@@ -192,30 +218,32 @@ void aeroflot_update()
 void aeroflot_display()
 {
     int t;
+    sort_struct_arr(aeroflot, Aeroflot_size);
     cout << "\n-----------------------------------------------------------------\n";
     for (t = 0; t < Aeroflot_size; t++)
     {
         if (*aeroflot[t].name)
         {
             cout << "\nНомер рейса: " << aeroflot[t].route_n << "\n\n";
-            cout << "Название самолета : " << aeroflot[t].name << '\n';
+            cout << "Тип самолета: " << aeroflot[t].name << '\n';
             cout << "Пункт назначения: " << aeroflot[t].dest << "\n\n";
             cout << "-----------------------------------------------------------------\n";
         }
     }
     cout << '\n';
+    
     system("pause");
 
 }
 void aeroflot_selected_display()
 {
     int i;
-    int route;
-    cout << "\nВведите номер рейса: ";
-    cin >> route;
+    char name[80];
+    cout << "\nВведите тип самолета: ";
+    cin >> name;
    
     for (i = 0; i < Aeroflot_size; i++)
-        if (route == aeroflot[i].route_n)
+        if (!strcmp(name, aeroflot[i].name))
             break;
     if (i == Aeroflot_size)
     {
@@ -223,7 +251,7 @@ void aeroflot_selected_display()
     }
     cout << "\n-----------------------------------------------------------------\n";
     cout << "\nНомер рейса: " << aeroflot[i].route_n << '\n';
-    cout << "\nНазвание самолета : " << aeroflot[i].name << '\n';
+    cout << "\nТип самолета : " << aeroflot[i].name << '\n';
     cout << "Пункт назначения: " << aeroflot[i].dest << '\n';
     cout << "\n-----------------------------------------------------------------\n";
     system("pause");
@@ -234,7 +262,7 @@ void AEROFLOT()
     system("chcp 1251");
     bool quit = false;
     char choice;
-    aeroflot_init();
+    //aeroflot_init();
     while(!quit)
     {
         choice = aeroflot_menu();
