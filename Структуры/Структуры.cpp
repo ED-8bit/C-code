@@ -139,13 +139,13 @@ routes aeroflot[Aeroflot_size] = {
 };
 
 
-void aeroflot_init()
+void init_routes_arr(routes *route, int size)
 {
     int t;
-    for (t = 0; t < Aeroflot_size; t++)
-        *aeroflot[t].name = '\0';
+    for (t = 0; t < size; t++)
+        *route[t].name = '\0';
 }
-char aeroflot_menu()
+char structs_menu()
 {
     char ch;
     cout << '\n';
@@ -260,10 +260,11 @@ void AEROFLOT()
 {
     bool quit = false;
     char choice;
-    //aeroflot_init();
+    if (!aeroflot[0].name)
+        init_routes_arr(aeroflot, Aeroflot_size);
     while(!quit)
     {
-        choice = aeroflot_menu();
+        choice = structs_menu();
 
         switch (choice)
         {
@@ -301,21 +302,93 @@ void AEROFLOT()
 
 }
 
+
+const int CoupleSize = 20;
+struct student
+{
+    char family_name[80];
+    char name[50];
+    char surname[60];
+    int group_n;
+    char exams[3];
+};
+void student_input(student* students,int i)
+{
+    cout << "Фамилия: "; cin >> students[i].family_name;
+    cout << "Имя: "; cin >> students[i].name;
+    cout << "Отчество: "; cin >> students[i].surname;
+    cout << "Номер группы: "; cin >> students[i].group_n;
+    cout << "Оценка по математике: "; cin >> students[i].exams[0];
+    cout << "Оценка по программированию: "; cin >> students[i].exams[1];
+    cout << "Оценка по экономике: "; cin >> students[i].exams[2];
+}
+void init_students_arr(student* students, int CoupleSize)
+{
+    int t;
+    for (t = 0; t < CoupleSize; t++)
+        *students[t].family_name = '\0';
+}
+void students_enter(student* students, int CoupleSize)
+{
+    int i;
+    cout << '\n';
+    for (i = 0; i < CoupleSize; i++)
+        if (!*students[i].family_name) break;
+    if (i == CoupleSize)
+    {
+        cout << "Список полон.\n"; return;
+    }
+    student_input(students, i);
+}
+void students_update(student* students, int CoupleSize, )
+{
+    int i;
+    char name[80];
+    cout << '\n';
+    cout << "Введите тип самолета: ";
+    cin >> name;
+    for (i = 0; i < Aeroflot_size; i++)
+        if (!strcmp(name, aeroflot[i].name))
+            break;
+    if (i == Aeroflot_size)
+    {
+        cout << "Рейс не найден.\n"; return;
+    }
+    cout << "Введите новую информацию.\n";
+    student_input(students,i);
+}
 void Session_review()
 {
-    const int GroupSize = 20;
-    struct student
-    {
-        char family_name[80];
-        char name[50];
-        char surname[60];
-        int group_n;
-        int math_ex;
-        int programming_ex;
-        int economy_ex;
+    char choice;
+    bool quit;
+    student students[CoupleSize] = {
+        
+        
     };
-    student students[GroupSize];
 
+    if (!students[0].family_name)
+        init_students_arr(students, CoupleSize);
+    while (!quit)
+    {
+        choice = structs_menu();
+        switch (choice)
+        {
+        case 'e':
+            students_enter(students, CoupleSize);
+            break;
+        case 'd':
+            aeroflot_display();
+            break;
+        case 's':
+            aeroflot_selected_display();
+            break;
+        case 'u':
+            aeroflot_update();
+            break;
+        case 'q':
+            quit = true;
+            break;
+        }
 }
 
 void task_3()
