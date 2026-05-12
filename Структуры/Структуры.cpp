@@ -228,10 +228,8 @@ void aeroflot_selected_display()
     cout << "\n-----------------------------------------------------------------\n";
     system("pause");
 }
-
 void AEROFLOT()
 {
-    system("chcp 1251");
     bool quit = false;
     char choice;
     aeroflot_init();
@@ -275,8 +273,20 @@ void AEROFLOT()
 
 }
 
-void task_2()
+void Session_review()
 {
+    const int GroupSize = 20;
+    struct student
+    {
+        char family_name[80];
+        char name[50];
+        char surname[60];
+        int group_n;
+        int math_ex;
+        int programming_ex;
+        int economy_ex;
+    };
+    student students[GroupSize];
 
 }
 
@@ -335,7 +345,7 @@ int main()
             break;
         case 2:
             system("cls");
-            task_2();
+            Session_review();
             system("pause");
             break;
         case 3:
