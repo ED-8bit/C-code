@@ -318,6 +318,7 @@ struct student
     int group_n;
     char exams[4];
 };
+
 void sort_students_arr(student* students, int size)
 {
     int i, j, current_char, new_char, step, max = 0;
@@ -585,26 +586,44 @@ struct car
     double consumption;
 };
 
-void all_cars_display(car* cars, int size)
+void cars_display(car* cars, int size, int pricemin, int pricemax, int enginepwrmin, int enginepwrmax, double consumptionmin, double consumptionmax)
 {
     int i;
+    
     cout << "\n ----------------------------------------------------------------- \n";
     for (i = 0; i < size; i++)
     {
+        bool price = false, pwr = false, cons = false;
         if (*cars[i].brand)
         {
-           cout << "\n    Марка: " << cars[i].brand << "  Модель: " << cars[i].model << "  Цена: " << cars[i].price << " рублей" << "\n\n";
-           cout << "    Цвет: " << cars[i].color << "  Мощность: " << cars[i].engine_pwr << " л. с." << "  Расход: " << cars[i].consumption << "л/100км\n\n";
-           cout << " ----------------------------------------------------------------- \n";
+            if ((cars[i].price >= pricemin) && (cars[i].price <= pricemax))
+                price = true;
+            if ((cars[i].engine_pwr >= enginepwrmin) && (cars[i].engine_pwr <= enginepwrmax))
+                pwr = true;
+            if ((cars[i].consumption >= consumptionmin) && (cars[i].consumption <= consumptionmax))
+                cons = true;
+            if (price && pwr && cons)
+            {
+                cout << "\n    Марка: " << cars[i].brand << "  Модель: " << cars[i].model << "  Цена: " << cars[i].price << " рублей" << "\n\n";
+                cout << "    Цвет: " << cars[i].color << "  Мощность: " << cars[i].engine_pwr << " л. с." << "  Расход: " << cars[i].consumption << "л/100км\n\n";
+                cout << " ----------------------------------------------------------------- \n";
+            }
         }
     }
     cout << '\n';
 
     system("pause");
 }
-
-
-
+void filters(int* pricemin, int* pricemax, int* enginepwrmin, int* enginepwrmax, double* consumptionmin, double* consumptionmax)
+{
+    cout << "** Фильтры **";
+    cout << "\nВведите минимальную цену: "; cin >> *pricemin;
+    cout << "\nВведите максимальную цену: "; cin >> *pricemax;
+    cout << "\nВведите минимальную мощность двигателя: "; cin >> *enginepwrmin;
+    cout << "\nВведите максимальную мощность двигателя: "; cin >> *enginepwrmax;
+    cout << "\nВведите минимальный расход топлива: "; cin >> *consumptionmin;
+    cout << "\nВведите максимальный расход топлива: "; cin >> *consumptionmax;
+}
 
 void CarDealer()
 {
@@ -615,23 +634,38 @@ void CarDealer()
         {"Toyota", "RAV 4","Серый", 1350000, 148, 15},
         {"Changan", "LX" ,"Красный", 2960000, 120, 12},
         {"Hyundai", "Solaris","Желтый", 1195000, 94, 8.8},
-        {"Opel", "Astra", "Серый",  350000, 115, 8.2}
+        {"Opel", "Astra", "Серый",  350000, 115, 8.2},
+        {"Dodge", "Charger II", "Бардовый",  48800000, 345, 22},
+        {"Imponte", "Duke`o`Death", "Черный", 76600000, 600, 40}
     };
     char choice;
     bool quit = false;
+
+    // filters
+    int pricemin = 0, pricemax = 9999999999;
+    int enginepwrmin = 0, enginepwrmax = 99999;
+    double consumptionmin = 0, consumptionmax = 99999;
+    //
     do
     {
         system("cls");
         cout << "** Меню **\n";
         cout << "(D)isplay\n";
+        cout << "(F)ilters\n";
         cout << "(Q)uit\n";
         cout << "Выберите действие: ";
         cin >> choice;
+        choice = tolower(choice);
 
         switch (choice)
         {
         case 'd':
-            all_cars_display(cars, size);
+            system("cls");
+            cars_display(cars, size, pricemin, pricemax, enginepwrmin, enginepwrmax, consumptionmin, consumptionmax);
+            break;
+        case 'f':
+            system("cls");
+            filters(&pricemin, &pricemax, &enginepwrmin, &enginepwrmax, &consumptionmin, &consumptionmax);
             break;
         case 'q':
             quit = true;
@@ -652,7 +686,16 @@ void CarDealer()
 
 }
 
-void task_5()
+
+
+
+
+
+
+
+
+
+void Auditory()
 {
 
 }
@@ -704,7 +747,7 @@ int main()
             break;
         case 5:
             system("cls");
-            task_5();
+            Auditory();
             system("pause");
             break;
         case 0:
