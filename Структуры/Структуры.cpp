@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 #include <cstring>
 #include <cctype>
+#include <Windows.h>
 
 using namespace std;
 
@@ -145,7 +146,7 @@ void init_routes_arr(routes *route, int size)
     for (t = 0; t < size; t++)
         *route[t].name = '\0';
 }
-char structs_menu()
+char structs_menu(int n)
 {
     char ch;
     cout << '\n';
@@ -156,13 +157,15 @@ char structs_menu()
         cout << "(D)isplay\n";
         cout << "(S)elected display\n";
         cout << "(U)pdate\n";
+        if (n == 2)
+            cout << "(R)eview\n";
         cout << "(Q)uit\n\n";
         cout << "Выберите команду: "; cin >> ch;
-    } while (!strchr("edusq", tolower(ch)));
+    } while (!strchr("edusqr", tolower(ch)));
     return tolower(ch);
 }
 
-void sort_struct_arr(routes *route, int size)
+void sort_routes_arr(routes *route, int size)
 {
     int i, j, current_char, new_char, step, max = 0;
     char current_colony, new_colony;
@@ -195,6 +198,7 @@ void aeroflot_enter()
     if (i == Aeroflot_size)
     {
         cout << "Список полон.\n"; return;
+        Sleep(450);
     }
     aeroflot_input(i);
 }
@@ -211,6 +215,7 @@ void aeroflot_update()
     if (i == Aeroflot_size)
     {
         cout << "Рейс не найден.\n"; return;
+        Sleep(450);
     }
     cout << "Введите новую информацию.\n";
     aeroflot_input(i);
@@ -218,7 +223,7 @@ void aeroflot_update()
 void aeroflot_display()
 {
     int t;
-    sort_struct_arr(aeroflot, Aeroflot_size);
+    sort_routes_arr(aeroflot, Aeroflot_size);
     cout << "\n-----------------------------------------------------------------\n";
     for (t = 0; t < Aeroflot_size; t++)
     {
@@ -248,6 +253,7 @@ void aeroflot_selected_display()
     if (i == Aeroflot_size)
     {
         cout << "Рейс не найден.\n"; return;
+        Sleep(450);
     }
     cout << "\n-----------------------------------------------------------------\n";
     cout << "\nНомер рейса: " << aeroflot[i].route_n << '\n';
@@ -264,7 +270,7 @@ void AEROFLOT()
         init_routes_arr(aeroflot, Aeroflot_size);
     while(!quit)
     {
-        choice = structs_menu();
+        choice = structs_menu(1);
 
         switch (choice)
         {
@@ -310,8 +316,25 @@ struct student
     char name[50];
     char surname[60];
     int group_n;
-    char exams[3];
+    char exams[4];
 };
+void sort_students_arr(student* students, int size)
+{
+    int i, j, current_char, new_char, step, max = 0;
+    char current_colony, new_colony;
+
+    for (int i = 0; i < size - 1; i++)
+    {
+        for (int j = 0; j < size - i - 1; j++)
+        {
+
+            if (strcmp(students[j].family_name, students[j + 1].family_name) > 0)
+            {
+                swap(students[j], students[j + 1]);
+            }
+        }
+    }
+}
 void student_input(student* students,int i)
 {
     cout << "Фамилия: "; cin >> students[i].family_name;
@@ -321,13 +344,13 @@ void student_input(student* students,int i)
     cout << "Оценка по математике: "; cin >> students[i].exams[0];
     cout << "Оценка по программированию: "; cin >> students[i].exams[1];
     cout << "Оценка по экономике: "; cin >> students[i].exams[2];
-}
+} // +
 void init_students_arr(student* students, int CoupleSize)
 {
     int t;
     for (t = 0; t < CoupleSize; t++)
         *students[t].family_name = '\0';
-}
+} 
 void students_enter(student* students, int CoupleSize)
 {
     int i;
@@ -337,67 +360,295 @@ void students_enter(student* students, int CoupleSize)
     if (i == CoupleSize)
     {
         cout << "Список полон.\n"; return;
+        Sleep(450);
     }
     student_input(students, i);
 }
-void students_update(student* students, int CoupleSize, )
+void students_update(student* students, int CoupleSize)
 {
     int i;
     char name[80];
+    char family_name[80];
     cout << '\n';
-    cout << "Введите тип самолета: ";
+    cout << "Введите имя: ";
     cin >> name;
-    for (i = 0; i < Aeroflot_size; i++)
-        if (!strcmp(name, aeroflot[i].name))
+    cout << "\nВведите фамилию: ";
+    cin >> family_name;
+    for (i = 0; i < CoupleSize; i++)
+        if (!strcmp(name, students[i].name) && (!strcmp(family_name, students[i].family_name)))
             break;
-    if (i == Aeroflot_size)
+    if (i == CoupleSize)
     {
-        cout << "Рейс не найден.\n"; return;
+        cout << "Студент не найден.\n"; return;
+        Sleep(450);
     }
     cout << "Введите новую информацию.\n";
     student_input(students,i);
 }
+void student_display(student* students, int CoupleSize)
+{
+    int t;
+    sort_students_arr(students, CoupleSize);
+    cout << "\n-----------------------------------------------------------------\n";
+    for (t = 0; t < CoupleSize; t++)
+    {
+        if (*students[t].name)
+        {
+            cout << "\nСтудент: " << students[t].family_name << ' ' << students[t].name << ' ' << students[t].surname << '\n';
+            cout << "Группа: " << students[t].group_n << '\n';
+            cout << "Математика: " << students[t].exams[0] << "\nПрограммирование: " << students[t].exams[1] << "\nЭкономика: " << students[t].exams[2] << "\n\n";
+            cout << "-----------------------------------------------------------------\n";
+        }
+    }
+    cout << '\n';
+
+    system("pause");
+
+}
+void student_selected_display(student* students, int CoupleSize)
+{
+    int i;
+    char name[80];
+    char family_name[80];
+    cout << "Введите имя: ";
+    cin >> name;
+    cout << "\nВведите фамилию: ";
+    cin >> family_name;
+    for (i = 0; i < CoupleSize; i++)
+        if (!strcmp(name, students[i].name) && (!strcmp(family_name, students[i].family_name)))
+            break;
+    if (i == CoupleSize)
+    {
+        cout << "Студент не найден\n"; return;
+    }
+    cout << "\n-----------------------------------------------------------------\n";
+    cout << "\nСтудент: " << students[i].family_name << ' ' << students[i].name << ' ' << students[i].surname << '\n';
+    cout << "Группа: " << students[i].group_n << '\n';
+    cout << "Математика: " << students[i].exams[0] << "\nПрограммирование: " << students[i].exams[1] << "\nЭкономика: " << students[i].exams[2] << "\n\n";
+    cout << "\n-----------------------------------------------------------------\n";
+    system("pause");
+}
+void students_review(student* students, int CoupleSize)
+{
+    int i, j, c;
+    double r, st = 0, best = 0;
+    for (i = 0; i < CoupleSize; i++)
+    {
+        if (*students[i].name)
+        {
+            st += 1;
+            c = 0;
+            for (j = 0; j < 3; j++)
+            { 
+                if ((students[i].exams[j] == '4') || (students[i].exams[j] == '5'))
+                    c += 1;
+            }
+            if (c == 3)
+                best += 1;
+        }
+    }
+    r = best / st * 100;
+    cout << "\n4 и 5 на экзаменах получило " << r << "% студентов\n\n";
+    system("pause");
+}
+
 void Session_review()
 {
     char choice;
-    bool quit;
+    bool quit = false;
     student students[CoupleSize] = {
-        
-        
+    {"Safonov", "Ura", "*surname", 252, "424"},
+    {"Tozlian", "Edgar", "Davidovich", 252, "354" },
+    {"Starovoitov", "Ilya", "RedbuLLovich", 252, "545" },
+    {"Chhaidze", "David", "*surname", 252, "432" },
+    {"Grigorov", "Andrey", "*surname", 252, "555" }
+
     };
 
     if (!students[0].family_name)
         init_students_arr(students, CoupleSize);
     while (!quit)
     {
-        choice = structs_menu();
+        choice = structs_menu(2);
         switch (choice)
         {
         case 'e':
             students_enter(students, CoupleSize);
             break;
         case 'd':
-            aeroflot_display();
+            student_display(students, CoupleSize);
             break;
         case 's':
-            aeroflot_selected_display();
+            student_selected_display(students, CoupleSize);
             break;
         case 'u':
-            aeroflot_update();
+            students_update(students, CoupleSize);
+            break;
+        case 'r':
+            students_review(students, CoupleSize);
             break;
         case 'q':
             quit = true;
             break;
         }
+    }
 }
 
-void task_3()
+struct Inum
 {
+    int a;
+    int i;
+};
 
+void add_i(Inum a, Inum b, Inum* res)
+{
+    res->a = a.a + b.a;
+    res->i = a.i + b.i;
+}
+void reduce_i(Inum a, Inum b, Inum* res)
+{
+    res->a = a.a - b.a;
+    res->i = a.i - b.i;
+}
+void mult_i(Inum a, Inum b, Inum* res)
+{
+    res->a = a.a * b.a - a.i * b.i;
+    res->i = a.a * b.i + a.i * b.a;
+}
+void del_i(Inum a, Inum b, Inum* res)
+{
+    res->a = (a.a * b.a + a.i * b.i) / (b.a * b.a + b.i * b.i);
+    res->i = (a.i * b.a - a.a * b.i) / (b.a * b.a + b.i * b.i);
+}
+void I_numbers()
+{
+    Inum a, b, res;
+    int choice;
+    bool quit = false;
+    cout << "Введите число А: ";
+    cin >> a.a;
+    system("cls");
+    cout << "Введите число A: " << a.a << ' ';
+    cin >> a.i;
+    system("cls");
+    cout << "Число А: " << a.a << '+' << a.i << "i\n";
+    cout << "Введите число B: ";
+    cin >> b.a;
+    system("cls");
+    cout << "Число А: " << a.a << '+' << a.i << "i\n";
+    cout << "Введите число B: " << b.a << ' ';
+    cin >> b.i;
+    system("cls");
+    cout << "Число А: " << a.a << '+' << a.i << "i\n";
+    cout << "Число B: " << b.a << '+' << b.i << "i\n\n";
+
+    cout << "** Меню **\n";
+    cout << "1. +\n";
+    cout << "2. -\n";
+    cout << "3. *\n";
+    cout << "4. /\n";
+    cout << "Выберите действие: ";
+    cin >> choice;
+
+    switch (choice)
+    {
+    case 1:
+        add_i(a, b, &res);
+        cout << "Результат: " << res.a << '+' << res.i << 'i';
+        break;
+    case 2:
+        reduce_i(a, b, &res);
+        cout << "Результат: " << res.a << '+' << res.i << 'i';
+        break;
+    case 3:
+        mult_i(a, b, &res);
+        cout << "Результат: " << res.a << '+' << res.i << 'i';
+        break;
+    case 4:
+        del_i(a, b, &res);
+        cout << "Результат: " << res.a << '+' << res.i << 'i';
+        break;
+    default:
+        break;
+    }
+    cout << "\n\n";
+    
 }
 
-void task_4()
+struct car
 {
+    char brand[40];
+    char model[40];
+    char color[40];
+    int price;
+    int engine_pwr;
+    double consumption;
+};
+
+void all_cars_display(car* cars, int size)
+{
+    int i;
+    cout << "\n ----------------------------------------------------------------- \n";
+    for (i = 0; i < size; i++)
+    {
+        if (*cars[i].brand)
+        {
+           cout << "\n    Марка: " << cars[i].brand << "  Модель: " << cars[i].model << "  Цена: " << cars[i].price << " рублей" << "\n\n";
+           cout << "    Цвет: " << cars[i].color << "  Мощность: " << cars[i].engine_pwr << " л. с." << "  Расход: " << cars[i].consumption << "л/100км\n\n";
+           cout << " ----------------------------------------------------------------- \n";
+        }
+    }
+    cout << '\n';
+
+    system("pause");
+}
+
+
+
+
+void CarDealer()
+{
+    const int size = 16;
+    car cars[size] = {
+        {"ВАЗ", "2107","Черный", 250000, 76, 9.6},
+        {"Nissan", "Sylphy","Белый", 1960000, 116, 11},
+        {"Toyota", "RAV 4","Серый", 1350000, 148, 15},
+        {"Changan", "LX" ,"Красный", 2960000, 120, 12},
+        {"Hyundai", "Solaris","Желтый", 1195000, 94, 8.8},
+        {"Opel", "Astra", "Серый",  350000, 115, 8.2}
+    };
+    char choice;
+    bool quit = false;
+    do
+    {
+        system("cls");
+        cout << "** Меню **\n";
+        cout << "(D)isplay\n";
+        cout << "(Q)uit\n";
+        cout << "Выберите действие: ";
+        cin >> choice;
+
+        switch (choice)
+        {
+        case 'd':
+            all_cars_display(cars, size);
+            break;
+        case 'q':
+            quit = true;
+            break;
+        }
+    } while (!quit);
+
+
+
+
+
+
+
+
+
+
+
 
 }
 
@@ -406,23 +657,15 @@ void task_5()
 
 }
 
-void task_6()
-{
-
-}
-
-
-
 int menu()
 {
     int choice;
     cout << "** Меню **\n";
     cout << "1. AEROFLOT\n";
-    cout << "2. e\n";
-    cout << "3. Функция для квадратного уравнения\n";
-    cout << "4. Функция для выставления нижнего регистра строки\n";
-    cout << "5. Функции для работы с дробями\n";
-    cout << "6. Функция для возврата простых делителей\n";
+    cout << "2. Session review\n";
+    cout << "3. Комплексные числа\n";
+    cout << "4. Автосалон\n";
+    cout << "5. Занятость аудитории\n";
     cout << "0. Выход\n";
     cout << "Выберите действие: ";
     cin >> choice;
@@ -451,22 +694,17 @@ int main()
             break;
         case 3:
             system("cls");
-            task_3();
+            I_numbers();
             system("pause");
             break;
         case 4:
             system("cls");
-            task_4();
+            CarDealer();
             system("pause");
             break;
         case 5:
             system("cls");
             task_5();
-            system("pause");
-            break;
-        case 6:
-            system("cls");
-            task_6();
             system("pause");
             break;
         case 0:
