@@ -686,17 +686,63 @@ void CarDealer()
 
 }
 
+struct period {
+    int startH;
+    int startM;
+    int endH;
+    int endM;
+};
+struct lesson{
+    char lesson[80];
+    period time;
+};
+struct AUD {
+    int number;
+    lesson lessons[18];
+};
 
-
-
-
-
-
-
+char AUD_menu()
+{
+        char ch;
+        cout << '\n';
+        do
+        {
+            system("cls");
+            cout << "(E)nter\n";
+            cout << "(D)isplay\n";
+            cout << "(S)elected display\n";
+            cout << "(U)pdate\n";
+            cout << "(Q)uit\n\n";
+            cout << "Выберите команду: "; cin >> ch;
+        } while (!strchr("edusq", tolower(ch)));
+        return tolower(ch);
+}
 
 
 void Auditory()
 {
+    int audn, i;
+    bool quit = false;
+    const int size = 10;
+    char choice;
+
+    AUD rooms[10] =
+    {
+        {252, { { "Математика", {8, 30, 9, 50} }, { "C++", {10, 00, 11, 20} } } },
+        {251, { { "История дизайна", {8, 30, 9, 50} }, { "Английский язык", {10, 00, 11, 20} } } }
+    };
+
+    do
+    {
+        system("cls");
+        choice = AUD_menu();
+
+
+
+    } while (!quit);
+
+
+   
 
 }
 
