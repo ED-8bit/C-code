@@ -167,12 +167,11 @@ char structs_menu(int n)
 
 void sort_routes_arr(routes *route, int size)
 {
-    int i, j, current_char, new_char, step, max = 0;
-    char current_colony, new_colony;
+    int i, j, max = 0;
 
-    for (int i = 0; i < size - 1; i++)
+    for (i = 0; i < size - 1; i++)
     {
-        for (int j = 0; j < size - i - 1; j++)
+        for (j = 0; j < size - i - 1; j++)
         {
             
             if (strcmp(route[j].dest, route[j + 1].dest) > 0)
@@ -321,12 +320,11 @@ struct student
 
 void sort_students_arr(student* students, int size)
 {
-    int i, j, current_char, new_char, step, max = 0;
-    char current_colony, new_colony;
+    int i, j, max = 0;
 
-    for (int i = 0; i < size - 1; i++)
+    for (i = 0; i < size - 1; i++)
     {
-        for (int j = 0; j < size - i - 1; j++)
+        for (j = 0; j < size - i - 1; j++)
         {
 
             if (strcmp(students[j].family_name, students[j + 1].family_name) > 0)
@@ -635,14 +633,15 @@ void CarDealer()
         {"Changan", "LX" ,"Красный", 2960000, 120, 12},
         {"Hyundai", "Solaris","Желтый", 1195000, 94, 8.8},
         {"Opel", "Astra", "Серый",  350000, 115, 8.2},
-        {"Dodge", "Charger II", "Бардовый",  48800000, 345, 22},
-        {"Imponte", "Duke`o`Death", "Черный", 76600000, 600, 40}
+        {"Dodge", "Charger II", "Бардовый",  50800000, 345, 22},
+        {"Imponte", "Duke o`Death", "Черный", 76600000, 900, 40},
+        {"RAM", "TRX", "Красный", 15000000, 702, 25}
     };
     char choice;
     bool quit = false;
 
     // filters
-    int pricemin = 0, pricemax = 9999999999;
+    int pricemin = 0, pricemax = 899999999;
     int enginepwrmin = 0, enginepwrmax = 99999;
     double consumptionmin = 0, consumptionmax = 99999;
     //
@@ -672,14 +671,6 @@ void CarDealer()
             break;
         }
     } while (!quit);
-
-
-
-
-
-
-
-
 
 
 
@@ -717,16 +708,99 @@ char AUD_menu()
         } while (!strchr("edusq", tolower(ch)));
         return tolower(ch);
 }
+// Ввод
+void period_input(AUD* rooms, lesson* lesson, period* time, int n)
+{
 
+}
+void lesson_input(AUD* rooms,lesson* lesson , int n, int i)
+{
+    system("cls");
+    cout << "Введите время " << i + 1 << " пары: ";
+
+}
+void AUD_input(AUD* rooms, int n)
+{
+    char choice;
+    int i, num;
+    bool quit = false;
+    do
+    {
+
+    // Смена номера
+
+        system("cls");
+        cout << "Поменять номер?\nY - Да \nN - Нет\n"; cin >> choice;
+        choice = tolower(choice);
+        switch (choice)
+        {
+        case 'y':
+            system("cls");
+            cout << "Введите новый номер: "; cin >> num;
+            rooms[n].number = num;
+            quit = true;
+            break;
+        case 'n':
+            quit = true;
+            break;
+        default:
+            break;
+        }
+    } while (!quit);
+    quit = false;
+    // Пары: 
+
+    system("cls");
+    do
+    {
+        system("cls");
+        int cell;
+        cout << "Номер ячейки"; cin >> cell;
+        if (!rooms[n].lessons)
+            lesson_input(rooms, &rooms[n].lessons[cell], n, cell);
+    } while (!quit);
+    
+
+    
+}
+void AUD_enter(AUD* rooms, int size)
+{
+    
+}
+void AUD_update(AUD* rooms, int size)
+{
+    int i, n;
+    cout << "Введите номер аудитории: "; cin >> n;
+    for (i = 0; i < size; i++)
+    {
+        if (rooms[i].number == n)
+        {
+            AUD_input(rooms, n);
+            break;
+        }
+    }
+}
+// Вывод
+void AUD_output()
+{
+
+}
+void AUD_display()
+{
+
+}
+void AUD_display_s()
+{
+
+}
 
 void Auditory()
 {
-    int audn, i;
     bool quit = false;
     const int size = 10;
     char choice;
 
-    AUD rooms[10] =
+    AUD rooms[size] =
     {
         {252, { { "Математика", {8, 30, 9, 50} }, { "C++", {10, 00, 11, 20} } } },
         {251, { { "История дизайна", {8, 30, 9, 50} }, { "Английский язык", {10, 00, 11, 20} } } }
@@ -737,6 +811,24 @@ void Auditory()
         system("cls");
         choice = AUD_menu();
 
+        switch (choice)
+        {
+        case 'e':
+
+            break;
+        case 'd':
+
+            break;
+        case 's':
+
+            break;
+        case 'u':
+            AUD_update(rooms, size);
+            break;
+        case 'q':
+            quit = true;
+            break;
+        }
 
 
     } while (!quit);
