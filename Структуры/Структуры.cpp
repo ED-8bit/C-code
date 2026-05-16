@@ -122,7 +122,6 @@ int main()
     }
 }*/
 
-
 const int Aeroflot_size = 7;
 struct routes
 {
@@ -290,23 +289,7 @@ void AEROFLOT()
             break;
         }
     }
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
-
 
 const int CoupleSize = 20;
 struct student
@@ -677,21 +660,31 @@ void CarDealer()
 
 }
 
-struct period {
-    int startH;
-    int startM;
-    int endH;
-    int endM;
-};
 struct lesson{
     char lesson[80];
-    period time;
+    int start_time;
+    int end_time;
 };
 struct AUD {
     int number;
-    lesson lessons[18];
+    lesson lessons[8];
 };
-
+int slt = 650;
+void time_out(int time)
+{
+    int h, m;
+    h = time / 60;
+    m = time % 60;
+    if (h < 10)
+        cout << "0" << h;
+    else
+        cout << h;
+    cout << ':';
+    if (m < 10)
+        cout << "0" << m;
+    else
+        cout << m;
+}
 char AUD_menu()
 {
         char ch;
@@ -699,99 +692,209 @@ char AUD_menu()
         do
         {
             system("cls");
-            cout << "(E)nter\n";
+            cout << "** Меню **\n";
+            cout << "(E)dit\n";
             cout << "(D)isplay\n";
-            cout << "(S)elected display\n";
-            cout << "(U)pdate\n";
             cout << "(Q)uit\n\n";
             cout << "Выберите команду: "; cin >> ch;
-        } while (!strchr("edusq", tolower(ch)));
+        } while (!strchr("edq", tolower(ch)));
         return tolower(ch);
 }
+/*void AUD_init(AUD* rooms, int size)
+{
+    int i, j;
+    for (i = 0; i < size; i++)
+        for (j = 0; j < 8; j++)
+        {
+            if ()
+        }
+            rooms[i].lessons[j].lesson[0] = '\0';
+}
+*/
+
 // Ввод
-void period_input(AUD* rooms, lesson* lesson, period* time, int n)
+void AUD_L_disp(AUD* rooms, int id, int Lsize)
 {
-
+    cout << "Аудитория " << rooms[id].number << '\n' << "--------------------------------------------------------------------------------------------\n";
+    for (int i = 0; i < Lsize; i++)
+    {
+        //if (rooms[id].lessons[i].lesson[0] != '\0')
+        {
+            cout << i+1 << " | " << rooms[id].lessons[i].lesson << " | "; time_out(rooms[id].lessons[i].start_time); cout << " - "; time_out(rooms[id].lessons[i].end_time); cout << " |\n";
+        }   
+    }
+    cout << "--------------------------------------------------------------------------------------------\n";
 }
-void lesson_input(AUD* rooms,lesson* lesson , int n, int i)
+void AUD_lesson_input(AUD* rooms, int id, lesson* lesson, int cell)
 {
-    system("cls");
-    cout << "Введите время " << i + 1 << " пары: ";
-
+    int h, m;
+    cin.ignore();
+    cout << rooms[id].number << " аудитория\n\n";
+    cout << "Введите название предмета для " << cell + 1 << " пары: "; cin.getline(rooms[id].lessons[cell].lesson, 80); cout << '\n';
+    
+    cout << rooms[id].number << " аудитория\n";
+    cout << cell + 1 << " пара: " << rooms[id].lessons[cell].lesson << "\n\n";
+    cout << "Введите время начала: "; cin >> h >> m;
+    rooms[id].lessons[cell].start_time = m + h * 60;
+    cout << "Введите время окончания: "; cin >> h >> m;
+    rooms[id].lessons[cell].end_time = m + h * 60;
 }
-void AUD_input(AUD* rooms, int n)
+void AUD_lesson_del(AUD* rooms, int id, lesson* lessons, int cell)
 {
-    char choice;
-    int i, num;
-    bool quit = false;
+    rooms[id].lessons[cell].lesson[0] = '\0';
+    rooms[id].lessons[cell].start_time = 0;
+    rooms[id].lessons[cell].end_time = 0;
+}
+void AUD_add(AUD* rooms, int id, lesson* lesson)
+{
+    int cell;
+    bool limit = true;
+    for (cell = 0; cell < 8; cell++)
+    {
+        if (!rooms[id].lessons[cell].lesson[0])
+        {
+            AUD_lesson_input(rooms, id, rooms[id].lessons, cell);
+            limit = false;
+            break;
+        }
+    }
+    if (limit)
+    {
+        cout << "Достигнут лимит пар";
+        Sleep(slt);
+    }
+}
+void AUD_edit(AUD* rooms, int id)
+{
+    char choice, ch;
+    bool quit = false; 
     do
     {
-
-    // Смена номера
-
         system("cls");
-        cout << "Поменять номер?\nY - Да \nN - Нет\n"; cin >> choice;
+        AUD_L_disp(rooms, id, 8);
+
+        cout << "(A)dd\n";
+        cout << "(C)hange\n";
+        cout << "(D)elete\n";
+        cout << "(B)ack\n";
+        cout << "Введите команду: ";
+        cin >> choice;
         choice = tolower(choice);
+        int cell;
         switch (choice)
         {
-        case 'y':
+        case 'a':
             system("cls");
-            cout << "Введите новый номер: "; cin >> num;
-            rooms[n].number = num;
-            quit = true;
+            AUD_L_disp(rooms, id, 8);
+            AUD_add(rooms, id, rooms[id].lessons);
             break;
-        case 'n':
+        case 'c':
+            system("cls");
+            AUD_L_disp(rooms, id, 8);
+            cout << "Введите номер ячейки для замены: "; cin >> cell;
+            if ((cell > 0) || (cell < 9))
+            {
+                if (rooms[id].lessons[cell - 1].lesson[0])
+                {
+                    system("cls");
+                    AUD_L_disp(rooms, id, 8);
+                    AUD_lesson_input(rooms, id, rooms[id].lessons, cell - 1);
+                } 
+                else
+                {
+                    cout << "Ячейка пуста. Добавить пару?\n";
+                    cout << "Y - Да\nN - нет\n";
+                    cout << "Выберите команду: "; cin >> ch;
+                    ch = tolower(ch);
+                    switch (ch)
+                    {
+                    case'y':
+                        system("cls");
+                        AUD_L_disp(rooms, id, 8);
+                        AUD_lesson_input(rooms, id, rooms[id].lessons, cell - 1);
+                        break;
+                    case 'n':
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                "За пределами ввода";
+                Sleep(slt);
+            }
+            break;
+
+        case 'd':
+            system("cls");
+            AUD_L_disp(rooms, id, 8);
+            cout << "Введите номер ячейки для удаления: "; cin >> cell;
+            if ((cell > 0) || (cell < 9))
+            {
+                if (rooms[id].lessons[cell - 1].lesson[0])
+                {
+                    system("cls");
+                    AUD_L_disp(rooms, id, 8);
+                    AUD_lesson_del(rooms, id, rooms[id].lessons, cell - 1);
+                }
+                else
+                    cout << "Ячейка уже пуста";
+            }
+            else
+            {
+                "За пределами ввода";
+                Sleep(slt);
+            }
+            break;
+            break;
+        case 'b':
             quit = true;
             break;
         default:
             break;
         }
-    } while (!quit);
-    quit = false;
-    // Пары: 
 
-    system("cls");
+    } while (!quit);
+    
+
+    
+}
+void AUD_N_disp(AUD* rooms, int size)
+{
+    for (int id = 0; id < size; id++)
+    {
+        if (rooms[id].number)
+            cout << rooms[id].number << " аудитория\n";
+    }
+}
+
+void AUD_choose(AUD* rooms, int size)
+{
+    int id, n;
+    bool f = false;
     do
     {
         system("cls");
-        int cell;
-        cout << "Номер ячейки"; cin >> cell;
-        if (!rooms[n].lessons)
-            lesson_input(rooms, &rooms[n].lessons[cell], n, cell);
-    } while (!quit);
-    
-
-    
-}
-void AUD_enter(AUD* rooms, int size)
-{
-    
-}
-void AUD_update(AUD* rooms, int size)
-{
-    int i, n;
-    cout << "Введите номер аудитории: "; cin >> n;
-    for (i = 0; i < size; i++)
-    {
-        if (rooms[i].number == n)
+        AUD_N_disp(rooms, size);
+        cout << "\nВведите номер аудитории: "; cin >> n;
+        for (id = 0; id < size; id++)
         {
-            AUD_input(rooms, n);
-            break;
+            if (rooms[id].number == n)
+            {
+                system("cls");
+                AUD_edit(rooms, id);
+                f = true;
+                break;
+            }
         }
-    }
-}
-// Вывод
-void AUD_output()
-{
-
-}
-void AUD_display()
-{
-
-}
-void AUD_display_s()
-{
-
+        if (!f)
+        {
+            cout << "Аудитория не найдена";
+            Sleep(slt);
+        }
+    } while (!f);
+    
+    
 }
 
 void Auditory()
@@ -800,10 +903,10 @@ void Auditory()
     const int size = 10;
     char choice;
 
-    AUD rooms[size] =
+    AUD rooms1[size] =
     {
-        {252, { { "Математика", {8, 30, 9, 50} }, { "C++", {10, 00, 11, 20} } } },
-        {251, { { "История дизайна", {8, 30, 9, 50} }, { "Английский язык", {10, 00, 11, 20} } } }
+        {252, { { "Математика", 560, 720 }, { "C++", 720, 940 } } },
+        {251, { { "История дизайна",  30, 9  }, { "Английский язык", 1120, 1440} } } 
     };
 
     do
@@ -814,16 +917,11 @@ void Auditory()
         switch (choice)
         {
         case 'e':
-
+            system("cls");
+            AUD_choose(rooms1, size);
             break;
         case 'd':
 
-            break;
-        case 's':
-
-            break;
-        case 'u':
-            AUD_update(rooms, size);
             break;
         case 'q':
             quit = true;
@@ -832,9 +930,6 @@ void Auditory()
 
 
     } while (!quit);
-
-
-   
 
 }
 
