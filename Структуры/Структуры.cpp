@@ -896,7 +896,6 @@ void AUD_choose(AUD* rooms, int size)
     
     
 }
-
 void Auditory()
 {
     bool quit = false;
