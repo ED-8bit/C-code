@@ -763,10 +763,6 @@ void AUD_input(AUD* rooms, int n)
 
     
 }
-void AUD_enter(AUD* rooms, int size)
-{
-    
-}
 void AUD_update(AUD* rooms, int size)
 {
     int i, n;
