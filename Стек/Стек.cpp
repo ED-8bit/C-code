@@ -195,7 +195,8 @@ void int_stack()
 }
 
 
-struct charST {
+
+struct charST{
     char arr[80];
     int top = 0;
     int MAXsize = 80;
@@ -275,31 +276,59 @@ void charST_out(charST& s1)
 bool brackets(char str[])
 {
     charST s1;
-    int i, open = 0, close = 0;
+    int i;
     for (i = 0; str[i] != '\0'; i++)
     {
-        if (str[i] == '(' || str[i] == ')')
+        if (str[i] == '(')
             charST_push(s1, str[i]);
+        if (str[i] == ')')
+            if (s1.fill != 0)
+                charST_pop(s1);
+            else
+                return false;
     }
-
-    for (i = 0; i < s1.MAXsize; i++)
-    {
-        if (s1.arr[i] == '(')
-            open++;
-        else if (s1.arr[i] == ')')
-            close++;
-        if (close > open)
-        {
-            return false;
-        }
-    }
-    if (close == open)
-        return true;
-    else
-        return false;
+    return true;
 }
 
-void brackets_check()
+bool brackets_f(char str[])
+{
+    charST s1;
+    int i;
+    for (i = 0; str[i] != '\0'; i++)
+    {
+        if (str[i] == '(' || str[i] == '{' || str[i] == '[')
+            charST_push(s1, str[i]);
+        if (str[i] == ')')
+            if (s1.fill != 0)
+                if (s1.arr[s1.top - 1] == '(')
+                    charST_pop(s1);
+                else
+                    return false;
+            else
+                return false;
+
+        if (str[i] == '}')
+            if (s1.fill != 0)
+                if (s1.arr[s1.top - 1] == '{')
+                    charST_pop(s1);
+                else
+                    return false;
+            else
+                return false;
+
+        if (str[i] == ']')
+            if (s1.fill != 0)
+                if (s1.arr[s1.top - 1] == '[')
+                    charST_pop(s1);
+                else
+                    return false;
+            else
+                return false;
+    }
+    return true;
+}
+
+void brackets_check(bool f)
 {
     char str[80] = "Hello world :)\0";
     bool quit = false;
@@ -322,10 +351,21 @@ void brackets_check()
             break;
         case 2:
             cout << '\n';
-            if (brackets(str))
-                cout << "Структура правильная";
+            if (f)
+            {
+                if (brackets_f(str))
+                    cout << "Структура правильная";
+                else
+                    cout << "Ошибка в структуре";
+            }
             else
-                cout << "Ошибка в структуре";
+            {
+                if (brackets(str))
+                    cout << "Структура правильная";
+                else
+                    cout << "Ошибка в структуре";
+            }
+            
             Sleep(slt);
             break;
         case 0:
@@ -337,27 +377,6 @@ void brackets_check()
         }
     } while (!quit);
 }
-
-
-
-
-
-void brackets_check_f()
-{
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
 
 int menu()
 {
@@ -387,11 +406,11 @@ int main()
             break;
         case 2:
             system("cls");
-            brackets_check();
+            brackets_check(false);
             break;
         case 3:
             system("cls");
-            brackets_check_f();
+            brackets_check(true);
             break;
         case 0:
             quit = true;
