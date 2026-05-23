@@ -287,7 +287,10 @@ bool brackets(char str[])
             else
                 return false;
     }
-    return true;
+    if (s1.fill == 0)
+        return true;
+    else
+        return false;
 }
 
 bool brackets_f(char str[])
@@ -325,7 +328,10 @@ bool brackets_f(char str[])
             else
                 return false;
     }
-    return true;
+    if (s1.fill == 0)
+        return true;
+    else
+        return false;
 }
 
 void brackets_check(bool f)
