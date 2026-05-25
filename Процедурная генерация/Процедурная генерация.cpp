@@ -119,11 +119,11 @@ int* generateCellularAutomata(
     int width,
     int height,
     int fillPercent = 60,
-    int iterations = 4,
+    int iterations = 7,
     int wallThreshold = 5,
     bool edgeIsWall = true,
     bool cleanIslands = true,
-    int minRegionSize = 20)
+    int minRegionSize = 7)
 {
     mt19937 rng(seed);
     uniform_int_distribution<int> dist(0, 99);
@@ -257,12 +257,14 @@ int main()
         int seed1, seed2;
         seed1 = rand();
         seed2 = rand();
+        //seed1 = 1234;
+        //seed2 = 1234;
         system("chcp 1251");
         // 1. Карта высот шумом Перлина (1024x1024)
         const int size = 256;
         float* heightMap = generatePerlinNoise(seed1, size, size + 1.5 * size);
 
-        cout << "=== Карта высот (шум Перлина, random seed) ===\n";
+        cout << "=== Карта высот (шум Перлина, "; cout << seed1 << " ) ===\n";
         for (int y = 0; y < size; ++y) {
             for (int x = 0; x < size; ++x) {
                 float v = heightMap[y * size + x];
@@ -278,14 +280,14 @@ int main()
             cout << '\n';
         }
         delete[] heightMap;
-
+        int size2 = 30;
         // 2. Пещера клеточным автоматом (25x25)
-        cout << "\n=== Пещера (клеточный автомат, random seed) ===\n";
-        int* cave = generateCellularAutomata(seed2, 256, 256);
+        cout << "\n=== Пещера (клеточный автомат, "; cout << seed2 << " ) ===\n";
+        int* cave = generateCellularAutomata(seed2, size2, size2);
 
-        for (int y = 0; y < 256; ++y) {
-            for (int x = 0; x < 256; ++x) {
-                cout << (cave[y * 256 + x] ? '#' : ' ') << ' ';
+        for (int y = 0; y < size2; ++y) {
+            for (int x = 0; x < size2; ++x) {
+                cout << (cave[y * size2 + x] ? '#' : ' ') << ' ';
             }
             cout << '\n';
         }
