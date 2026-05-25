@@ -43,8 +43,8 @@ float* generatePerlinNoise(
     int width,
     int height,
     float scale = 0.008f,
-    int octaves = 6,
-    float persistence = 0.5f,
+    int octaves = 7,
+    float persistence = 0.52f,
     float lacunarity = 2.0f)
 {
     // 1. Таблица перестановок на основе seed
@@ -259,7 +259,7 @@ int main()
         seed2 = rand();
         system("chcp 1251");
         // 1. Карта высот шумом Перлина (1024x1024)
-        const int size = 512;
+        const int size = 256;
         float* heightMap = generatePerlinNoise(seed1, size, size + 1.5 * size);
 
         cout << "=== Карта высот (шум Перлина, random seed) ===\n";
@@ -299,7 +299,7 @@ int main()
         int* caveFull = generateCellularAutomata(888u, 50, 50, 50, 6, 5, true, true, 30);
         delete[] caveFull;*/
         Sleep(2000);
-    } while (true);
+    } while (false);
     
 
     return 0;
