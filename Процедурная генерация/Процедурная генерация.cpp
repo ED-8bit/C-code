@@ -119,7 +119,7 @@ int* generateCellularAutomata(
     int width,
     int height,
     int fillPercent = 60,
-    int iterations = 7,
+    int iterations = 4,
     int wallThreshold = 5,
     bool edgeIsWall = true,
     bool cleanIslands = true,
