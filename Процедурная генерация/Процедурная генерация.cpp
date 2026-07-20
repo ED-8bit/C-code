@@ -122,7 +122,7 @@ int* generateCellularAutomata(
     int iterations = 7,
     int wallThreshold = 5,
     bool edgeIsWall = true,
-    bool cleanIslands = true,
+    bool cleanIslands = false,
     int minRegionSize = 7)
 {
     mt19937 rng(seed);
