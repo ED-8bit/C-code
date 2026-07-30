@@ -40,42 +40,73 @@ using namespace std;
 //    p1.take_damage(&p2, &p2->getBeat());
 //    
 //}
-pair<int, int> spawn_away_from_walls(vector<vector<bool>>& game, int minDistance = 2) {
+
+struct tilemap {
+	int floor = 0;
+	int subject = 0;
+	int biome = 0;
+};
+
+
+void seed_fill_CA(vector<vector<bool>>& game, int seed, int fill = 0)
+{
 	int size = game.size();
-	vector<pair<int, int>> candidates;
+	mt19937 rng(seed);
+	uniform_int_distribution<int> dist(0, 99);
 
-	
-	for (int i = minDistance; i < size - minDistance; i++) {
-		for (int j = minDistance; j < size - minDistance; j++) {
-			if (!game[i][j]) {
-				bool isClear = true;
-
-				
-				for (int di = -minDistance; di <= minDistance; di++) {
-					for (int dj = -minDistance; dj <= minDistance; dj++) {
-						if (i + di >= 0 && i + di < size &&
-							j + dj >= 0 && j + dj < size &&
-							game[i + di][j + dj]) {
-							isClear = false;
-							break;
-						}
-					}
-					if (!isClear) break;
-				}
-
-				if (isClear) {
-					candidates.push_back({ i, j });
-				}
-			}
+	for (int i = 0; i < size; i++)
+	{
+		for (int j = 0; j < size; j++)
+		{
+			if (dist(rng) < fill)
+				game[i][j] = true;
 		}
 	}
 
-	if (!candidates.empty()) {
-		
-		return candidates[0];
-	}
+}
+void iteration_CA(vector<vector<bool>>& game, int need)
+{
+	int i, j;
+	int size = game.size();
+	vector<vector<bool>> newGame = game;
+	for (i = 0; size > i; i++)
+	{
+		for (j = 0; size > j; j++)
+		{
+			int neighbors = 0;
 
-	return { size / 2, size / 2 }; 
+			if (i > 0 && j > 0 && game[i - 1][j - 1])
+				neighbors++;
+
+			if (i > 0 && game[i - 1][j])
+				neighbors++;
+
+			if (i > 0 && j < size - 1 && game[i - 1][j + 1])
+				neighbors++;
+
+			if (j > 0 && game[i][j - 1])
+				neighbors++;
+
+			if (j < size - 1 && game[i][j + 1])
+				neighbors++;
+
+			if (i < size - 1 && j > 0 && game[i + 1][j - 1])
+				neighbors++;
+
+			if (i < size - 1 && game[i + 1][j])
+				neighbors++;
+
+			if (i < size - 1 && j < size - 1 && game[i + 1][j + 1])
+				neighbors++;
+
+			if (neighbors > need + 1 || neighbors < need - 1)
+				newGame[i][j] = false;
+			else if (neighbors == need || neighbors == need - 1)
+				newGame[i][j] = true;
+
+		}
+	}
+	game = newGame;
 }
 void fill_holes_CA(vector<vector<bool>>& game, int minzone = 0)
 {
@@ -134,65 +165,65 @@ void fill_holes_CA(vector<vector<bool>>& game, int minzone = 0)
 		}
 	}
 }
-void seed_fill_CA(vector<vector<bool>>& game, int seed, int fill = 0)
+void destroy_debris_CA(vector<vector<bool>>& game)
 {
-	int size = game.size();
-	mt19937 rng(seed);
-	uniform_int_distribution<int> dist(0, 99);
-
-	for (int i = 0; i < size; i++)
+	int i, j, size = game.size();
+	for (i = 0; i < size; i++)
 	{
-		for (int j = 0; j < size; j++)
+		for (j = 0; j < size; j++)
 		{
-			if (dist(rng) < fill)
-				game[i][j] = true;
+			bool onBorder = true;
+			if ((i != 0 && j != 0) && (i + 1 != size && j + 1 != size))
+			{
+				onBorder = false;
+			}
+			if (!onBorder)
+			{
+				int dx[] = { -1, 0, 1, 1, };
+				int dy[] = { -1, -1, -1, 0, };
+
+				for (int d = 0; d < 4; d++)
+				{
+					int x = i + dx[d];
+					int y = j + dy[d];
+					int nx = i - dx[d];
+					int ny = j - dy[d];
+					if (!game[x][y] && !game[nx][ny])
+						game[i][j] = false;
+				}
+			}
 		}
 	}
-	
 }
-void iteration_CA(vector<vector<bool>>& game, int need)
+void build_smoothing_CA(vector<vector<bool>>& game)
 {
-	int i, j;
-	int size = game.size();
-	vector<vector<bool>> newGame = game;
-	for (i = 0; size > i; i++)
+	int i, j, size = game.size();
+	for (i = 0; i < size; i++)
 	{
-		for (j = 0; size > j; j++)
+		for (j = 0; j < size; j++)
 		{
-			int neighbors = 0;
+			bool onBorder = true;
+			if ((i != 0 && j != 0) && (i + 1 != size && j + 1 != size))
+			{
+				onBorder = false;
+			}
+			if (!onBorder)
+			{
+				int dx[] = { -1, 0, 1, 1, };
+				int dy[] = { -1, -1, -1, 0, };
 
-			if (i > 0 && j > 0 && game[i - 1][j - 1])
-				neighbors++;
-			
-			if (i > 0 && game[i - 1][j])
-				neighbors++;
-			
-			if (i > 0 && j < size - 1 && game[i - 1][j + 1])
-				neighbors++;
-		
-			if (j > 0 && game[i][j - 1])
-				neighbors++;
-			
-			if (j < size - 1 && game[i][j + 1])
-				neighbors++;
-			
-			if (i < size - 1 && j > 0 && game[i + 1][j - 1])
-				neighbors++;
-		
-			if (i < size - 1 && game[i + 1][j])
-				neighbors++;
-			
-			if (i < size - 1 && j < size - 1 && game[i + 1][j + 1])
-				neighbors++;
-
-			if (neighbors > need+1 || neighbors < need-1)
-				newGame[i][j] = false;
-			else if (neighbors == need || neighbors == need - 1)
-				newGame[i][j] = true;
-			
+				for (int d = 0; d < 4; d++)
+				{
+					int x = i + dx[d];
+					int y = j + dy[d];
+					int nx = i - dx[d];
+					int ny = j - dy[d];
+					if (game[x][y] && game[nx][ny])
+						game[i][j] = true;
+				}
+			}
 		}
 	}
-	game = newGame;
 }
 void border_fill_CA(vector<vector<bool>>& game, int wall = 0)
 {
@@ -210,17 +241,39 @@ void border_fill_CA(vector<vector<bool>>& game, int wall = 0)
 		}
 	}
 }
-vector<vector<bool>> create_map_CA(int size, int iters, int seed = rand(), int fill = 50, int wall = 0, int minzone = 0, int need = 3)
+vector<vector<bool>> create_map_CAVE(int size, int iters, int seed = rand(), int fill = 50, int wall = 0, int minzone = 0, int destr = 1, int smooth = 1, int need = 3)
 {
 	int i;
 	vector<vector<bool>> game(size, vector<bool>(size, false));
 	seed_fill_CA(game, seed, fill);
 	for (i = 0; i < iters; i++)
+	{
 		iteration_CA(game, need);
+	}
 	border_fill_CA(game, wall);
 	fill_holes_CA(game, minzone);
+	for (i = 0; i < destr; i++)
+	{
+		destroy_debris_CA(game);
+	}
+	for (i = 0; i < smooth; i++)
+	{
+		build_smoothing_CA(game);
+	}
 	return game;
 }
+
+
+
+
+vector<vector<bool>> create_map_VILLAGE(int seed, int size)
+{
+	int i;
+	vector<vector<bool>> game(size, vector<bool>(size, false));
+
+	return game;
+}
+
 void OUT_MAP(vector<vector<bool>> game)
 {
 	int i, j;
@@ -237,21 +290,107 @@ void OUT_MAP(vector<vector<bool>> game)
 	}
 }
 
+void CAVE_gen()
+{
+	int seed;
+	cout << "Enter seed (0 = random): "; cin >> seed;
+	if (seed == 0)
+		seed = rand();
+	system("cls");
+	//                                size, iters, seed, fill, wall, minzone, debris, smooth need
+	vector<vector<bool>> cave = create_map_CAVE(64, 6, seed, 47, 2, 25, 4, 3, 5);
+	cout << "Level: Cave" << " \nSeed:  " << seed << '\n' << '\n';
+	OUT_MAP(cave);
+	system("pause");
+}
+void VILLAGE_gen()
+{
+	int seed;
+	cout << "Enter seed (0 = random): "; cin >> seed;
+	if (seed == 0)
+		seed = rand();
+	system("cls");
+	vector<vector<bool>> castle = create_map_VILLAGE(seed, 64);
+	cout << "Level: Village" << " \nSeed:  " << seed << '\n' << '\n';
+	OUT_MAP(castle);
+	system("pause");
+
+}
+void DUNGEON_gen()
+{
+	int seed;
+	cout << "Enter seed (0 = random): "; cin >> seed;
+	if (seed == 0)
+		seed = rand();
+	system("cls");
+
+}
+void CASTLE_gen()
+{
+	int seed;
+	cout << "Enter seed (0 = random): "; cin >> seed;
+	if (seed == 0)
+		seed = rand();
+	system("cls");
+
+}
+void OUT_MENU()
+{
+	cout << "**  MENU  **\n";
+	cout << "1. CAVES_gen\n";
+	cout << "2. VILLAGE_gen\n";
+	cout << "3. DUNGEON_gen\n";
+	cout << "4. CASTLE_gen\n";
+	cout << "0. EXIT\n\n";
+	cout << "Choice: ";
+}
 
 int main() {
 	system("chcp 1251");
 	system("cls");
 	srand(time(0));
-	for (int i = 0; i < 1; i++)
+	int choose;
+	do
 	{
 		system("cls");
-		int seed = rand();
-		//                                size, iters, seed, fill, wall, need
-		vector<vector<bool>> cave = create_map_CA(128, 7, seed, 55, 1, 3, 5);
-		cout << "Level: Cave #" << i+1 << " \nSeed:  " << seed << '\n' << '\n';
-		OUT_MAP(cave);
-		Sleep(2000);
-	}
+		OUT_MENU();
+		cin >> choose;
+		switch (choose)
+		{
+		case 1:
+		{
+			system("cls");
+			CAVE_gen();
+			break;
+		}
+		case 2:
+		{
+			system("cls");
+			VILLAGE_gen();
+			break;
+		}
+			
+		case 3:
+		{
+			system("cls");
+			DUNGEON_gen();
+			break;
+		}
+		case 4:
+		{
+			system("cls");
+			CASTLE_gen();
+			break;
+		}
+		case 0:
+			break;
+		default:
+			cout << "ERROR";
+			Sleep(1000);
+			break;
+		}
+	} while (choose != 0);
+	
 
 	return 0;
 }
