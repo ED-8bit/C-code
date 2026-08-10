@@ -7,52 +7,21 @@
 #include <queue>
 #include <utility> 
 using namespace std;
-//
-//class Entity {
-//private:
-//    string name;
-//    double strength;
-//    double weight;
-//    double health;
-//    double beat;
-//public:
-//    double getBeat() const { return beat; }
-//
-//    Entity(string n, double s, double w) : name(n), strength(s), weight(w), health(weight*strength), beat(strength*weight/10) {
-//        cout << "Created Entity " << "'" << name << "'" << " with:\n" << health << " HP\n" << beat << " DP\n";
-//    }
-//
-//    void take_damage(Entity* beater, double beat) {
-//        health -= beat;
-//        cout << "Entity " << "'" << name << "'" << "take " << beat << " damage " << "from " << &beater->name  << '\n' << "Entity HP -> " << health;
-//    }
-//
-//    ~Entity() {
-//        cout << "Entity " << "'" << name << "'" << " deleted";
-//    }
-//};
-//
-//int main() {
-//    system("chcp 1251");
-//    Entity p1("player1", 10, 65);
-//    Entity p2("player2", 10, 75);
-//    system("pause");
-//    p1.take_damage(&p2, &p2->getBeat());
-//    
-//}
 
 string tileset[2][8] = {
-	// Индексы: 0    1    2    3    4    5    6    7
-	{"  ", "`.", "^,", "YY", "NN", "  ", "  ", "  "},  // Пол (floor)
-	{"  ", "@@", "[]", "  ", "  ", "  ", "  ", "  "}   // Стены/объекты (subject)
+//    0     1     2     3     4     5     6     7
+	{"  ", "`.", "^,", "SP", "EN", "  ", "  ", "  "},  // Пол (floor)
+	{"  ", "@@", "[]", "OR", "  ", "  ", "  ", "  "}   // Стены/объекты (subject)
 };
 
 struct tilemap {
 	int floor;
 	int subject;
+	int air;
+	float temp;
 	int biome;
 
-	tilemap(int f = 0, int s = 0, int b = 0): floor(f), subject(s), biome(b){}
+	tilemap(int f = 0, int s = 0, int a = 0, double t = 0, int b = 0): floor(f), subject(s), air(a), temp(t), biome(b){}
 };
 
 struct coords {
@@ -255,28 +224,120 @@ void border_fill_CAVE(vector<vector<tilemap>>& game, int wall = 0)
 			}
 		}
 	}
-} 
+}
 
-coords find_player_spawn(vector<vector<tilemap>>& game, int minrange, int seed)
+coords find_player_spawn(vector<vector<tilemap>>& game, int R, int seed)
 {
 	int size = game.size();
 	mt19937 s(seed);
-	int start = s();
-	switch (start % 4)
-	{
-	case 3:
-		for (size_t x = 0; x < size; x++)
-		{
-			for (size_t y = 0; y < size; y++)
-			{
+	unsigned int start = s();
 
+	// Направление перебора зависит от остатка деления сида на 4
+	int direction = start % 4;
+
+	// Лямбда-функция для проверки, безопасна ли точка (нет ли стен в радиусе R)
+	auto is_safe = [&](int x, int y) {
+		if (game[x][y].subject != 0) return false;
+
+		for (int dx = -R; dx <= R; dx++) {
+			for (int dy = -R; dy <= R; dy++) {
+				// Если вышли за границы карты или встретили стену/объект
+				if (x + dx < 0 || x + dx >= size || y + dy < 0 || y + dy >= size) return false;
+				if (game[x + dx][y + dy].subject != 0) return false;
 			}
 		}
+		return true;
+		};
 
+	switch (direction)
+	{
+	case 0: // Сверху вниз, слева направо (стандартный порядок)
+		for (int x = R; x < size - R; x++) {
+			for (int y = R; y < size - R; y++) {
+				if (is_safe(x, y)) return coords(x, y);
+			}
+		}
+		break;
+
+	case 1: // Снизу вверх, слева направо
+		for (int x = size - 1 - R; x >= R; x--) {
+			for (int y = R; y < size - R; y++) {
+				if (is_safe(x, y)) return coords(x, y);
+			}
+		}
+		break;
+
+	case 2: // Сверху вниз, справа налево
+		for (int x = R; x < size - R; x++) {
+			for (int y = size - 1 - R; y >= R; y--) {
+				if (is_safe(x, y)) return coords(x, y);
+			}
+		}
+		break;
+
+	case 3: // Снизу вверх, справа налево
+		for (int x = size - 1 - R; x >= R; x--) {
+			for (int y = size - 1 - R; y >= R; y--) {
+				if (is_safe(x, y)) return coords(x, y);
+			}
+		}
+		break;
 	}
-		
 
+	// Резервный план: если с учетом радиуса R ничего не нашли,
+	// ищем самую первую вообще пустую клетку (без учета радиуса безопасности)
+	// в том же направлении, которое определил сид
+	switch (direction)
+	{
+	case 0:
+		for (int x = 0; x < size; x++)
+			for (int y = 0; y < size; y++)
+				if (game[x][y].subject == 0) return coords(x, y);
+		break;
+	case 1:
+		for (int x = size - 1; x >= 0; x--)
+			for (int y = 0; y < size; y++)
+				if (game[x][y].subject == 0) return coords(x, y);
+		break;
+	case 2:
+		for (int x = 0; x < size; x++)
+			for (int y = size - 1; y >= 0; y--)
+				if (game[x][y].subject == 0) return coords(x, y);
+		break;
+	case 3:
+		for (int x = size - 1; x >= 0; x--)
+			for (int y = size - 1; y >= 0; y--)
+				if (game[x][y].subject == 0) return coords(x, y);
+		break;
+	}
+
+	// Если карта абсолютно монолитна и пустых мест нет вообще
+	return coords(0, 0);
 }
+void set_player_spawn(vector<vector<tilemap>>& game, int seed)
+{
+	coords SP = find_player_spawn(game, 1, seed);
+	game[SP.x][SP.y].floor = 3;
+}
+
+void random_ore_spawn(vector<vector<tilemap>>& game, int seed, int fill)
+{
+	int size = game.size();
+	mt19937 ore(seed);
+	for (size_t x = 0; x < size; x++)
+	{
+		for (size_t y = 0; y < size; y++)
+		{
+			if (game[x][y].subject == 1) 
+				if(ore() % 100 + 1 <= fill)
+			{
+				game[x][y].subject = 3;
+			}
+		}
+	}
+	
+}
+
 vector<vector<tilemap>> create_map_CAVE(int size, int iters, int seed = rand(), int fill = 50, int wall = 0, int minzone = 0, int destr = 1, int smooth = 1, int need = 3)
 {
 	int i;
@@ -296,56 +357,17 @@ vector<vector<tilemap>> create_map_CAVE(int size, int iters, int seed = rand(), 
 	{
 		build_smoothing_CAVE(game);
 	}
-	return game;
-}
-
-bool can_set_house_VILLAGE(vector<vector<tilemap>>& game, int x, int y, int width, int height)
-{
-	int size = game.size();
-	if (x + width > size || y + height > size)
-		return false;
-	else
-		return true;
-}
-void seed_set_VILLAGE(vector<vector<tilemap>>& game, int seed)
-{
-	int size = game.size();
-	mt19937 rng(seed);
-	uniform_int_distribution<int> dist(0, size*size);
-	int M =  dist(rng);
-	for (size_t i = 0; i < size; i++)
-	{
-		for (size_t j = 0; j < size; j++)
-		{
-			if (i + j * size != 3002)
-				game[i][j].floor = 2;
-			else
-			{
-				if (can_set_house_VILLAGE(game, i, j, 7, 5))
-					game[i][j].floor = 3; // YY
-				else
-					game[i][j].floor = 4; // NN
-			}
-				
-		}
-	}
-	
-
-
-}
-vector<vector<tilemap>> create_map_VILLAGE(int seed, int size)
-{
-	vector<vector<tilemap>> game(size, vector<tilemap>(size, tilemap(2, 0, 1)));
-	seed_set_VILLAGE(game, seed);
+	random_ore_spawn(game, seed, 1);
 	return game;
 }
 
 void OUT_MAP(vector<vector<tilemap>> game)
 {
 	size_t i, j;
-	for (i = 0; game.size() > i; i++)
+	int size = game.size();
+	for (i = 0; size > i; i++)
 	{
-		for (j = 0; game.size() > j; j++)
+		for (j = 0; size > j; j++)
 		{
 			if (!game[i][j].subject)
 				cout << tileset[0][game[i][j].floor];
@@ -355,7 +377,6 @@ void OUT_MAP(vector<vector<tilemap>> game)
 		cout << '\n';
 	}
 }
-
 void CAVE_gen()
 {
 	int seed;
@@ -364,49 +385,17 @@ void CAVE_gen()
 		seed = rand();
 	system("cls");
 	//                                size, iters, seed, fill, wall, minzone, debris, smooth need
-	vector<vector<tilemap>> cave = create_map_CAVE(64, 6, seed, 47, 3, 100, 4, 3, 5);
+	vector<vector<tilemap>> cave = create_map_CAVE(96, 6, seed, 46, 4, 100, 4, 2, 5);
+	set_player_spawn(cave, seed);
 	cout << "Level: Cave" << " \nSeed: " << seed << '\n' << '\n';
 	OUT_MAP(cave);
 	system("pause");
 }
-void VILLAGE_gen()
-{
-	int seed;
-	cout << "Enter seed (0 = random): "; cin >> seed;
-	if (seed == 0)
-		seed = rand();
-	system("cls");
-	vector<vector<tilemap>> village = create_map_VILLAGE(seed, 64);
-	cout << "Level: Village" << " \nSeed: " << seed << '\n' << '\n';
-	OUT_MAP(village);
-	system("pause");
 
-}
-void DUNGEON_gen()
-{
-	int seed;
-	cout << "Enter seed (0 = random): "; cin >> seed;
-	if (seed == 0)
-		seed = rand();
-	system("cls");
-
-}
-void CASTLE_gen()
-{
-	int seed;
-	cout << "Enter seed (0 = random): "; cin >> seed;
-	if (seed == 0)
-		seed = rand();
-	system("cls");
-
-}
 void OUT_MENU()
 {
 	cout << "**  MENU  **\n";
-	cout << "1. CAVES_gen\n";
-	cout << "2. VILLAGE_gen\n";
-	cout << "3. DUNGEON_gen\n";
-	cout << "4. CASTLE_gen\n";
+	cout << "1. CAVES\n";
 	cout << "0. EXIT\n\n";
 	cout << "Choice: ";
 }
@@ -415,7 +404,7 @@ int main() {
 	system("chcp 1251");
 	system("cls");
 	srand(time(0));
-	int choose;
+	size_t choose;
 	do
 	{
 		system("cls");
@@ -427,25 +416,6 @@ int main() {
 		{
 			system("cls");
 			CAVE_gen();
-			break;
-		}
-		case 2:
-		{
-			system("cls");
-			VILLAGE_gen();
-			break;
-		}
-			
-		case 3:
-		{
-			system("cls");
-			DUNGEON_gen();
-			break;
-		}
-		case 4:
-		{
-			system("cls");
-			CASTLE_gen();
 			break;
 		}
 		case 0:
