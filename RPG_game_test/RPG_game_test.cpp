@@ -14,6 +14,7 @@ string tileset[3][8] = {
 	{"  ", "[]", "WA", "OR", "  ", "  ", "  ", "  "},   // Стены/объекты (subject)
 	{"  ", "@@", "  ", "  ", "  ", "  ", "  ", "  "},   // Воздух
 };
+
 struct tile {
 	int floor;
 	int subject;
@@ -21,7 +22,7 @@ struct tile {
 	float temp;
 	int biome;
 
-	tile(int f = 0, int s = 0, int a = 0, double t = 0, int b = 0): floor(f), subject(s), air(a), temp(t), biome(b){}
+	tile(int f = 0, int s = 0, int a = 0, float t = 0, int b = 0): floor(f), subject(s), air(a), temp(t), biome(b){}
 };
 struct point {
 	int x;
@@ -29,6 +30,7 @@ struct point {
 
 	point(int x, int y) : x(x), y(y) {}
 };
+
 int ent = 0;
 class Entity
 {
@@ -41,7 +43,7 @@ protected:
 	int age;
 	
 public:
-	Entity(vector<vector<tile>>& m, point l = { 0, 0 }, string n = " ", float w = 0, int a = 0) : map(m), local(l), name(n), weight(w), age(a) { id = ++ent; }
+	Entity(vector<vector<tile>>& m, point l = { 0, 0 }, string n = "", float w = 0, int a = 0) : map(m), local(l), name(n), weight(w), age(a) { id = ++ent; }
 	
 	virtual int getID() const { return id; }
 	virtual string getName() const { return name; }
@@ -58,7 +60,7 @@ public:
 	}
 
 	virtual void printInfo() const {
-		cout << "📊 " << name << " | Позиция: (" << local.x << ", " << local.y << ")" << endl;
+		cout << name << " | Позиция: (" << local.x << ", " << local.y << ")" << endl;
 		cout << "   Вес: " << weight << " | Возраст: " << age << endl;
 	}
 
@@ -79,7 +81,7 @@ public:
 
 	
 	void move(Direction dir) {
-		int size = map.size();
+		size_t size = map.size();
 		switch (dir) {
 		case north: if (local.y < size - 1) local.y++; break;
 		case south: if (local.y > 0) local.y--; break;
@@ -108,18 +110,18 @@ public:
 	virtual ~Character(){}
 };
 
-
-
-
-
-
-
-
-
+bool onBorder(vector<vector<tile>>& game, point dot)
+{
+	size_t size = game.size(); 
+	if (dot.x == 0 || dot.y == 0 || dot.x == size - 1 || dot.y == size - 1)
+		return true;
+	else
+		return false;
+}
 
 void seed_fill_CAVE(vector<vector<tile>>& game, int seed, int fill = 0)
 {
-	int size = game.size();
+	size_t size = game.size();
 	mt19937 rng(seed);
 	uniform_int_distribution<int> dist(0, 99);
 
@@ -405,22 +407,107 @@ void set_player_spawn(vector<vector<tile>>& game, int seed)
 	game[SP.x][SP.y].floor = 3;
 }
 
+
 void random_ore_spawn(vector<vector<tile>>& game, int seed, int fill)
 {
-	int size = game.size();
+	size_t size = game.size();
 	mt19937 ore(seed);
 	for (size_t x = 0; x < size; x++)
 	{
 		for (size_t y = 0; y < size; y++)
 		{
-			if (game[x][y].subject == 1) 
-				if((ore() % 100 + 1) <= fill)
+			if (game[x][y].subject == 1)
 			{
-				game[x][y].subject = 3;
+				if ((ore() % 100 + 1) <= fill)
+				{
+					game[x][y].subject = 3;
+				}
 			}
 		}
 	}
 	
+}
+void random_ore_grow(vector<vector<tile>>& game, int seed)
+{
+	int size = game.size();
+	int r;
+	vector<vector<tile>> NewGame = game;
+	mt19937 ore(seed);
+	for (int x = 0; x < size; x++)
+	{
+		for (int y = 0; y < size; y++)
+		{
+			if ((game[x][y].subject == 3) && (!onBorder(game, { x, y })))
+			{
+				do
+				{
+					r = ore() % 9;
+					switch (r)
+					{
+					case 0:
+					{
+						if (game[x - 1][y].subject == 1)
+							NewGame[x - 1][y].subject = 3;
+						break;
+					}
+					case 1:
+					{
+						if (game[x + 1][y].subject == 1)
+							NewGame[x + 1][y].subject = 3;
+						break;
+					}
+					case 2:
+					{
+						if (game[x][y - 1].subject == 1)
+							NewGame[x][y - 1].subject = 3;
+						break;
+					}
+					case 3:
+					{
+						if (game[x][y + 1].subject == 1)
+							NewGame[x][y + 1].subject = 3;
+						break;
+					}
+					case 4:
+					{
+						if (game[x - 1][y+1].subject == 1)
+							NewGame[x - 1][y+1].subject = 3;
+						break;
+					}
+					case 5:
+					{
+						if (game[x + 1][y-1].subject == 1)
+							NewGame[x + 1][y-1].subject = 3;
+						break;
+					}
+					case 6:
+					{
+						if (game[x+1][y + 1].subject == 1)
+							NewGame[x+1][y + 1].subject = 3;
+						break;
+					}
+					case 7:
+					{
+						if (game[x-1][y - 1].subject == 1)
+							NewGame[x-1][y - 1].subject = 3;
+						break;
+					}
+					default:
+						break;
+					}
+				} while (r < 4);
+				
+
+			}	
+		}
+	}
+	game = NewGame;
+}
+void set_ore(vector<vector<tile>>& game, int seed, int level = 0, bool grow = 0)
+{
+	random_ore_spawn(game, seed, level);
+	if (grow)
+		random_ore_grow(game, seed);
 }
 
 vector<vector<tile>> create_map_CAVE(int size, int iters, int seed = rand(), int fill = 50, int wall = 0, int minzone = 0, int destr = 1, int smooth = 1, int need = 3, int ore = 0)
@@ -442,7 +529,8 @@ vector<vector<tile>> create_map_CAVE(int size, int iters, int seed = rand(), int
 	{
 		build_smoothing_CAVE(game);
 	}
-	random_ore_spawn(game, seed, ore);
+	set_ore(game, seed, ore, true);
+	set_player_spawn(game, seed);
 	return game;
 }
 
@@ -471,9 +559,9 @@ void CAVE_gen()
 	if (seed == 0)
 		seed = rand();
 	system("cls");
-	//                                          size, iters, seed, fill, wall, minzone, debris, smooth, need, ore
-	vector<vector<tile>> cave = create_map_CAVE(  96,     6, seed,   46,    4,      75,      4,      2,    5,   2);
-	set_player_spawn(cave, seed);
+	//                                           size, iters, seed, fill, wall,  minzone, debris, smooth, need, ore
+	vector<vector<tile>> cave = create_map_CAVE(  128,     4, seed,   46,    4,      100,      4,      2,    5,   1);
+	
 	cout << "Level: Cave" << " \nSeed: " << seed << '\n' << '\n';
 	OUT_MAP(cave);
 	system("pause");
