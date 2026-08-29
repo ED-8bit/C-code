@@ -1,19 +1,14 @@
-﻿#include <iostream>
+﻿#include <SFML/Graphics.hpp>
+#include <iostream>
 #include <string>
 #include <vector>
 #include <Windows.h>
 #include <random>
 #include <algorithm>
 #include <queue>
-#include <utility> 
-using namespace std;
+#include <utility>
 
-string tileset[3][8] = {
-//    0     1     2     3     4     5     6     7
-	{"  ", "`.", "LV", "SP", "EN", "PL", "  ", "  "},   // Пол (floor)
-	{"  ", "[]", "WA", "OR", "  ", "  ", "  ", "  "},   // Стены/объекты (subject)
-	{"  ", "@@", "  ", "  ", "  ", "  ", "  ", "  "},   // Воздух
-};
+using namespace std;
 
 struct tile {
 	int floor;
@@ -22,97 +17,17 @@ struct tile {
 	float temp;
 	int biome;
 
-	tile(int f = 0, int s = 0, int a = 0, float t = 0, int b = 0): floor(f), subject(s), air(a), temp(t), biome(b){}
+	tile(int f = 0, int s = 0, int a = 0, float t = 0, int b = 0) : floor(f), subject(s), air(a), temp(t), biome(b) {}
 };
 struct point {
 	int x;
 	int y;
 
-	point(int x, int y) : x(x), y(y) {}
+	point(int x = 0, int y = 0) : x(x), y(y) {}
 };
-
-int ent = 0;
-class Entity
-{
-protected:
-	int id;
-	vector<vector<tile>>& map;
-	point local;
-	string name;
-	float weight;
-	int age;
-	
-public:
-	Entity(vector<vector<tile>>& m, point l = { 0, 0 }, string n = "", float w = 0, int a = 0) : map(m), local(l), name(n), weight(w), age(a) { id = ++ent; }
-	
-	virtual int getID() const { return id; }
-	virtual string getName() const { return name; }
-	virtual point getPosition() const { return local; }
-	virtual float getWeight() const { return weight; }
-	virtual int getAge() const { return age; }
-
-	void setName(const string& newName) { name = newName; }
-	void setPosition(int x, int y) {
-		if (x >= 0 && x < (int)map.size() && y >= 0 && y < (int)map.size()) {
-			local.x = x;
-			local.y = y;
-		}
-	}
-
-	virtual void printInfo() const {
-		cout << name << " | Позиция: (" << local.x << ", " << local.y << ")" << endl;
-		cout << "   Вес: " << weight << " | Возраст: " << age << endl;
-	}
-
-	virtual ~Entity() {}
-
-};
-
-enum Direction { north, south, west, east };
-
-class Character : public Entity
-{
-protected:
-
-	float HP = 10;
-	float DMG = 0;
-public:
-	Character(vector<vector<tile>>& map, point local, string name, float weight, int age): Entity(map, local, name, weight, age) {}
-
-	
-	void move(Direction dir) {
-		size_t size = map.size();
-		switch (dir) {
-		case north: if (local.y < size - 1) local.y++; break;
-		case south: if (local.y > 0) local.y--; break;
-		case west:  if (local.x < size - 1) local.x++; break;
-		case east:  if (local.x > 0) local.x--; break;
-		}
-	}
-	void take_damage(float dmg)
-	{
-		if (dmg < 0)
-			return;
-		HP -= dmg;
-		if (HP < 0)
-			HP = 0;
-	}
-	void give_damage(Character& enemy)
-	{
-		if (DMG <= 0) return;
-		enemy.take_damage(DMG);
-	}
-	bool isAlive() const
-	{
-		return HP > 0;
-	}
-
-	virtual ~Character(){}
-};
-
 bool onBorder(vector<vector<tile>>& game, point dot)
 {
-	size_t size = game.size(); 
+	size_t size = game.size();
 	if (dot.x == 0 || dot.y == 0 || dot.x == size - 1 || dot.y == size - 1)
 		return true;
 	else
@@ -125,55 +40,55 @@ void seed_fill_CAVE(vector<vector<tile>>& game, int seed, int fill = 0)
 	mt19937 rng(seed);
 	uniform_int_distribution<int> dist(0, 99);
 
-	for (int i = 0; i < size; i++)
+	for (int y = 0; y < size; y++)
 	{
-		for (int j = 0; j < size; j++)
+		for (int x = 0; x < size; x++)
 		{
 			if (dist(rng) < fill)
-				game[i][j].subject = 1;
+				game[y][x].subject = 1;
 		}
 	}
 
 }
 void iteration_CAVE(vector<vector<tile>>& game, int need)
 {
-	int i, j;
+	int y, x;
 	int size = game.size();
 	vector<vector<tile>> newGame = game;
-	for (i = 0; size > i; i++)
+	for (y = 0; size > y; y++)
 	{
-		for (j = 0; size > j; j++)
+		for (x = 0; size > x; x++)
 		{
 			int neighbors = 0;
 
-			if (i > 0 && j > 0 && game[i - 1][j - 1].subject)
+			if (y > 0 && x > 0 && game[y - 1][x - 1].subject)
 				neighbors++;
 
-			if (i > 0 && game[i - 1][j].subject)
+			if (y > 0 && game[y - 1][x].subject)
 				neighbors++;
 
-			if (i > 0 && j < size - 1 && game[i - 1][j + 1].subject)
+			if (y > 0 && x < size - 1 && game[y - 1][x + 1].subject)
 				neighbors++;
 
-			if (j > 0 && game[i][j - 1].subject)
+			if (x > 0 && game[y][x - 1].subject)
 				neighbors++;
 
-			if (j < size - 1 && game[i][j + 1].subject)
+			if (x < size - 1 && game[y][x + 1].subject)
 				neighbors++;
 
-			if (i < size - 1 && j > 0 && game[i + 1][j - 1].subject)
+			if (y < size - 1 && x > 0 && game[y + 1][x - 1].subject)
 				neighbors++;
 
-			if (i < size - 1 && game[i + 1][j].subject)
+			if (y < size - 1 && game[y + 1][x].subject)
 				neighbors++;
 
-			if (i < size - 1 && j < size - 1 && game[i + 1][j + 1].subject)
+			if (y < size - 1 && x < size - 1 && game[y + 1][x + 1].subject)
 				neighbors++;
 
 			if (neighbors > need + 1 || neighbors < need - 1)
-				newGame[i][j].subject = 0;
+				newGame[y][x].subject = 0;
 			else if (neighbors == need || neighbors == need - 1)
-				newGame[i][j].subject = 1;
+				newGame[y][x].subject = 1;
 
 		}
 	}
@@ -184,17 +99,17 @@ void fill_holes_CAVE(vector<vector<tile>>& game, int minzone = 0)
 	int size = game.size();
 	vector<vector<bool>> visited(size, vector<bool>(size, false));
 
-	for (int i = 0; i < size; i++)
+	for (int y = 0; y < size; y++)
 	{
-		for (int j = 0; j < size; j++)
+		for (int x = 0; x < size; x++)
 		{
-			if (!game[i][j].subject && !visited[i][j])
+			if (!game[y][x].subject && !visited[y][x])
 			{
 				// Find connected component
 				vector<pair<int, int>> component;
 				queue<pair<int, int>> q;
-				q.push({ i, j });
-				visited[i][j] = true;
+				q.push({ y, x });
+				visited[y][x] = true;
 				bool touchesBorder = false;
 
 				while (!q.empty())
@@ -224,7 +139,6 @@ void fill_holes_CAVE(vector<vector<tile>>& game, int minzone = 0)
 					}
 				}
 
-				// Fill if it's a hole (doesn't touch border) and small enough
 				if (!touchesBorder && component.size() <= minzone)
 				{
 					for (auto [x, y] : component)
@@ -238,13 +152,13 @@ void fill_holes_CAVE(vector<vector<tile>>& game, int minzone = 0)
 }
 void destroy_debris_CAVE(vector<vector<tile>>& game)
 {
-	int i, j, size = game.size();
-	for (i = 0; i < size; i++)
+	int y, x, size = game.size();
+	for (y = 0; y < size; y++)
 	{
-		for (j = 0; j < size; j++)
+		for (x = 0; x < size; x++)
 		{
 			bool onBorder = true;
-			if ((i != 0 && j != 0) && (i + 1 != size && j + 1 != size))
+			if ((y != 0 && x != 0) && (y + 1 != size && x + 1 != size))
 			{
 				onBorder = false;
 			}
@@ -255,12 +169,12 @@ void destroy_debris_CAVE(vector<vector<tile>>& game)
 
 				for (int d = 0; d < 4; d++)
 				{
-					int x = i + dx[d];
-					int y = j + dy[d];
-					int nx = i - dx[d];
-					int ny = j - dy[d];
+					int x = y + dx[d];
+					int y = x + dy[d];
+					int nx = y - dx[d];
+					int ny = x - dy[d];
 					if (!game[x][y].subject && !game[nx][ny].subject)
-						game[i][j].subject = 0;
+						game[y][x].subject = 0;
 				}
 			}
 		}
@@ -268,13 +182,13 @@ void destroy_debris_CAVE(vector<vector<tile>>& game)
 }
 void build_smoothing_CAVE(vector<vector<tile>>& game)
 {
-	int i, j, size = game.size();
-	for (i = 0; i < size; i++)
+	int y, x, size = game.size();
+	for (y = 0; y < size; y++)
 	{
-		for (j = 0; j < size; j++)
+		for (x = 0; x < size; x++)
 		{
 			bool onBorder = true;
-			if ((i != 0 && j != 0) && (i + 1 != size && j + 1 != size))
+			if ((y != 0 && x != 0) && (y + 1 != size && x + 1 != size))
 			{
 				onBorder = false;
 			}
@@ -285,12 +199,12 @@ void build_smoothing_CAVE(vector<vector<tile>>& game)
 
 				for (int d = 0; d < 4; d++)
 				{
-					int x = i + dx[d];
-					int y = j + dy[d];
-					int nx = i - dx[d];
-					int ny = j - dy[d];
+					int x = y + dx[d];
+					int y = x + dy[d];
+					int nx = y - dx[d];
+					int ny = x - dy[d];
 					if (game[x][y].subject && game[nx][ny].subject)
-						game[i][j].subject = 1;
+						game[y][x].subject = 1;
 				}
 			}
 		}
@@ -298,16 +212,16 @@ void build_smoothing_CAVE(vector<vector<tile>>& game)
 }
 void border_fill_CAVE(vector<vector<tile>>& game, int wall = 0)
 {
-	int i, j, w;
+	int y, x, thickness;
 	int size = game.size();
-	for (w = 0; w < wall; w++)
+	for (thickness = 0; thickness < wall; thickness++)
 	{
-		for (i = w; i < size - w; i++)
+		for (y = thickness; y < size - thickness; y++)
 		{
-			for (j = w; j < size - w; j++)
+			for (x = thickness; x < size - thickness; x++)
 			{
-				if ((i == w || i == size - w - 1) || (j == w || j == size - w - 1))
-					game[i][j].subject = 2;
+				if ((y == thickness || y == size - thickness - 1) || (x == thickness || x == size - thickness - 1))
+					game[y][x].subject = 2;
 			}
 		}
 	}
@@ -401,20 +315,20 @@ point find_player_spawn(vector<vector<tile>>& game, int R, int seed)
 	// Если карта абсолютно монолитна и пустых мест нет вообще
 	return point(0, 0);
 }
-void set_player_spawn(vector<vector<tile>>& game, int seed)
+point set_player_spawn(vector<vector<tile>>& game, int seed)
 {
 	point SP = find_player_spawn(game, 1, seed);
 	game[SP.x][SP.y].floor = 3;
+	return SP;
 }
-
 
 void random_ore_spawn(vector<vector<tile>>& game, int seed, int fill)
 {
-	size_t size = game.size();
+	int size = game.size();
 	mt19937 ore(seed);
-	for (size_t x = 0; x < size; x++)
+	for (int x = 0; x < size; x++)
 	{
-		for (size_t y = 0; y < size; y++)
+		for (int y = 0; y < size; y++)
 		{
 			if (game[x][y].subject == 1)
 			{
@@ -425,7 +339,7 @@ void random_ore_spawn(vector<vector<tile>>& game, int seed, int fill)
 			}
 		}
 	}
-	
+
 }
 void random_ore_grow(vector<vector<tile>>& game, int seed)
 {
@@ -470,35 +384,35 @@ void random_ore_grow(vector<vector<tile>>& game, int seed)
 					}
 					case 4:
 					{
-						if (game[x - 1][y+1].subject == 1)
-							NewGame[x - 1][y+1].subject = 3;
+						if (game[x - 1][y + 1].subject == 1)
+							NewGame[x - 1][y + 1].subject = 3;
 						break;
 					}
 					case 5:
 					{
-						if (game[x + 1][y-1].subject == 1)
-							NewGame[x + 1][y-1].subject = 3;
+						if (game[x + 1][y - 1].subject == 1)
+							NewGame[x + 1][y - 1].subject = 3;
 						break;
 					}
 					case 6:
 					{
-						if (game[x+1][y + 1].subject == 1)
-							NewGame[x+1][y + 1].subject = 3;
+						if (game[x + 1][y + 1].subject == 1)
+							NewGame[x + 1][y + 1].subject = 3;
 						break;
 					}
 					case 7:
 					{
-						if (game[x-1][y - 1].subject == 1)
-							NewGame[x-1][y - 1].subject = 3;
+						if (game[x - 1][y - 1].subject == 1)
+							NewGame[x - 1][y - 1].subject = 3;
 						break;
 					}
 					default:
 						break;
 					}
 				} while (r < 4);
-				
 
-			}	
+
+			}
 		}
 	}
 	game = NewGame;
@@ -510,98 +424,409 @@ void set_ore(vector<vector<tile>>& game, int seed, int level = 0, bool grow = 0)
 		random_ore_grow(game, seed);
 }
 
-vector<vector<tile>> create_map_CAVE(int size, int iters, int seed = rand(), int fill = 50, int wall = 0, int minzone = 0, int destr = 1, int smooth = 1, int need = 3, int ore = 0)
-{
-	int i;
-	vector<vector<tile>> game(size, vector<tile>(size, tile(1)));
-	seed_fill_CAVE(game, seed, fill);
-	for (i = 0; i < iters; i++)
-	{
-		iteration_CAVE(game, need);
-	}
-	border_fill_CAVE(game, wall);
-	fill_holes_CAVE(game, minzone);
-	for (i = 0; i < destr; i++)
-	{
-		destroy_debris_CAVE(game);
-	}
-	for (i = 0; i < smooth; i++)
-	{
-		build_smoothing_CAVE(game);
-	}
-	set_ore(game, seed, ore, true);
-	set_player_spawn(game, seed);
-	return game;
-}
 
-void OUT_MAP(vector<vector<tile>> game)
+static int MAPs = 0;
+enum level_type { cave };
+class LEVEL
 {
-	size_t i, j;
-	int size = game.size();
-	for (i = 0; size > i; i++)
+protected:
+	int ID;
+	int Seed;
+	string Name;
+	vector<vector<tile>> grid;
+	point Spawn;
+	level_type Type;
+
+public:
+	LEVEL(string n = "", level_type t = cave, int seed = 23, int size = 32) : Name(n), Type(t), Seed(seed)
 	{
-		for (j = 0; size > j; j++)
+		ID = ++MAPs;
+		grid.resize(size, vector<tile>(size, tile(1)));
+		if (Type == cave)
 		{
-			if ((!game[i][j].subject) && (!game[i][j].air))
-				cout << tileset[0][game[i][j].floor];
-			else if (game[i][j].subject)
-				cout << tileset[1][game[i][j].subject];
-			else if (game[i][j].air)
-				cout << tileset[2][game[i][j].air];
+			int i, iters = 4, fill = 46, need = 5, wall = 4, minzone = 100, debris = 2, smooth = 4, ore = 2;
+			seed_fill_CAVE(grid, seed, fill);
+			for (i = 0; i < iters; i++)
+			{
+				iteration_CAVE(grid, need);
+			}
+			border_fill_CAVE(grid, wall);
+			fill_holes_CAVE(grid, minzone);
+			for (i = 0; i < debris; i++)
+			{
+				destroy_debris_CAVE(grid);
+			}
+			for (i = 0; i < smooth; i++)
+			{
+				build_smoothing_CAVE(grid);
+			}
+			set_ore(grid, seed, ore, true);
+			Spawn = set_player_spawn(grid, seed);
+			switch (Type)
+			{
+			case cave:
+				cout << "CAVE: ";
+				break;
+			default:
+				cout << "LEVEL: ";
+				break;
+			}
+			cout << Name << " with SEED: " << Seed << " GENERATED\n";
 		}
-		cout << '\n';
+	}
+	int getID() { return ID; }
+	int getSeed() { return Seed; }
+	string getName() { return Name; }
+	int getSize() { return grid.size(); }
+	vector<vector<tile>>& getGrid() { return grid; }
+	point getSpawn() { return Spawn; }
+
+	void setName(string NewName) { Name = NewName; }
+
+
+	~LEVEL()
+	{
+		switch (Type)
+		{
+		case cave:
+			cout << "CAVE: ";
+			break;
+		default:
+			cout << "LEVEL: ";
+			break;
+		}
+		cout << Name << " with SEED: " << Seed << " DELETED\n";
+	}
+
+};
+//    0     1     2     3     4     5     6     7
+//  {"  ", "`.", "LV", "SP", "EN", "PL", "  ", "  "},   // Пол (floor)
+//  {"  ", "[]", "WA", "OR", "  ", "  ", "  ", "  "},   // Стены/объекты (subject)
+//  {"  ", "@@", "  ", "  ", "  ", "  ", "  ", "  "},   // Воздух (air)
+
+static int ENTs = 0;
+enum Dir { north, south, west, east };
+enum AI_type { None };
+class ENTITY
+{
+protected:
+	int ID;
+	string Name;
+	LEVEL& Map;
+	point Pos;
+public:
+	ENTITY(LEVEL& game, point pos, string name) : Name(name), Pos(pos), Map(game)
+	{
+		ID = ++ENTs;
+		//cout << "ENTITY: " << Name << " CREATED\n";
+	}
+
+	virtual int getID() const { return ID; }
+	virtual string getName() const { return Name; }
+	virtual point getPos() const { return Pos; }
+	virtual LEVEL& getMAP() const { return Map; }
+	virtual void setName(string NewName) { Name = NewName; }
+	virtual void setPos(point NewPos) { Pos = NewPos; }
+	virtual void setMAP(LEVEL& NewMap) { Map = NewMap; }
+
+	virtual ~ENTITY()
+	{
+		//cout << "ENTITY: " << Name << " DELETED\n";
+	}
+};
+class CHARACTER : public ENTITY
+{
+protected:
+	int HP;
+	int DMG;
+	AI_type AI = None;
+public:
+	CHARACTER(LEVEL& game, point pos, string name, int hp = 10, int dmg = 0, AI_type ai = None) : ENTITY(game, pos, name), HP(hp), DMG(dmg), AI(ai)
+	{
+		// cout << "CHARACTER: " << Name << " CREATED\n";
+	}
+
+	virtual int getID() const override { return ID; }
+	virtual string getName() const override { return Name; }
+	virtual point getPos() const override { return Pos; }
+	virtual LEVEL& getMAP() const override { return Map; }
+	virtual void setName(string NewName) override { Name = NewName; }
+	virtual void setPos(point NewPos) override
+	{
+		if (NewPos.x >= 0 && NewPos.x < getMAP().getSize() && NewPos.y >= 0 && NewPos.y < getMAP().getSize())
+		{
+			Pos = NewPos;
+		}
+	}
+	virtual void setMAP(LEVEL& NewMap) override { Map = NewMap; }
+
+	virtual bool isALive() const
+	{
+		return HP > 0;
+	}
+	virtual int getHP() const { return HP; }
+	virtual int getDMG() const { return DMG; }
+	virtual AI_type getAI() const { return AI; }
+	virtual void setHP(int NewHP) { HP = NewHP; }
+	virtual void setDMG(int NewDMG) { DMG = NewDMG; }
+	virtual void setAI(AI_type NewAI) { AI = NewAI; }
+
+	virtual void move(Dir dir)
+	{
+		if (!isALive())
+			return;
+		int newX = Pos.x;
+		int newY = Pos.y;
+		int mapSize = getMAP().getSize();
+
+		switch (dir)
+		{
+		case north: newY = (Pos.y < mapSize - 1) ? Pos.y + 1 : Pos.y; break;
+		case south: newY = (Pos.y > 0) ? Pos.y - 1 : Pos.y; break;
+		case west:  newX = (Pos.x < mapSize - 1) ? Pos.x + 1 : Pos.x; break;
+		case east:  newX = (Pos.x > 0) ? Pos.x - 1 : Pos.x; break;
+		}
+
+		if (newX != Pos.x || newY != Pos.y) {
+			Pos.x = newX;
+			Pos.y = newY;
+			cout << Name << " MOVED to (" << Pos.x << ", " << Pos.y << ")" << endl;
+		}
+		else {
+			cout << Name << " CANT MOVE" << endl;
+		}
+	}
+	virtual void takeDamage(int dmg)
+	{
+		if (dmg < 0)
+			return;
+		HP -= dmg;
+		if (HP < 0)
+			HP = 0;
+	}
+	virtual void giveDamage(CHARACTER& enemy)
+	{
+		if ((DMG < 0) || (!isALive()))
+			return;
+		else
+			enemy.takeDamage(DMG);
+	}
+
+
+	virtual ~CHARACTER() override
+	{
+		// cout << "CHARACTER: " << Name << " DELETED\n";
+	}
+};
+class PLAYER : public CHARACTER
+{
+protected:
+
+
+public:
+	PLAYER(LEVEL& game, point pos, string name, int hp = 100, int dmg = 10, AI_type ai = None) : CHARACTER(game, pos, name, hp, dmg, ai)
+	{
+		cout << "PLAYER: " << Name << " CREATED\n";
+	}
+
+	virtual int getID() const override { return ID; }
+	virtual string getName() const override { return Name; }
+	virtual point getPos() const override { return Pos; }
+	virtual LEVEL& getMAP() const override { return Map; }
+	virtual void setName(string NewName) override { Name = NewName; }
+	virtual void setPos(point NewPos) override
+	{
+		if (NewPos.x >= 0 && NewPos.x < getMAP().getSize() && NewPos.y >= 0 && NewPos.y < getMAP().getSize())
+		{
+			Pos = NewPos;
+		}
+	}
+	virtual void setMAP(LEVEL& NewMap) override { Map = NewMap; }
+
+	virtual bool isALive() const
+	{
+		return HP > 0;
+	}
+	virtual int getHP() const { return HP; }
+	virtual int getDMG() const { return DMG; }
+	virtual AI_type getAI() const { return AI; }
+	virtual void setHP(int NewHP) { HP = NewHP; }
+	virtual void setDMG(int NewDMG) { DMG = NewDMG; }
+	virtual void setAI(AI_type NewAI) { AI = NewAI; }
+
+	virtual void move(Dir dir) override
+	{
+		if (!isALive())
+			return;
+		int newX = Pos.x;
+		int newY = Pos.y;
+		int mapSize = getMAP().getSize();
+
+		switch (dir)
+		{
+		case north: newY = (Pos.y < mapSize - 1) ? Pos.y + 1 : Pos.y; break;
+		case south: newY = (Pos.y > 0) ? Pos.y - 1 : Pos.y; break;
+		case west:  newX = (Pos.x < mapSize - 1) ? Pos.x + 1 : Pos.x; break;
+		case east:  newX = (Pos.x > 0) ? Pos.x - 1 : Pos.x; break;
+		}
+
+		if (newX != Pos.x || newY != Pos.y) {
+			Pos.x = newX;
+			Pos.y = newY;
+			cout << Name << " MOVED to (" << Pos.x << ", " << Pos.y << ")" << endl;
+		}
+		else {
+			cout << Name << " CANT MOVE" << endl;
+		}
+	}
+	virtual void takeDamage(int dmg) override
+	{
+		if (dmg < 0)
+			return;
+		HP -= dmg;
+		if (HP < 0)
+			HP = 0;
+	}
+	virtual void giveDamage(CHARACTER& enemy) override
+	{
+		if ((DMG < 0) || (!isALive()))
+			return;
+		else
+			enemy.takeDamage(DMG);
+	}
+
+	virtual ~PLAYER() override
+	{
+		cout << "PLAYER: " << Name << " DELETED\n";
+	}
+
+};
+
+void OUT_GRID(vector<vector<tile>>& map, sf::RenderWindow& w)
+{
+	const int MAP_WIDTH = 128;
+	const int MAP_HEIGHT = 128;
+	const int TILE_SIZE = 8;
+	vector<sf::RectangleShape> tiles;
+	for (int y = 0; y < MAP_HEIGHT; y++)
+	{
+		for (int x = 0; x < MAP_WIDTH; x++)
+		{
+			sf::RectangleShape rect({ (float)TILE_SIZE, (float)TILE_SIZE });
+
+			rect.setPosition({ (float)(x * TILE_SIZE), (float)(y * TILE_SIZE) });
+
+			sf::Color color;
+			if (!map[y][x].subject)
+			{
+				if (map[y][x].floor == 1) {
+					color = sf::Color(61, 56, 56);      //stone
+				}
+				else if (map[y][x].floor == 2) {
+					color = sf::Color(209, 83, 10); //lava
+				}
+				else if (map[y][x].floor == 3) {
+					color = sf::Color::Green; // SP
+				}
+				else {
+					color = sf::Color::Black;     // По умолчанию
+				}
+			}
+			else
+			{
+				if (map[y][x].subject == 1) {
+					color = sf::Color(44, 40, 43);
+				}
+				else if (map[y][x].subject == 2) {
+					color = sf::Color(31, 31, 31);
+				}
+				else if (map[y][x].subject == 3) {
+					color = sf::Color(115, 83, 64);
+				}
+			}
+
+
+			rect.setFillColor(color);
+
+			rect.setOutlineColor(sf::Color::Black);
+			rect.setOutlineThickness(1.0f);
+
+			tiles.push_back(rect);
+		}
+	}
+	for (const auto& tile_rect : tiles)
+	{
+		w.draw(tile_rect);
 	}
 }
-void CAVE_gen()
+void OUT_PLAYER(PLAYER& p, sf::RenderWindow& w)
 {
-	int seed;
-	cout << "Enter seed (0 = random): "; cin >> seed;
-	if (seed == 0)
-		seed = rand();
-	system("cls");
-	//                                           size, iters, seed, fill, wall,  minzone, debris, smooth, need, ore
-	vector<vector<tile>> cave = create_map_CAVE(  128,     4, seed,   46,    4,      100,      4,      2,    5,   1);
-	
-	cout << "Level: Cave" << " \nSeed: " << seed << '\n' << '\n';
-	OUT_MAP(cave);
-	system("pause");
+	const int MAP_WIDTH = 128;
+	const int MAP_HEIGHT = 128;
+	const int TILE_SIZE = 8;
+	sf::RectangleShape rect({ (float)TILE_SIZE, (float)TILE_SIZE });
+	rect.setPosition({ (float)(p.getPos().x * TILE_SIZE), (float)(p.getPos().y * TILE_SIZE) });
+	sf::Color color(201, 16, 16);
+	w.draw(rect);
+}
+void update_window(sf::RenderWindow& w, vector<vector<tile>>& map, PLAYER& p)
+{
+	w.clear();
+	OUT_GRID(map, w);
+	OUT_PLAYER(p, w);
+	w.display();
+}
+void GAME()
+{
+	const int MAP_WIDTH = 128;
+	const int MAP_HEIGHT = 128;
+	const int TILE_SIZE = 8;
+	sf::RenderWindow window(
+		sf::VideoMode({ MAP_WIDTH * TILE_SIZE, MAP_HEIGHT * TILE_SIZE }), "Game");
+
+	LEVEL game("Пещера", cave, rand(), 128);
+	PLAYER p1(game, game.getSpawn(), "HELLBOUND");
+
+	while (window.isOpen()) {
+
+		while (const auto p_event = window.pollEvent()) {
+
+			if (p_event->is<sf::Event::Closed>())
+				window.close();
+
+			if (const auto* keyEvent = p_event->getIf<sf::Event::KeyPressed>()) {
+				switch (keyEvent->code) {
+				case sf::Keyboard::Key::W:
+				case sf::Keyboard::Key::Up:
+					p1.move(north);
+					break;
+				case sf::Keyboard::Key::S:
+				case sf::Keyboard::Key::Down:
+					p1.move(south);
+					break;
+				case sf::Keyboard::Key::A:
+				case sf::Keyboard::Key::Left:
+					p1.move(west);
+					break;
+				case sf::Keyboard::Key::D:
+				case sf::Keyboard::Key::Right:
+					p1.move(east);
+					break;
+				default:
+					break;
+				}
+			}
+		}
+		update_window(window, game.getGrid(), p1);
+	}
+
 }
 
-void OUT_MENU()
-{
-	cout << "**  MENU  **\n";
-	cout << "1. CAVES\n";
-	cout << "0. EXIT\n\n";
-	cout << "Choice: ";
-}
 
 int main() {
 	system("chcp 1251");
-	system("cls");
 	srand(time(0));
-	size_t choose;
-	do
-	{
-		system("cls");
-		OUT_MENU();
-		cin >> choose;
-		switch (choose)
-		{
-		case 1:
-		{
-			system("cls");
-			CAVE_gen();
-			break;
-		}
-		case 0:
-			break;
-		default:
-			cout << "ERROR";
-			Sleep(1000);
-			break;
-		}
-	} while (choose != 0);
-	
+	GAME();
 
 	return 0;
 }
