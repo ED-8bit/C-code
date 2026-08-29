@@ -737,7 +737,9 @@ public:
 	}
 
 };
-
+//			 || 
+// optimize \  /
+//           \/
 void OUT_GRID(vector<vector<tile>>& map, sf::RenderWindow& w)
 {
 	const int MAP_WIDTH = map.size();
@@ -821,6 +823,9 @@ void GAME()
 	const int TILE_SIZE = 16;
 	sf::RenderWindow window(
 		sf::VideoMode({ MAP_WIDTH * TILE_SIZE, MAP_HEIGHT * TILE_SIZE }), "Game");
+	window.setFramerateLimit(60);
+	sf::Clock moveClock;
+	const float moveDelay = 0.18f; // задержка 
 
 	LEVEL game("Пещера", cave, rand(), 64);
 	PLAYER p1(game, game.getSpawn(), "HELLBOUND");
@@ -832,31 +837,28 @@ void GAME()
 			if (p_event->is<sf::Event::Closed>())
 				window.close();
 
-			if (const auto* keyEvent = p_event->getIf<sf::Event::KeyPressed>()) {
-				switch (keyEvent->code) {
-				case sf::Keyboard::Key::W:
-				case sf::Keyboard::Key::Up:
+			if (moveClock.getElapsedTime().asSeconds() >= moveDelay) {
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) ||
+					sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
 					p1.move(north);
-					break;
-				case sf::Keyboard::Key::S:
-				case sf::Keyboard::Key::Down:
-					p1.move(south);
-					break;
-				case sf::Keyboard::Key::A:
-				case sf::Keyboard::Key::Left:
-					p1.move(west);
-					break;
-				case sf::Keyboard::Key::D:
-				case sf::Keyboard::Key::Right:
-					p1.move(east);
-					break;
-				case sf::Keyboard::Key::Space:
-					Sleep(250);
-					p1.destroy();
-					break;
-				default:
-					break;
+					
 				}
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) ||
+					sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
+					p1.move(south);
+					
+				}
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) ||
+					sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
+					p1.move(west);
+					
+				}
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) ||
+					sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
+					p1.move(east);
+					
+				}
+					moveClock.restart();
 			}
 		}
 		update_window(window, game.getGrid(), p1);

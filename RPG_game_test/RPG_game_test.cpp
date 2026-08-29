@@ -27,7 +27,7 @@ struct point {
 };
 bool onBorder(vector<vector<tile>>& game, point dot)
 {
-	size_t size = game.size();
+	int size = game.size();
 	if (dot.x == 0 || dot.y == 0 || dot.x == size - 1 || dot.y == size - 1)
 		return true;
 	else
@@ -36,59 +36,59 @@ bool onBorder(vector<vector<tile>>& game, point dot)
 
 void seed_fill_CAVE(vector<vector<tile>>& game, int seed, int fill = 0)
 {
-	size_t size = game.size();
+	int size = game.size();
 	mt19937 rng(seed);
 	uniform_int_distribution<int> dist(0, 99);
 
-	for (int y = 0; y < size; y++)
+	for (int x = 0; x < size; x++)
 	{
-		for (int x = 0; x < size; x++)
+		for (int y = 0; y < size; y++)
 		{
 			if (dist(rng) < fill)
-				game[y][x].subject = 1;
+				game[x][y].subject = 1;
 		}
 	}
 
 }
 void iteration_CAVE(vector<vector<tile>>& game, int need)
 {
-	int y, x;
+	int x, y;
 	int size = game.size();
 	vector<vector<tile>> newGame = game;
-	for (y = 0; size > y; y++)
+	for (x = 0; size > x; x++)
 	{
-		for (x = 0; size > x; x++)
+		for (y = 0; size > y; y++)
 		{
 			int neighbors = 0;
 
-			if (y > 0 && x > 0 && game[y - 1][x - 1].subject)
+			if (x > 0 && y > 0 && game[x - 1][y - 1].subject)
 				neighbors++;
 
-			if (y > 0 && game[y - 1][x].subject)
+			if (x > 0 && game[x - 1][y].subject)
 				neighbors++;
 
-			if (y > 0 && x < size - 1 && game[y - 1][x + 1].subject)
+			if (x > 0 && y < size - 1 && game[x - 1][y + 1].subject)
 				neighbors++;
 
-			if (x > 0 && game[y][x - 1].subject)
+			if (y > 0 && game[x][y - 1].subject)
 				neighbors++;
 
-			if (x < size - 1 && game[y][x + 1].subject)
+			if (y < size - 1 && game[x][y + 1].subject)
 				neighbors++;
 
-			if (y < size - 1 && x > 0 && game[y + 1][x - 1].subject)
+			if (x < size - 1 && y > 0 && game[x + 1][y - 1].subject)
 				neighbors++;
 
-			if (y < size - 1 && game[y + 1][x].subject)
+			if (x < size - 1 && game[x + 1][y].subject)
 				neighbors++;
 
-			if (y < size - 1 && x < size - 1 && game[y + 1][x + 1].subject)
+			if (x < size - 1 && y < size - 1 && game[x + 1][y + 1].subject)
 				neighbors++;
 
 			if (neighbors > need + 1 || neighbors < need - 1)
-				newGame[y][x].subject = 0;
+				newGame[x][y].subject = 0;
 			else if (neighbors == need || neighbors == need - 1)
-				newGame[y][x].subject = 1;
+				newGame[x][y].subject = 1;
 
 		}
 	}
@@ -99,17 +99,17 @@ void fill_holes_CAVE(vector<vector<tile>>& game, int minzone = 0)
 	int size = game.size();
 	vector<vector<bool>> visited(size, vector<bool>(size, false));
 
-	for (int y = 0; y < size; y++)
+	for (int x = 0; x < size; x++)
 	{
-		for (int x = 0; x < size; x++)
+		for (int y = 0; y < size; y++)
 		{
-			if (!game[y][x].subject && !visited[y][x])
+			if (!game[x][y].subject && !visited[x][y])
 			{
 				// Find connected component
 				vector<pair<int, int>> component;
 				queue<pair<int, int>> q;
-				q.push({ y, x });
-				visited[y][x] = true;
+				q.push({ x, y });
+				visited[x][y] = true;
 				bool touchesBorder = false;
 
 				while (!q.empty())
@@ -152,29 +152,28 @@ void fill_holes_CAVE(vector<vector<tile>>& game, int minzone = 0)
 }
 void destroy_debris_CAVE(vector<vector<tile>>& game)
 {
-	int y, x, size = game.size();
-	for (y = 0; y < size; y++)
+	int x, y, size = game.size();
+	for (x = 0; x < size; x++)
 	{
-		for (x = 0; x < size; x++)
+		for (y = 0; y < size; y++)
 		{
-			bool onBorder = true;
-			if ((y != 0 && x != 0) && (y + 1 != size && x + 1 != size))
+			if (!onBorder(game, { x, y }))
 			{
-				onBorder = false;
-			}
-			if (!onBorder)
-			{
-				int dx[] = { -1, 0, 1, 1, };
-				int dy[] = { -1, -1, -1, 0, };
+				int dx[4] = { -1, 0, 1, 1 };
+				int dy[4] = { -1, -1, -1, 0 };
 
 				for (int d = 0; d < 4; d++)
 				{
-					int x = y + dx[d];
-					int y = x + dy[d];
-					int nx = y - dx[d];
-					int ny = x - dy[d];
-					if (!game[x][y].subject && !game[nx][ny].subject)
-						game[y][x].subject = 0;
+					int ox = x + dx[d];
+					int oy = y + dy[d];
+					int nx = x - dx[d];
+					int ny = y - dy[d];
+					if (!game[ox][oy].subject && !game[nx][ny].subject)
+					{
+						game[x][y].subject = 0;
+						break;
+					}
+
 				}
 			}
 		}
@@ -182,29 +181,28 @@ void destroy_debris_CAVE(vector<vector<tile>>& game)
 }
 void build_smoothing_CAVE(vector<vector<tile>>& game)
 {
-	int y, x, size = game.size();
-	for (y = 0; y < size; y++)
+	int x, y, size = game.size();
+	for (x = 0; x < size; x++)
 	{
-		for (x = 0; x < size; x++)
+		for (y = 0; y < size; y++)
 		{
-			bool onBorder = true;
-			if ((y != 0 && x != 0) && (y + 1 != size && x + 1 != size))
+			if (!onBorder(game, { x, y }))
 			{
-				onBorder = false;
-			}
-			if (!onBorder)
-			{
-				int dx[] = { -1, 0, 1, 1, };
-				int dy[] = { -1, -1, -1, 0, };
+				int dx[4] = { -1, 0, 1, 1 };
+				int dy[4] = { -1, -1, -1, 0 };
 
 				for (int d = 0; d < 4; d++)
 				{
-					int x = y + dx[d];
-					int y = x + dy[d];
-					int nx = y - dx[d];
-					int ny = x - dy[d];
-					if (game[x][y].subject && game[nx][ny].subject)
-						game[y][x].subject = 1;
+					int ox = x + dx[d];
+					int oy = y + dy[d];
+					int nx = x - dx[d];
+					int ny = y - dy[d];
+					if (game[ox][oy].subject && game[nx][ny].subject)
+					{
+						game[x][y].subject = 1;
+						break;
+					}
+
 				}
 			}
 		}
@@ -212,16 +210,16 @@ void build_smoothing_CAVE(vector<vector<tile>>& game)
 }
 void border_fill_CAVE(vector<vector<tile>>& game, int wall = 0)
 {
-	int y, x, thickness;
+	int x, y, thickness;
 	int size = game.size();
 	for (thickness = 0; thickness < wall; thickness++)
 	{
-		for (y = thickness; y < size - thickness; y++)
+		for (x = thickness; x < size - thickness; x++)
 		{
-			for (x = thickness; x < size - thickness; x++)
+			for (y = thickness; y < size - thickness; y++)
 			{
-				if ((y == thickness || y == size - thickness - 1) || (x == thickness || x == size - thickness - 1))
-					game[y][x].subject = 2;
+				if ((x == thickness || x == size - thickness - 1) || (y == thickness || y == size - thickness - 1))
+					game[x][y].subject = 2;
 			}
 		}
 	}
@@ -433,7 +431,7 @@ protected:
 	int ID;
 	int Seed;
 	string Name;
-	vector<vector<tile>> grid;
+	vector<vector<tile>> Grid;
 	point Spawn;
 	level_type Type;
 
@@ -441,27 +439,27 @@ public:
 	LEVEL(string n = "", level_type t = cave, int seed = 23, int size = 32) : Name(n), Type(t), Seed(seed)
 	{
 		ID = ++MAPs;
-		grid.resize(size, vector<tile>(size, tile(1)));
+		Grid.resize(size, vector<tile>(size, tile(1)));
 		if (Type == cave)
 		{
-			int i, iters = 4, fill = 46, need = 5, wall = 4, minzone = 100, debris = 2, smooth = 4, ore = 2;
-			seed_fill_CAVE(grid, seed, fill);
+			int i, iters = 4, fill = 45, need = 5, wall = 4, minzone = 100, debris = 2, smooth = 4, ore = 2;
+			seed_fill_CAVE(Grid, seed, fill);
 			for (i = 0; i < iters; i++)
 			{
-				iteration_CAVE(grid, need);
+				iteration_CAVE(Grid, need);
 			}
-			border_fill_CAVE(grid, wall);
-			fill_holes_CAVE(grid, minzone);
+			border_fill_CAVE(Grid, wall);
+			fill_holes_CAVE(Grid, minzone);
 			for (i = 0; i < debris; i++)
 			{
-				destroy_debris_CAVE(grid);
+				destroy_debris_CAVE(Grid);
 			}
 			for (i = 0; i < smooth; i++)
 			{
-				build_smoothing_CAVE(grid);
+				build_smoothing_CAVE(Grid);
 			}
-			set_ore(grid, seed, ore, true);
-			Spawn = set_player_spawn(grid, seed);
+			set_ore(Grid, seed, ore, true);
+			Spawn = set_player_spawn(Grid, seed);
 			switch (Type)
 			{
 			case cave:
@@ -477,8 +475,8 @@ public:
 	int getID() { return ID; }
 	int getSeed() { return Seed; }
 	string getName() { return Name; }
-	int getSize() { return grid.size(); }
-	vector<vector<tile>>& getGrid() { return grid; }
+	int getSize() { return Grid.size(); }
+	vector<vector<tile>>& getGrid() { return Grid; }
 	point getSpawn() { return Spawn; }
 
 	void setName(string NewName) { Name = NewName; }
@@ -539,6 +537,7 @@ class CHARACTER : public ENTITY
 protected:
 	int HP;
 	int DMG;
+	Dir face = south;
 	AI_type AI = None;
 public:
 	CHARACTER(LEVEL& game, point pos, string name, int hp = 10, int dmg = 0, AI_type ai = None) : ENTITY(game, pos, name), HP(hp), DMG(dmg), AI(ai)
@@ -664,16 +663,28 @@ public:
 
 		switch (dir)
 		{
-		case north: newY = (Pos.y < mapSize - 1) ? Pos.y + 1 : Pos.y; break;
-		case south: newY = (Pos.y > 0) ? Pos.y - 1 : Pos.y; break;
-		case west:  newX = (Pos.x < mapSize - 1) ? Pos.x + 1 : Pos.x; break;
-		case east:  newX = (Pos.x > 0) ? Pos.x - 1 : Pos.x; break;
+		case south:
+			newY = (Pos.y < mapSize - 1 && !Map.getGrid()[newX][Pos.y + 1].subject) ? Pos.y + 1 : Pos.y;
+			face = south;
+			break;
+		case north:
+			newY = (Pos.y > 0 && !Map.getGrid()[newX][Pos.y - 1].subject) ? Pos.y - 1 : Pos.y;
+			face = north;
+			break;
+		case east:
+			newX = (Pos.x < mapSize - 1 && !Map.getGrid()[Pos.x + 1][newY].subject) ? Pos.x + 1 : Pos.x;
+			face = east;
+			break;
+		case west:
+			newX = (Pos.x > 0 && !Map.getGrid()[Pos.x - 1][newY].subject) ? Pos.x - 1 : Pos.x;
+			face = west;
+			break;
 		}
 
 		if (newX != Pos.x || newY != Pos.y) {
 			Pos.x = newX;
 			Pos.y = newY;
-			cout << Name << " MOVED to (" << Pos.x << ", " << Pos.y << ")" << endl;
+			//cout << Name << " MOVED to (" << Pos.x << ", " << Pos.y << ")" << endl;
 		}
 		else {
 			cout << Name << " CANT MOVE" << endl;
@@ -694,6 +705,31 @@ public:
 		else
 			enemy.takeDamage(DMG);
 	}
+	virtual void destroy()
+	{
+		if (!isALive())
+			return;
+		int mapSize = getMAP().getSize();
+		switch (face)
+		{
+		case south:
+			if (Pos.y < mapSize - 1 && Map.getGrid()[Pos.x][Pos.y + 1].subject != 2)
+				Map.getGrid()[Pos.x][Pos.y + 1].subject = 0;
+			break;
+		case north:
+			if (Pos.y > 0 && Map.getGrid()[Pos.x][Pos.y - 1].subject != 2)
+				Map.getGrid()[Pos.x][Pos.y - 1].subject = 0;
+			break;
+		case east:
+			if (Pos.x < mapSize - 1 && Map.getGrid()[Pos.x + 1][Pos.y].subject != 2)
+				Map.getGrid()[Pos.x + 1][Pos.y].subject = 0;
+			break;
+		case west:
+			if (Pos.x > 0 && Map.getGrid()[Pos.x - 1][Pos.y].subject != 2)
+				Map.getGrid()[Pos.x - 1][Pos.y].subject = 0;
+			break;
+		}
+	}
 
 	virtual ~PLAYER() override
 	{
@@ -704,28 +740,30 @@ public:
 
 void OUT_GRID(vector<vector<tile>>& map, sf::RenderWindow& w)
 {
-	const int MAP_WIDTH = 128;
-	const int MAP_HEIGHT = 128;
-	const int TILE_SIZE = 8;
+	const int MAP_WIDTH = map.size();
+	const int MAP_HEIGHT = map.size();
+	const int TILE_SIZE = 16;
 	vector<sf::RectangleShape> tiles;
-	for (int y = 0; y < MAP_HEIGHT; y++)
+	for (int x = 0; x < MAP_WIDTH; x++)
 	{
-		for (int x = 0; x < MAP_WIDTH; x++)
+		for (int y = 0; y < MAP_HEIGHT; y++)
 		{
+			int mapX = x;
+			int mapY = y;
 			sf::RectangleShape rect({ (float)TILE_SIZE, (float)TILE_SIZE });
 
 			rect.setPosition({ (float)(x * TILE_SIZE), (float)(y * TILE_SIZE) });
 
 			sf::Color color;
-			if (!map[y][x].subject)
+			if (!map[mapX][mapY].subject)
 			{
-				if (map[y][x].floor == 1) {
+				if (map[mapX][mapY].floor == 1) {
 					color = sf::Color(61, 56, 56);      //stone
 				}
-				else if (map[y][x].floor == 2) {
+				else if (map[mapX][mapY].floor == 2) {
 					color = sf::Color(209, 83, 10); //lava
 				}
-				else if (map[y][x].floor == 3) {
+				else if (map[mapX][mapY].floor == 3) {
 					color = sf::Color::Green; // SP
 				}
 				else {
@@ -734,13 +772,13 @@ void OUT_GRID(vector<vector<tile>>& map, sf::RenderWindow& w)
 			}
 			else
 			{
-				if (map[y][x].subject == 1) {
+				if (map[mapX][mapY].subject == 1) {
 					color = sf::Color(44, 40, 43);
 				}
-				else if (map[y][x].subject == 2) {
+				else if (map[mapX][mapY].subject == 2) {
 					color = sf::Color(31, 31, 31);
 				}
-				else if (map[y][x].subject == 3) {
+				else if (map[mapX][mapY].subject == 3) {
 					color = sf::Color(115, 83, 64);
 				}
 			}
@@ -761,9 +799,9 @@ void OUT_GRID(vector<vector<tile>>& map, sf::RenderWindow& w)
 }
 void OUT_PLAYER(PLAYER& p, sf::RenderWindow& w)
 {
-	const int MAP_WIDTH = 128;
-	const int MAP_HEIGHT = 128;
-	const int TILE_SIZE = 8;
+	const int MAP_WIDTH = p.getMAP().getSize();
+	const int MAP_HEIGHT = p.getMAP().getSize();
+	const int TILE_SIZE = 16;
 	sf::RectangleShape rect({ (float)TILE_SIZE, (float)TILE_SIZE });
 	rect.setPosition({ (float)(p.getPos().x * TILE_SIZE), (float)(p.getPos().y * TILE_SIZE) });
 	sf::Color color(201, 16, 16);
@@ -778,13 +816,13 @@ void update_window(sf::RenderWindow& w, vector<vector<tile>>& map, PLAYER& p)
 }
 void GAME()
 {
-	const int MAP_WIDTH = 128;
-	const int MAP_HEIGHT = 128;
-	const int TILE_SIZE = 8;
+	const int MAP_WIDTH = 64;
+	const int MAP_HEIGHT = 64;
+	const int TILE_SIZE = 16;
 	sf::RenderWindow window(
 		sf::VideoMode({ MAP_WIDTH * TILE_SIZE, MAP_HEIGHT * TILE_SIZE }), "Game");
 
-	LEVEL game("Пещера", cave, rand(), 128);
+	LEVEL game("Пещера", cave, rand(), 64);
 	PLAYER p1(game, game.getSpawn(), "HELLBOUND");
 
 	while (window.isOpen()) {
@@ -812,6 +850,9 @@ void GAME()
 				case sf::Keyboard::Key::Right:
 					p1.move(east);
 					break;
+				case sf::Keyboard::Key::Space:
+					p1.destroy();
+					break;
 				default:
 					break;
 				}
@@ -821,7 +862,6 @@ void GAME()
 	}
 
 }
-
 
 int main() {
 	system("chcp 1251");
