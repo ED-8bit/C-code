@@ -33,6 +33,14 @@ bool onBorder(vector<vector<tile>>& game, point dot)
 	else
 		return false;
 }
+bool outBorder(vector<vector<tile>>& game, point dot)
+{
+	int size = game.size();
+	if (dot.x < 0 || dot.y < 0 || dot.x >= size || dot.y >= size)
+		return true;
+	else
+		return false;
+}
 
 void seed_fill_CAVE(vector<vector<tile>>& game, int seed, int fill = 0)
 {
@@ -428,7 +436,7 @@ enum level_type { cave };
 class LEVEL
 {
 protected:
-	int ID;
+	int ID; 
 	int Seed;
 	string Name;
 	vector<vector<tile>> Grid;
@@ -442,7 +450,7 @@ public:
 		Grid.resize(size, vector<tile>(size, tile(1)));
 		if (Type == cave)
 		{
-			int i, iters = 4, fill = 45, need = 5, wall = 4, minzone = 100, debris = 2, smooth = 4, ore = 2;
+			int i, iters = 4, fill = 44, need = 5, wall = 3, minzone = 25, debris = 2, smooth = 3, ore = 2;
 			seed_fill_CAVE(Grid, seed, fill);
 			for (i = 0; i < iters; i++)
 			{
@@ -480,7 +488,20 @@ public:
 	point getSpawn() { return Spawn; }
 
 	void setName(string NewName) { Name = NewName; }
-
+	bool destroy_sub(point sub)
+	{
+		if (!outBorder(Grid, sub) && Grid[sub.x][sub.y].subject != 2)
+		{
+			Grid[sub.x][sub.y].subject = 0;
+			return true;
+		}
+		else
+		{
+			cout << "cant break " << sub.x << ',' << sub.y << '\n';
+			return false;
+		}
+			
+	}
 
 	~LEVEL()
 	{
@@ -537,7 +558,7 @@ class CHARACTER : public ENTITY
 protected:
 	int HP;
 	int DMG;
-	Dir face = south;
+	Dir FACE = south;
 	AI_type AI = None;
 public:
 	CHARACTER(LEVEL& game, point pos, string name, int hp = 10, int dmg = 0, AI_type ai = None) : ENTITY(game, pos, name), HP(hp), DMG(dmg), AI(ai)
@@ -569,6 +590,8 @@ public:
 	virtual void setHP(int NewHP) { HP = NewHP; }
 	virtual void setDMG(int NewDMG) { DMG = NewDMG; }
 	virtual void setAI(AI_type NewAI) { AI = NewAI; }
+	virtual Dir getFacing() const { return FACE; }
+	virtual void setFacing(Dir NewFACE) { FACE = NewFACE;}
 
 	virtual void move(Dir dir)
 	{
@@ -652,6 +675,8 @@ public:
 	virtual void setHP(int NewHP) { HP = NewHP; }
 	virtual void setDMG(int NewDMG) { DMG = NewDMG; }
 	virtual void setAI(AI_type NewAI) { AI = NewAI; }
+	virtual Dir getFacing() const { return FACE; }
+	virtual void setFacing(Dir NewFACE) { FACE = NewFACE; }
 
 	virtual void move(Dir dir) override
 	{
@@ -664,20 +689,20 @@ public:
 		switch (dir)
 		{
 		case south: 
+			FACE = south;
 			newY = (Pos.y < mapSize - 1 && !Map.getGrid()[newX][Pos.y + 1].subject) ? Pos.y + 1 : Pos.y;
-			face = south;
 			break;
 		case north: 
+			FACE = north;
 			newY = (Pos.y > 0 && !Map.getGrid()[newX][Pos.y - 1].subject) ? Pos.y - 1 : Pos.y; 
-			face = north;
 			break;
 		case east:  
+			FACE = east;
 			newX = (Pos.x < mapSize - 1 && !Map.getGrid()[Pos.x + 1][newY].subject) ? Pos.x + 1 : Pos.x; 
-			face = east;
 			break;
 		case west:  
+			FACE = west;
 			newX = (Pos.x > 0 && !Map.getGrid()[Pos.x - 1][newY].subject) ? Pos.x - 1 : Pos.x; 
-			face = west;
 			break;
 		}
 
@@ -687,7 +712,22 @@ public:
 			//cout << Name << " MOVED to (" << Pos.x << ", " << Pos.y << ")" << endl;
 		}
 		else {
-			cout << Name << " CANT MOVE" << endl;
+			cout << Name << " cant be moved to ";
+			switch (dir)
+			{
+			case 0:
+				cout << "NORTH\n";
+				break;
+			case 1:
+				cout << "SOUTH\n";
+				break;
+			case 2:
+				cout << "WEST\n";
+				break;
+			case 3:
+				cout << "EAST\n";
+				break;
+			}
 		}
 	}
 	virtual void takeDamage(int dmg) override
@@ -705,28 +745,24 @@ public:
 		else
 			enemy.takeDamage(DMG);
 	}
-	virtual void destroy()
+	virtual bool destroy_on_facing()
 	{
 		if (!isALive())
-			return;
+			return false;
 		int mapSize = getMAP().getSize();
-		switch (face)
+		switch (FACE)
 		{
 		case south:
-			if (Pos.y < mapSize - 1 && Map.getGrid()[Pos.x][Pos.y + 1].subject != 2)
-				Map.getGrid()[Pos.x][Pos.y + 1].subject = 0;
+			return Map.destroy_sub({ Pos.x, Pos.y + 1 });
 			break;
 		case north:
-			if (Pos.y > 0 && Map.getGrid()[Pos.x][Pos.y - 1].subject != 2)
-				Map.getGrid()[Pos.x][Pos.y - 1].subject = 0;
+			return Map.destroy_sub({ Pos.x, Pos.y - 1 });
 			break;
 		case east:
-			if (Pos.x < mapSize - 1 && Map.getGrid()[Pos.x + 1][Pos.y].subject != 2)
-				Map.getGrid()[Pos.x + 1][Pos.y].subject = 0;
+			return Map.destroy_sub({ Pos.x + 1, Pos.y });
 			break;
 		case west:
-			if (Pos.x > 0 && Map.getGrid()[Pos.x - 1][Pos.y].subject != 2)
-				Map.getGrid()[Pos.x - 1][Pos.y].subject = 0;
+			return Map.destroy_sub({ Pos.x - 1, Pos.y });
 			break;
 		}
 	}
@@ -737,35 +773,33 @@ public:
 	}
 
 };
-//			 || 
-// optimize \  /
+//           ||   
+//optimized	_||_ 
+//   shit   \  /
 //           \/
-void OUT_GRID(vector<vector<tile>>& map, sf::RenderWindow& w)
+void SET_GRID_TILES(vector<vector<tile>>& map, vector<vector<sf::RectangleShape>>& tiles)
 {
 	const int MAP_WIDTH = map.size();
 	const int MAP_HEIGHT = map.size();
-	const int TILE_SIZE = 16;
-	vector<sf::RectangleShape> tiles;
+	const int TILE_SIZE = 1024 / map.size();
 	for (int x = 0; x < MAP_WIDTH; x++)
 	{
 		for (int y = 0; y < MAP_HEIGHT; y++)
 		{
-			int mapX = x;
-			int mapY = y;
 			sf::RectangleShape rect({ (float)TILE_SIZE, (float)TILE_SIZE });
 
 			rect.setPosition({ (float)(x * TILE_SIZE), (float)(y * TILE_SIZE) });
 
 			sf::Color color;
-			if (!map[mapX][mapY].subject)
+			if (!map[x][y].subject)
 			{
-				if (map[mapX][mapY].floor == 1) {
+				if (map[x][y].floor == 1) {
 					color = sf::Color(61, 56, 56);      //stone
 				}
-				else if (map[mapX][mapY].floor == 2) {
+				else if (map[x][y].floor == 2) {
 					color = sf::Color(209, 83, 10); //lava
 				}
-				else if (map[mapX][mapY].floor == 3) {
+				else if (map[x][y].floor == 3) {
 					color = sf::Color::Green; // SP
 				}
 				else {
@@ -774,13 +808,13 @@ void OUT_GRID(vector<vector<tile>>& map, sf::RenderWindow& w)
 			}
 			else
 			{
-				if (map[mapX][mapY].subject == 1) {
+				if (map[x][y].subject == 1) {
 					color = sf::Color(44, 40, 43);
 				}
-				else if (map[mapX][mapY].subject == 2) {
+				else if (map[x][y].subject == 2) {
 					color = sf::Color(31, 31, 31);
 				}
-				else if (map[mapX][mapY].subject == 3) {
+				else if (map[x][y].subject == 3) {
 					color = sf::Color(115, 83, 64);
 				}
 			}
@@ -791,77 +825,163 @@ void OUT_GRID(vector<vector<tile>>& map, sf::RenderWindow& w)
 			rect.setOutlineColor(sf::Color::Black);
 			rect.setOutlineThickness(1.0f);
 
-			tiles.push_back(rect);
+			tiles[x][y] = rect;
 		}
 	}
-	for (const auto& tile_rect : tiles)
-	{
-		w.draw(tile_rect);
-	}
 }
-void OUT_PLAYER(PLAYER& p, sf::RenderWindow& w)
+void UPDATE_GRID_TILE(vector<vector<tile>>& map, vector<vector<sf::RectangleShape>>& tiles, point dot)
 {
-	const int MAP_WIDTH = p.getMAP().getSize();
-	const int MAP_HEIGHT = p.getMAP().getSize();
-	const int TILE_SIZE = 16;
+	int x = dot.x;
+	int y = dot.y;
+	sf::Color color;
+	if (!map[x][y].subject)
+	{
+		if (map[x][y].floor == 1) {
+			color = sf::Color(61, 56, 56);      //stone
+		}
+		else if (map[x][y].floor == 2) {
+			color = sf::Color(209, 83, 10); //lava
+		}
+		else if (map[x][y].floor == 3) {
+			color = sf::Color::Green; // SP
+		}
+		else {
+			color = sf::Color::Black;     // По умолчанию
+		}
+	}
+	else
+	{
+		if (map[x][y].subject == 1) {
+			color = sf::Color(44, 40, 43);
+		}
+		else if (map[x][y].subject == 2) {
+			color = sf::Color(31, 31, 31);
+		}
+		else if (map[x][y].subject == 3) {
+			color = sf::Color(115, 83, 64);
+		}
+	}
+	tiles[x][y].setFillColor(color);
+
+}
+void DRAW_GRID(sf::RenderWindow& w, vector<vector<sf::RectangleShape>>& tiles)
+{
+	int size = tiles.size();
+	for (int x = 0; x < size; x++)
+		for (int y = 0; y < size; y++)
+			w.draw(tiles[x][y]);
+}
+
+void SET_PLAYER_TILE(PLAYER& p, sf::RectangleShape& tile)
+{
+	const int TILE_SIZE = 1024 / p.getMAP().getSize();
 	sf::RectangleShape rect({ (float)TILE_SIZE, (float)TILE_SIZE });
 	rect.setPosition({ (float)(p.getPos().x * TILE_SIZE), (float)(p.getPos().y * TILE_SIZE) });
-	sf::Color color(201, 16, 16);
-	w.draw(rect);
+	sf::Color color(180, 32, 32);
+	rect.setFillColor(color);
+	tile = rect;
 }
-void update_window(sf::RenderWindow& w, vector<vector<tile>>& map, PLAYER& p)
+void UPDATE_PLAYER_TILE(PLAYER& p, sf::RenderWindow& w, sf::RectangleShape& tile)
+{
+	const int TILE_SIZE = 1024 / p.getMAP().getSize();
+	tile.setPosition({ (float)(p.getPos().x * TILE_SIZE), (float)(p.getPos().y * TILE_SIZE) });
+}
+void DRAW_PLAYER(sf::RenderWindow& w, sf::RectangleShape& tile)
+{
+	w.draw(tile);
+}
+
+void REFRESH_DISPLAY(sf::RenderWindow& w, vector<vector<sf::RectangleShape>>& tiles, sf::RectangleShape& player)
 {
 	w.clear();
-	OUT_GRID(map, w);
-	OUT_PLAYER(p, w);
+	DRAW_GRID(w, tiles);
+	DRAW_PLAYER(w, player);
 	w.display();
 }
+
 void GAME()
 {
-	const int MAP_WIDTH = 64;
-	const int MAP_HEIGHT = 64;
-	const int TILE_SIZE = 16;
-	sf::RenderWindow window(
-		sf::VideoMode({ MAP_WIDTH * TILE_SIZE, MAP_HEIGHT * TILE_SIZE }), "Game");
-	window.setFramerateLimit(60);
-	sf::Clock moveClock;
-	const float moveDelay = 0.18f; // задержка 
+	const int MAP_SIZE = 128; // for gen
+	const int MAP_WIDTH = MAP_SIZE;  
+	const int MAP_HEIGHT = MAP_SIZE; 
+	const int TILE_SIZE = 1024 / MAP_SIZE;
+	sf::RenderWindow window(sf::VideoMode({ MAP_WIDTH * TILE_SIZE, MAP_HEIGHT * TILE_SIZE }), "Game");
+	window.setFramerateLimit(0);
 
-	LEVEL game("Пещера", cave, rand(), 64);
+	sf::Clock moveClock;
+	sf::Clock breakClock;
+	const float moveDelay = 0.16f; // задержка передвижения
+	const float breakDelay = 1.97f; // задержка копания
+
+	LEVEL game("Пещера", cave, rand(), MAP_SIZE);
 	PLAYER p1(game, game.getSpawn(), "HELLBOUND");
 
-	while (window.isOpen()) {
+	vector<vector<sf::RectangleShape>> tiles(MAP_SIZE, vector<sf::RectangleShape>(MAP_SIZE, sf::RectangleShape()));
+	sf::RectangleShape player_tile;
+	SET_GRID_TILES(game.getGrid(), tiles);
+	SET_PLAYER_TILE(p1, player_tile);
 
-		while (const auto p_event = window.pollEvent()) {
-
+	while (window.isOpen()) 
+	{
+		// event checker
+		while (const optional<sf::Event> p_event = window.pollEvent()) 
+		{ 
+			//closing
 			if (p_event->is<sf::Event::Closed>())
+			{
 				window.close();
+			}
 
-			if (moveClock.getElapsedTime().asSeconds() >= moveDelay) {
-				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) ||
-					sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
+			// digging button check
+			if (breakClock.getElapsedTime().asSeconds() >= breakDelay)
+			{
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
+					if (p1.destroy_on_facing())
+					{
+						switch (p1.getFacing())
+						{
+						case 0: //north
+							UPDATE_GRID_TILE(game.getGrid(), tiles, { p1.getPos().x, p1.getPos().y - 1 });
+							break;
+						case 1: //south
+							UPDATE_GRID_TILE(game.getGrid(), tiles, { p1.getPos().x, p1.getPos().y + 1 });
+							break;
+						case 2: //west
+							UPDATE_GRID_TILE(game.getGrid(), tiles, { p1.getPos().x - 1, p1.getPos().y  });
+							break;
+						case 3: //east
+							UPDATE_GRID_TILE(game.getGrid(), tiles, { p1.getPos().x + 1, p1.getPos().y });
+							break;
+
+						}
+					}
+				}
+			}
+
+			// movement control
+			if (moveClock.getElapsedTime().asSeconds() >= moveDelay) 
+			{ 
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) {
 					p1.move(north);
-					
+					UPDATE_PLAYER_TILE(p1, window, player_tile);
 				}
-				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) ||
-					sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) {
 					p1.move(south);
-					
+					UPDATE_PLAYER_TILE(p1, window, player_tile);
 				}
-				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) ||
-					sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) {
 					p1.move(west);
-					
+					UPDATE_PLAYER_TILE(p1, window, player_tile);
 				}
-				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) ||
-					sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
 					p1.move(east);
-					
+					UPDATE_PLAYER_TILE(p1, window, player_tile);
 				}
 					moveClock.restart();
 			}
 		}
-		update_window(window, game.getGrid(), p1);
+		// screen updater
+		REFRESH_DISPLAY(window, tiles, player_tile); 
 	}
 
 }

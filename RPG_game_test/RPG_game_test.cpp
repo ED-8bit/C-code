@@ -537,7 +537,7 @@ class CHARACTER : public ENTITY
 protected:
 	int HP;
 	int DMG;
-	Dir face = south;
+	Dir FACE = south;
 	AI_type AI = None;
 public:
 	CHARACTER(LEVEL& game, point pos, string name, int hp = 10, int dmg = 0, AI_type ai = None) : ENTITY(game, pos, name), HP(hp), DMG(dmg), AI(ai)
@@ -664,20 +664,20 @@ public:
 		switch (dir)
 		{
 		case south:
+			FACE = south;
 			newY = (Pos.y < mapSize - 1 && !Map.getGrid()[newX][Pos.y + 1].subject) ? Pos.y + 1 : Pos.y;
-			face = south;
 			break;
 		case north:
+			FACE = north;
 			newY = (Pos.y > 0 && !Map.getGrid()[newX][Pos.y - 1].subject) ? Pos.y - 1 : Pos.y;
-			face = north;
 			break;
 		case east:
+			FACE = east;
 			newX = (Pos.x < mapSize - 1 && !Map.getGrid()[Pos.x + 1][newY].subject) ? Pos.x + 1 : Pos.x;
-			face = east;
 			break;
 		case west:
+			FACE = west;
 			newX = (Pos.x > 0 && !Map.getGrid()[Pos.x - 1][newY].subject) ? Pos.x - 1 : Pos.x;
-			face = west;
 			break;
 		}
 
@@ -687,7 +687,22 @@ public:
 			//cout << Name << " MOVED to (" << Pos.x << ", " << Pos.y << ")" << endl;
 		}
 		else {
-			cout << Name << " CANT MOVE" << endl;
+			cout << Name << " cant be moved to ";
+			switch (dir)
+			{
+			case 0:
+				cout << "NORTH\n";
+				break;
+			case 1:
+				cout << "SOUTH\n";
+				break;
+			case 2:
+				cout << "WEST\n";
+				break;
+			case 3:
+				cout << "EAST\n";
+				break;
+			}
 		}
 	}
 	virtual void takeDamage(int dmg) override
@@ -705,12 +720,12 @@ public:
 		else
 			enemy.takeDamage(DMG);
 	}
-	virtual void destroy()
+	virtual void destroy_sub()
 	{
 		if (!isALive())
 			return;
 		int mapSize = getMAP().getSize();
-		switch (face)
+		switch (FACE)
 		{
 		case south:
 			if (Pos.y < mapSize - 1 && Map.getGrid()[Pos.x][Pos.y + 1].subject != 2)
@@ -737,7 +752,9 @@ public:
 	}
 
 };
-
+//			 || 
+// optimize \  /
+//           \/
 void OUT_GRID(vector<vector<tile>>& map, sf::RenderWindow& w)
 {
 	const int MAP_WIDTH = map.size();
@@ -816,13 +833,17 @@ void update_window(sf::RenderWindow& w, vector<vector<tile>>& map, PLAYER& p)
 }
 void GAME()
 {
-	const int MAP_WIDTH = 64;
-	const int MAP_HEIGHT = 64;
+	const int MAP_SIZE = 64;
+	const int MAP_WIDTH = MAP_SIZE;
+	const int MAP_HEIGHT = MAP_SIZE;
 	const int TILE_SIZE = 16;
 	sf::RenderWindow window(
 		sf::VideoMode({ MAP_WIDTH * TILE_SIZE, MAP_HEIGHT * TILE_SIZE }), "Game");
+	window.setFramerateLimit(60);
+	sf::Clock moveClock;
+	const float moveDelay = 0.18f; // задержка 
 
-	LEVEL game("Пещера", cave, rand(), 64);
+	LEVEL game("Пещера", cave, rand(), MAP_SIZE);
 	PLAYER p1(game, game.getSpawn(), "HELLBOUND");
 
 	while (window.isOpen()) {
@@ -832,30 +853,28 @@ void GAME()
 			if (p_event->is<sf::Event::Closed>())
 				window.close();
 
-			if (const auto* keyEvent = p_event->getIf<sf::Event::KeyPressed>()) {
-				switch (keyEvent->code) {
-				case sf::Keyboard::Key::W:
-				case sf::Keyboard::Key::Up:
+			if (moveClock.getElapsedTime().asSeconds() >= moveDelay) {
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) ||
+					sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
 					p1.move(north);
-					break;
-				case sf::Keyboard::Key::S:
-				case sf::Keyboard::Key::Down:
-					p1.move(south);
-					break;
-				case sf::Keyboard::Key::A:
-				case sf::Keyboard::Key::Left:
-					p1.move(west);
-					break;
-				case sf::Keyboard::Key::D:
-				case sf::Keyboard::Key::Right:
-					p1.move(east);
-					break;
-				case sf::Keyboard::Key::Space:
-					p1.destroy();
-					break;
-				default:
-					break;
+
 				}
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) ||
+					sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
+					p1.move(south);
+
+				}
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) ||
+					sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
+					p1.move(west);
+
+				}
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) ||
+					sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
+					p1.move(east);
+
+				}
+				moveClock.restart();
 			}
 		}
 		update_window(window, game.getGrid(), p1);
