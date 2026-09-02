@@ -213,12 +213,24 @@ void init_book_list(Book*& head)
 {
     head = nullptr;
 }
-void add_book(Book*& head, const char* title, const char* author, int udk)
-{
+bool exists_book_by_udk(Book* head, int udk) {
+    Book* cur = head;
+    while (cur != nullptr) {
+        if (cur->udk == udk)
+            return true;
+        cur = cur->next;
+    }
+    return false;
+}
+void add_book(Book*& head, const char* title, const char* author, int udk) {
+    
+    //if (exists_book_by_udk(head, udk)) {
+    //    cout << "Ошибка: книга с УДК " << udk << " уже существует!\n";
+    //    return;
+    //}
+
     Book* temp = new Book;
-    Book* temp1;
-
-
+    
     int i = 0;
     while (title[i] != '\0' && i < 99) {
         temp->title[i] = title[i];
@@ -240,8 +252,9 @@ void add_book(Book*& head, const char* title, const char* author, int udk)
         head = temp;
         return;
     }
-    temp1 = head;
-    while (temp1->next != nullptr) temp1 = temp1->next;
+    Book* temp1 = head;
+    while (temp1->next != nullptr)
+        temp1 = temp1->next;
     temp1->next = temp;
 }
 void remove_book_by_udk(Book*& head, int udk)
@@ -272,31 +285,27 @@ void remove_book_by_udk(Book*& head, int udk)
     }
     cout << "Книга с УДК " << udk << " не найдена\n";
 }
-void sort_books_by_udk(Book*& head)
-{
-    if (head == nullptr || head->next == nullptr) return;
+void sort_books_by_udk(Book*& head) {
+    if (!head || !head->next) return;
 
     bool swapped;
-    Book* ptr = nullptr;
+    Book** pp;
 
     do {
         swapped = false;
-        Book* current = head;
+        pp = &head;
 
-        while (current->next != ptr)
-        {
-            if (current->udk > current->next->udk)
-            {
-
-                Book temp = *current;
-                *current = *(current->next);
-                *(current->next) = temp;
-
+        while ((*pp) && (*pp)->next) {
+            Book* a = *pp;
+            Book* b = a->next;
+            if (a->udk > b->udk) {
+                a->next = b->next;
+                b->next = a;
+                *pp = b;
                 swapped = true;
             }
-            current = current->next;
+            pp = &(*pp)->next;
         }
-        ptr = current;
     } while (swapped);
 }
 void print_books(Book* head)
@@ -401,8 +410,7 @@ void add_student(Student*& head, const char* name, double score)
     while (temp1->next != nullptr) temp1 = temp1->next;
     temp1->next = temp;
 }
-void sort_students_by_score(Student*& head)
-{
+void sort_students_by_score(Student*& head) {
     if (head == nullptr || head->next == nullptr) return;
 
     bool swapped;
@@ -412,13 +420,20 @@ void sort_students_by_score(Student*& head)
         swapped = false;
         Student* current = head;
 
-        while (current->next != ptr)
-        {
-            if (current->average_score < current->next->average_score)
-            {
-                Student temp = *current;
-                *current = *(current->next);
-                *(current->next) = temp;
+        while (current->next != ptr) {
+            if (current->average_score < current->next->average_score) {
+                // Обмен содержимым (без изменения next)
+                char tmp_name[100];
+                double tmp_score;
+
+                strcpy_s(tmp_name, current->name);
+                tmp_score = current->average_score;
+
+                strcpy_s(current->name, current->next->name);
+                current->average_score = current->next->average_score;
+
+                strcpy_s(current->next->name, tmp_name);
+                current->next->average_score = tmp_score;
 
                 swapped = true;
             }
@@ -561,7 +576,7 @@ void list_demo()
     Node* myList = nullptr;
     init_list(myList);
 
-    int choice, value, min_val, max_val;
+    int choice, min_val, max_val;
 
     do {
         system("cls");
