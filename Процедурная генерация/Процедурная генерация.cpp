@@ -290,14 +290,6 @@ int main()
             cout << '\n';
         }
         delete[] cave;
-/*
-        // 3. Тест с параметрами по умолчанию (только seed и размер)
-        int* caveDefault = generateCellularAutomata(777u, 30, 30);
-        delete[] caveDefault;
-
-        // 4. Полная параметризация
-        int* caveFull = generateCellularAutomata(888u, 50, 50, 50, 6, 5, true, true, 30);
-        delete[] caveFull;*/
         Sleep(2000);
     } while (false);
     
