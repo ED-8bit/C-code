@@ -321,6 +321,102 @@ point find_player_spawn(vector<vector<tile>>& game, int R, int seed)
 	// Если карта абсолютно монолитна и пустых мест нет вообще
 	return point(0, 0);
 }
+point find_LEVEL_escape(vector<vector<tile>>& game, int R, int seed)
+{
+	int size = game.size();
+	mt19937 s(seed);
+	unsigned int start = s();
+
+	// Направление перебора зависит от остатка деления сида на 4
+	int direction = start % 4;
+
+	// Лямбда-функция для проверки, безопасна ли точка (нет ли стен в радиусе R)
+	auto is_safe = [&](int x, int y) {
+		if (game[x][y].subject != 0) return false;
+
+		for (int dx = -R; dx <= R; dx++) {
+			for (int dy = -R; dy <= R; dy++) {
+				// Если вышли за границы карты или встретили стену/объект
+				if (x + dx < 0 || x + dx >= size || y + dy < 0 || y + dy >= size) return false;
+				if (game[x + dx][y + dy].subject != 0) return false;
+			}
+		}
+		return true;
+		};
+
+	switch (direction)
+	{
+
+	case 0: // Снизу вверх, справа налево
+		for (int x = size - 1 - R; x >= R; x--) {
+			for (int y = size - 1 - R; y >= R; y--) {
+				if (is_safe(x, y)) return point(x, y);
+			}
+		}
+		break;
+
+	case 1: // Сверху вниз, справа налево
+		for (int x = R; x < size - R; x++) {
+			for (int y = size - 1 - R; y >= R; y--) {
+				if (is_safe(x, y)) return point(x, y);
+			}
+		}
+		break;
+
+	case 2: // Снизу вверх, слева направо
+		for (int x = size - 1 - R; x >= R; x--) {
+			for (int y = R; y < size - R; y++) {
+				if (is_safe(x, y)) return point(x, y);
+			}
+		}
+		break;
+
+	case 3: // Сверху вниз, слева направо (стандартный порядок)
+		for (int x = R; x < size - R; x++) {
+			for (int y = R; y < size - R; y++) {
+				if (is_safe(x, y)) return point(x, y);
+			}
+		}
+		break;
+	}
+
+	// Резервный план: если с учетом радиуса R ничего не нашли,
+	// ищем самую первую вообще пустую клетку (без учета радиуса безопасности)
+	// в том же направлении, которое определил сид
+	switch (direction)
+	{
+	case 3:
+		for (int x = 0; x < size; x++)
+			for (int y = 0; y < size; y++)
+				if (game[x][y].subject == 0) return point(x, y);
+		break;
+	case 2:
+		for (int x = size - 1; x >= 0; x--)
+			for (int y = 0; y < size; y++)
+				if (game[x][y].subject == 0) return point(x, y);
+		break;
+	case 1:
+		for (int x = 0; x < size; x++)
+			for (int y = size - 1; y >= 0; y--)
+				if (game[x][y].subject == 0) return point(x, y);
+		break;
+	case 0:
+		for (int x = size - 1; x >= 0; x--)
+			for (int y = size - 1; y >= 0; y--)
+				if (game[x][y].subject == 0) return point(x, y);
+		break;
+	}
+
+	// Если карта абсолютно монолитна и пустых мест нет вообще
+	return point(0, 0);
+}
+
+point set_LEVEL_escape(vector<vector<tile>>& game, int seed)
+{
+	point ESC = find_player_spawn(game, 1, seed);
+	game[ESC.x][ESC.y].floor = 4;
+	return ESC;
+}
 point set_player_spawn(vector<vector<tile>>& game, int seed)
 {
 	point SP = find_player_spawn(game, 1, seed);
@@ -441,6 +537,7 @@ protected:
 	string Name;
 	vector<vector<tile>> Grid;
 	point Spawn;
+	point Escape;
 	level_type Type;
 
 public:
@@ -450,7 +547,7 @@ public:
 		Grid.resize(size, vector<tile>(size, tile(1)));
 		if (Type == cave)
 		{
-			int i, iters = 4, fill = 44, need = 5, wall = 3, minzone = 25, debris = 2, smooth = 3, ore = 2;
+			int i, iters = 7, fill = 75, need = 5, wall = 3, minzone = 50, debris = 2, smooth = 1, ore = 2;
 			seed_fill_CAVE(Grid, seed, fill);
 			for (i = 0; i < iters; i++)
 			{
@@ -468,6 +565,7 @@ public:
 			}
 			set_ore(Grid, seed, ore, true);
 			Spawn = set_player_spawn(Grid, seed);
+			Escape = set_LEVEL_escape(Grid, seed);
 			switch (Type)
 			{
 			case cave:
@@ -802,6 +900,9 @@ void SET_GRID_TILES(vector<vector<tile>>& map, vector<vector<sf::RectangleShape>
 				else if (map[x][y].floor == 3) {
 					color = sf::Color::Green; // SP
 				}
+				else if (map[x][y].floor == 4) {
+					color = sf::Color::Black; // ESC
+				}
 				else {
 					color = sf::Color::Black;     // По умолчанию
 				}
@@ -844,6 +945,9 @@ void UPDATE_GRID_TILE(vector<vector<tile>>& map, vector<vector<sf::RectangleShap
 		}
 		else if (map[x][y].floor == 3) {
 			color = sf::Color::Green; // SP
+		}
+		else if (map[x][y].floor == 4) {
+			color = sf::Color::Black; // ESC
 		}
 		else {
 			color = sf::Color::Black;     // По умолчанию
@@ -901,7 +1005,7 @@ void REFRESH_DISPLAY(sf::RenderWindow& w, vector<vector<sf::RectangleShape>>& ti
 
 void GAME()
 {
-	const int MAP_SIZE = 128; // for gen
+	const int MAP_SIZE = 48; // for gen
 	const int MAP_WIDTH = MAP_SIZE;  
 	const int MAP_HEIGHT = MAP_SIZE; 
 	const int TILE_SIZE = 1024 / MAP_SIZE;
