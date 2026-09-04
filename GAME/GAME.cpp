@@ -346,24 +346,15 @@ point find_LEVEL_escape(vector<vector<tile>>& game, int R, int seed)
 
 	switch (direction)
 	{
-
-	case 0: // Снизу вверх, справа налево
-		for (int x = size - 1 - R; x >= R; x--) {
-			for (int y = size - 1 - R; y >= R; y--) {
-				if (is_safe(x, y)) return point(x, y);
-			}
-		}
-		break;
-
-	case 1: // Сверху вниз, справа налево
+	case 0: // Сверху вниз, слева направо (стандартный порядок)
 		for (int x = R; x < size - R; x++) {
-			for (int y = size - 1 - R; y >= R; y--) {
+			for (int y = R; y < size - R; y++) {
 				if (is_safe(x, y)) return point(x, y);
 			}
 		}
 		break;
 
-	case 2: // Снизу вверх, слева направо
+	case 1: // Снизу вверх, слева направо
 		for (int x = size - 1 - R; x >= R; x--) {
 			for (int y = R; y < size - R; y++) {
 				if (is_safe(x, y)) return point(x, y);
@@ -371,9 +362,17 @@ point find_LEVEL_escape(vector<vector<tile>>& game, int R, int seed)
 		}
 		break;
 
-	case 3: // Сверху вниз, слева направо (стандартный порядок)
+	case 2: // Сверху вниз, справа налево
 		for (int x = R; x < size - R; x++) {
-			for (int y = R; y < size - R; y++) {
+			for (int y = size - 1 - R; y >= R; y--) {
+				if (is_safe(x, y)) return point(x, y);
+			}
+		}
+		break;
+
+	case 3: // Снизу вверх, справа налево
+		for (int x = size - 1 - R; x >= R; x--) {
+			for (int y = size - 1 - R; y >= R; y--) {
 				if (is_safe(x, y)) return point(x, y);
 			}
 		}
@@ -385,22 +384,22 @@ point find_LEVEL_escape(vector<vector<tile>>& game, int R, int seed)
 	// в том же направлении, которое определил сид
 	switch (direction)
 	{
-	case 3:
+	case 0:
 		for (int x = 0; x < size; x++)
-			for (int y = 0; y < size; y++)
-				if (game[x][y].subject == 0) return point(x, y);
-		break;
-	case 2:
-		for (int x = size - 1; x >= 0; x--)
 			for (int y = 0; y < size; y++)
 				if (game[x][y].subject == 0) return point(x, y);
 		break;
 	case 1:
+		for (int x = size - 1; x >= 0; x--)
+			for (int y = 0; y < size; y++)
+				if (game[x][y].subject == 0) return point(x, y);
+		break;
+	case 2:
 		for (int x = 0; x < size; x++)
 			for (int y = size - 1; y >= 0; y--)
 				if (game[x][y].subject == 0) return point(x, y);
 		break;
-	case 0:
+	case 3:
 		for (int x = size - 1; x >= 0; x--)
 			for (int y = size - 1; y >= 0; y--)
 				if (game[x][y].subject == 0) return point(x, y);
@@ -410,7 +409,6 @@ point find_LEVEL_escape(vector<vector<tile>>& game, int R, int seed)
 	// Если карта абсолютно монолитна и пустых мест нет вообще
 	return point(0, 0);
 }
-
 point set_LEVEL_escape(vector<vector<tile>>& game, int seed)
 {
 	point ESC = find_player_spawn(game, 1, seed);
@@ -873,7 +871,7 @@ public:
 };
 //           ||   
 //optimized	_||_ 
-//   shit   \  /
+//   graph  \  /
 //           \/
 void SET_GRID_TILES(vector<vector<tile>>& map, vector<vector<sf::RectangleShape>>& tiles)
 {
