@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 #include <cmath>
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -48,11 +49,11 @@ public:
 	}
 	inum add(inum D)
 	{
-		return { real + D.im, im + D.im };
+		return { real + D.real, im + D.im };
 	}
 	inum sub(inum D)
 	{
-		return { real - D.im, im - D.im };
+		return { real - D.real, im - D.im };
 	}
 	inum mult(inum D)
 	{
@@ -181,7 +182,7 @@ public:
 	{
 		if (!isEmpty())
 		{
-			for (int i = 0; i < 100; i++)
+			for (int i = 0; i < count; i++)
 			{
 				if (data[i].getSurname() == surname)
 					return data[i];
@@ -192,9 +193,9 @@ public:
 	}
 	void RemoveContact(string surname)
 	{
-		if (!isEmpty)
+		if (!isEmpty())
 		{
-			for (int i = 0; i < 100; i++)
+			for (int i = 0; i < count; i++)
 			{
 				if (data[i].getSurname() == surname)
 				{
@@ -203,6 +204,7 @@ public:
 						data[j] = data[j + 1];
 					}
 					count--;
+					break;
 				}
 			}
 		}
@@ -211,9 +213,9 @@ public:
 	}
 	void PrintAll()
 	{
-		if (!isEmpty)
+		if (!isEmpty())
 		{
-			for (int i = 0; i <= count; i++)
+			for (int i = 0; i < count; i++)
 			{
 				data[i].Print();
 			}
@@ -228,7 +230,8 @@ private:
 	int month;
 	int year;
 public:
-	Date(int d = 1, int m = 1, int y = 2000): day(d), month(m), year(y) {}
+	Date(int d, int m, int y): day(d), month(m), year(y) {}
+	Date() : day(1), month(1), year(2000) {}
 	~Date(){}
 };
 class Person
@@ -241,6 +244,7 @@ private:
 
 public:
 	Person(string n, string sn, Date b, int pass) : name(n), surname(sn), birthday(b), passport(pass) {}
+	Person() : name(""), surname(""), birthday(Date()), passport(0) {}
 	~Person(){}
 
 
@@ -260,6 +264,7 @@ private:
 
 public:
 	Operation(Date d, Oper_type op, int s) : time(d), operation(op), sum(s) {}
+	Operation() : time(Date()), operation(increase), sum(0) {}
 	~Operation(){}
 
 
