@@ -10,6 +10,7 @@
 
 using namespace std;
 
+
 struct tile {
 	int floor;
 	int subject;
@@ -19,13 +20,20 @@ struct tile {
 
 	tile(int f = 0, int s = 0, int a = 0, float t = 0, int b = 0) : floor(f), subject(s), air(a), temp(t), biome(b) {}
 };
-struct point {
+struct point_int {
 	int x;
 	int y;
 
-	point(int x = 0, int y = 0) : x(x), y(y) {}
+	point_int(int x = 0, int y = 0) : x(x), y(y) {}
 };
-bool onBorder(vector<vector<tile>>& game, point dot)
+struct point_double {
+	double x;
+	double y;
+
+	point_double(double x = 0.0, double y = 0.0) : x(x), y(y) {}
+	point_double(point_int dot) : x(double(dot.x)), y(double(dot.y)) {}
+};
+bool onBorder(vector<vector<tile>>& game, point_int dot)
 {
 	int size = game.size();
 	if (dot.x == 0 || dot.y == 0 || dot.x == size - 1 || dot.y == size - 1)
@@ -33,7 +41,7 @@ bool onBorder(vector<vector<tile>>& game, point dot)
 	else
 		return false;
 }
-bool outBorder(vector<vector<tile>>& game, point dot)
+bool outBorder(vector<vector<tile>>& game, point_int dot)
 {
 	int size = game.size();
 	if (dot.x < 0 || dot.y < 0 || dot.x >= size || dot.y >= size)
@@ -233,7 +241,7 @@ void border_fill_CAVE(vector<vector<tile>>& game, int wall = 0)
 	}
 }
 
-point find_player_spawn(vector<vector<tile>>& game, int R, int seed)
+point_int find_player_spawn(vector<vector<tile>>& game, int R, int seed)
 {
 	int size = game.size();
 	mt19937 s(seed);
@@ -261,7 +269,7 @@ point find_player_spawn(vector<vector<tile>>& game, int R, int seed)
 	case 0: // Сверху вниз, слева направо (стандартный порядок)
 		for (int x = R; x < size - R; x++) {
 			for (int y = R; y < size - R; y++) {
-				if (is_safe(x, y)) return point(x, y);
+				if (is_safe(x, y)) return point_int(x, y);
 			}
 		}
 		break;
@@ -269,7 +277,7 @@ point find_player_spawn(vector<vector<tile>>& game, int R, int seed)
 	case 1: // Снизу вверх, слева направо
 		for (int x = size - 1 - R; x >= R; x--) {
 			for (int y = R; y < size - R; y++) {
-				if (is_safe(x, y)) return point(x, y);
+				if (is_safe(x, y)) return point_int(x, y);
 			}
 		}
 		break;
@@ -277,7 +285,7 @@ point find_player_spawn(vector<vector<tile>>& game, int R, int seed)
 	case 2: // Сверху вниз, справа налево
 		for (int x = R; x < size - R; x++) {
 			for (int y = size - 1 - R; y >= R; y--) {
-				if (is_safe(x, y)) return point(x, y);
+				if (is_safe(x, y)) return point_int(x, y);
 			}
 		}
 		break;
@@ -285,7 +293,7 @@ point find_player_spawn(vector<vector<tile>>& game, int R, int seed)
 	case 3: // Снизу вверх, справа налево
 		for (int x = size - 1 - R; x >= R; x--) {
 			for (int y = size - 1 - R; y >= R; y--) {
-				if (is_safe(x, y)) return point(x, y);
+				if (is_safe(x, y)) return point_int(x, y);
 			}
 		}
 		break;
@@ -299,29 +307,29 @@ point find_player_spawn(vector<vector<tile>>& game, int R, int seed)
 	case 0:
 		for (int x = 0; x < size; x++)
 			for (int y = 0; y < size; y++)
-				if (game[x][y].subject == 0) return point(x, y);
+				if (game[x][y].subject == 0) return point_int(x, y);
 		break;
 	case 1:
 		for (int x = size - 1; x >= 0; x--)
 			for (int y = 0; y < size; y++)
-				if (game[x][y].subject == 0) return point(x, y);
+				if (game[x][y].subject == 0) return point_int(x, y);
 		break;
 	case 2:
 		for (int x = 0; x < size; x++)
 			for (int y = size - 1; y >= 0; y--)
-				if (game[x][y].subject == 0) return point(x, y);
+				if (game[x][y].subject == 0) return point_int(x, y);
 		break;
 	case 3:
 		for (int x = size - 1; x >= 0; x--)
 			for (int y = size - 1; y >= 0; y--)
-				if (game[x][y].subject == 0) return point(x, y);
+				if (game[x][y].subject == 0) return point_int(x, y);
 		break;
 	}
 
 	// Если карта абсолютно монолитна и пустых мест нет вообще
-	return point(0, 0);
+	return point_int(0, 0);
 }
-point find_LEVEL_escape(vector<vector<tile>>& game, int R, int seed)
+point_int find_LEVEL_escape(vector<vector<tile>>& game, int R, int seed)
 {
 	int size = game.size();
 	mt19937 s(seed);
@@ -349,7 +357,7 @@ point find_LEVEL_escape(vector<vector<tile>>& game, int R, int seed)
 	case 0: // Сверху вниз, слева направо (стандартный порядок)
 		for (int x = R; x < size - R; x++) {
 			for (int y = R; y < size - R; y++) {
-				if (is_safe(x, y)) return point(x, y);
+				if (is_safe(x, y)) return point_int(x, y);
 			}
 		}
 		break;
@@ -357,7 +365,7 @@ point find_LEVEL_escape(vector<vector<tile>>& game, int R, int seed)
 	case 1: // Снизу вверх, слева направо
 		for (int x = size - 1 - R; x >= R; x--) {
 			for (int y = R; y < size - R; y++) {
-				if (is_safe(x, y)) return point(x, y);
+				if (is_safe(x, y)) return point_int(x, y);
 			}
 		}
 		break;
@@ -365,7 +373,7 @@ point find_LEVEL_escape(vector<vector<tile>>& game, int R, int seed)
 	case 2: // Сверху вниз, справа налево
 		for (int x = R; x < size - R; x++) {
 			for (int y = size - 1 - R; y >= R; y--) {
-				if (is_safe(x, y)) return point(x, y);
+				if (is_safe(x, y)) return point_int(x, y);
 			}
 		}
 		break;
@@ -373,7 +381,7 @@ point find_LEVEL_escape(vector<vector<tile>>& game, int R, int seed)
 	case 3: // Снизу вверх, справа налево
 		for (int x = size - 1 - R; x >= R; x--) {
 			for (int y = size - 1 - R; y >= R; y--) {
-				if (is_safe(x, y)) return point(x, y);
+				if (is_safe(x, y)) return point_int(x, y);
 			}
 		}
 		break;
@@ -387,37 +395,37 @@ point find_LEVEL_escape(vector<vector<tile>>& game, int R, int seed)
 	case 0:
 		for (int x = 0; x < size; x++)
 			for (int y = 0; y < size; y++)
-				if (game[x][y].subject == 0) return point(x, y);
+				if (game[x][y].subject == 0) return point_int(x, y);
 		break;
 	case 1:
 		for (int x = size - 1; x >= 0; x--)
 			for (int y = 0; y < size; y++)
-				if (game[x][y].subject == 0) return point(x, y);
+				if (game[x][y].subject == 0) return point_int(x, y);
 		break;
 	case 2:
 		for (int x = 0; x < size; x++)
 			for (int y = size - 1; y >= 0; y--)
-				if (game[x][y].subject == 0) return point(x, y);
+				if (game[x][y].subject == 0) return point_int(x, y);
 		break;
 	case 3:
 		for (int x = size - 1; x >= 0; x--)
 			for (int y = size - 1; y >= 0; y--)
-				if (game[x][y].subject == 0) return point(x, y);
+				if (game[x][y].subject == 0) return point_int(x, y);
 		break;
 	}
 
 	// Если карта абсолютно монолитна и пустых мест нет вообще
-	return point(0, 0);
+	return point_int(0, 0);
 }
-point set_LEVEL_escape(vector<vector<tile>>& game, int seed)
+point_int set_LEVEL_escape(vector<vector<tile>>& game, int seed)
 {
-	point ESC = find_player_spawn(game, 1, seed);
+	point_int ESC = find_player_spawn(game, 1, seed);
 	game[ESC.x][ESC.y].floor = 4;
 	return ESC;
 }
-point set_player_spawn(vector<vector<tile>>& game, int seed)
+point_int set_player_spawn(vector<vector<tile>>& game, int seed)
 {
-	point SP = find_player_spawn(game, 1, seed);
+	point_int SP = find_player_spawn(game, 1, seed);
 	game[SP.x][SP.y].floor = 3;
 	return SP;
 }
@@ -534,8 +542,8 @@ protected:
 	int Seed;
 	string Name;
 	vector<vector<tile>> Grid;
-	point Spawn;
-	point Escape;
+	point_int Spawn;
+	point_int Escape;
 	level_type Type;
 
 public:
@@ -581,10 +589,10 @@ public:
 	string getName() { return Name; }
 	int getSize() { return Grid.size(); }
 	vector<vector<tile>>& getGrid() { return Grid; }
-	point getSpawn() { return Spawn; }
+	point_int getSpawn() { return Spawn; }
 
 	void setName(string NewName) { Name = NewName; }
-	bool destroy_sub(point sub)
+	bool destroy_sub(point_int sub)
 	{
 		if (!outBorder(Grid, sub) && Grid[sub.x][sub.y].subject != 2)
 		{
@@ -620,29 +628,33 @@ public:
 //  {"  ", "@@", "  ", "  ", "  ", "  ", "  ", "  "},   // Воздух (air)
 
 static int ENTs = 0;
-enum Dir { north, south, west, east };
+enum Dir { north, south, west, east, north_west, north_east, south_west, south_east };
 enum AI_type { None };
 class ENTITY
 {
 protected:
 	int ID;
 	string Name;
+	int Size;
 	LEVEL& Map;
-	point Pos;
+	point_double Pos;
 public:
-	ENTITY(LEVEL& game, point pos, string name) : Name(name), Pos(pos), Map(game)
+	ENTITY(LEVEL& game, point_double pos, string name, int size) : Name(name), Pos(pos), Map(game), Size(size)
 	{
 		ID = ++ENTs;
 		//cout << "ENTITY: " << Name << " CREATED\n";
 	}
 
-	virtual int getID() const { return ID; }
-	virtual string getName() const { return Name; }
-	virtual point getPos() const { return Pos; }
-	virtual LEVEL& getMAP() const { return Map; }
+	virtual void setSize(int NewSize) { Size = NewSize; }
 	virtual void setName(string NewName) { Name = NewName; }
-	virtual void setPos(point NewPos) { Pos = NewPos; }
+	virtual void setPos(point_double NewPos) { Pos = NewPos; }
 	virtual void setMAP(LEVEL& NewMap) { Map = NewMap; }
+
+	virtual int getID() const { return ID; }
+	virtual int getSize() const { return Size; }
+	virtual string getName() const { return Name; }
+	virtual point_double getPos() const { return Pos; }
+	virtual LEVEL& getMAP() const { return Map; }
 
 	virtual ~ENTITY()
 	{
@@ -657,24 +669,27 @@ protected:
 	Dir FACE = south;
 	AI_type AI = None;
 public:
-	CHARACTER(LEVEL& game, point pos, string name, int hp = 10, int dmg = 0, AI_type ai = None) : ENTITY(game, pos, name), HP(hp), DMG(dmg), AI(ai)
+	CHARACTER(LEVEL& game, point_double pos, string name, int size, int hp = 10, int dmg = 0, AI_type ai = None) : ENTITY(game, pos, name, size), HP(hp), DMG(dmg), AI(ai)
 	{
 		// cout << "CHARACTER: " << Name << " CREATED\n";
 	}
 
+	virtual void setSize(int NewSize) override { Size = NewSize; }
 	virtual int getID() const override { return ID; }
 	virtual string getName() const override { return Name; }
-	virtual point getPos() const override { return Pos; }
+	virtual point_double getPos() const override { return Pos; }
 	virtual LEVEL& getMAP() const override { return Map; }
 	virtual void setName(string NewName) override { Name = NewName; }
-	virtual void setPos(point NewPos) override
+	virtual void setPos(point_double NewPos) override
 	{
-		if (NewPos.x >= 0 && NewPos.x < getMAP().getSize() && NewPos.y >= 0 && NewPos.y < getMAP().getSize())
+		if (NewPos.x >= 0 && NewPos.x < double(getMAP().getSize()) && NewPos.y >= 0 && NewPos.y < double(getMAP().getSize()))
 		{
 			Pos = NewPos;
 		}
 	}
 	virtual void setMAP(LEVEL& NewMap) override { Map = NewMap; }
+
+	virtual int getSize() const override{ return Size; }
 
 	virtual bool isALive() const
 	{
@@ -693,9 +708,9 @@ public:
 	{
 		if (!isALive())
 			return;
-		int newX = Pos.x;
-		int newY = Pos.y;
-		int mapSize = getMAP().getSize();
+		double newX = Pos.x;
+		double newY = Pos.y;
+		double mapSize = double(getMAP().getSize());
 
 		switch (dir)
 		{
@@ -742,63 +757,100 @@ protected:
 
 
 public:
-	PLAYER(LEVEL& game, point pos, string name, int hp = 100, int dmg = 10, AI_type ai = None) : CHARACTER(game, pos, name, hp, dmg, ai)
+	PLAYER(LEVEL& game, point_double pos, string name, int size, int hp = 100, int dmg = 10, AI_type ai = None) : CHARACTER(game, pos, name, size, hp, dmg, ai)
 	{
 		cout << "PLAYER: " << Name << " CREATED\n";
 	}
-
-	virtual int getID() const override { return ID; }
-	virtual string getName() const override { return Name; }
-	virtual point getPos() const override { return Pos; }
-	virtual LEVEL& getMAP() const override { return Map; }
-	virtual void setName(string NewName) override { Name = NewName; }
-	virtual void setPos(point NewPos) override
+	PLAYER(LEVEL& game, point_int pos, string name, int size, int hp = 100, int dmg = 10, AI_type ai = None) : CHARACTER(game, point_double(pos), name, size, hp, dmg, ai)
 	{
-		if (NewPos.x >= 0 && NewPos.x < getMAP().getSize() && NewPos.y >= 0 && NewPos.y < getMAP().getSize())
+		cout << "PLAYER: " << Name << " CREATED\n";
+	}
+	
+	virtual void setName(string NewName) override { Name = NewName; }
+	virtual void setSize(int NewSize) override { Size = NewSize; }
+	virtual void setHP(int NewHP) { HP = NewHP; }
+	virtual void setDMG(int NewDMG) { DMG = NewDMG; }
+	virtual void setAI(AI_type NewAI) { AI = NewAI; }
+	virtual void setPos(point_double NewPos) override
+	{
+		if (NewPos.x >= 0 && NewPos.x < double(getMAP().getSize()) && NewPos.y >= 0 && NewPos.y < double(getMAP().getSize()) )
 		{
 			Pos = NewPos;
 		}
 	}
+	virtual void setFacing(Dir NewFACE) { FACE = NewFACE; }
 	virtual void setMAP(LEVEL& NewMap) override { Map = NewMap; }
+
+	virtual string getName() const override { return Name; }
+	virtual int getSize() const override { return Size; }
+	virtual int getHP() const { return HP; }
+	virtual int getDMG() const { return DMG; }
+	virtual AI_type getAI() const { return AI; }
+	virtual point_double getPos() const override { return Pos; }
+	virtual Dir getFacing() const { return FACE; }
+	virtual LEVEL& getMAP() const override{ return Map; }
+	virtual int getID() const override { return ID; }
 
 	virtual bool isALive() const
 	{
 		return HP > 0;
 	}
-	virtual int getHP() const { return HP; }
-	virtual int getDMG() const { return DMG; }
-	virtual AI_type getAI() const { return AI; }
-	virtual void setHP(int NewHP) { HP = NewHP; }
-	virtual void setDMG(int NewDMG) { DMG = NewDMG; }
-	virtual void setAI(AI_type NewAI) { AI = NewAI; }
-	virtual Dir getFacing() const { return FACE; }
-	virtual void setFacing(Dir NewFACE) { FACE = NewFACE; }
-
 	virtual void move(Dir dir) override
 	{
 		if (!isALive())
 			return;
-		int newX = Pos.x;
-		int newY = Pos.y;
-		int mapSize = getMAP().getSize();
-
+		double newX = Pos.x;
+		double newY = Pos.y;
+		double mapSize = double(getMAP().getSize());
+		double step = 0.125;
 		switch (dir)
 		{
+		case north_east:
+			FACE = north_east;   //                           ':                                                            :'
+			newY = (Pos.y > 0 && (!Map.getGrid()[int(newX)][int(Pos.y - step)].subject && !Map.getGrid()[int(newX + 1)][int(Pos.y - step)].subject))
+				? Pos.y - step : Pos.y;
+			newX = (Pos.x < mapSize - 1 && (!Map.getGrid()[int(Pos.x + 1 + step)][int(newY)].subject && !Map.getGrid()[int(Pos.x + 1 + step)][int(newY + 1)].subject))
+				? Pos.x + step : Pos.x;
+			break;
+		case north_west:
+			FACE = north_west;
+			newY = (Pos.y > 0 && (!Map.getGrid()[int(newX)][int(Pos.y - step)].subject && !Map.getGrid()[int(newX + 1)][int(Pos.y - step)].subject))
+				? Pos.y - step : Pos.y;
+			newX = (Pos.x > 0 && (!Map.getGrid()[int(Pos.x - step)][int(newY)].subject && !Map.getGrid()[int(Pos.x - step)][int(newY + 1)].subject))
+				? Pos.x - step : Pos.x;
+			break;
+		case south_east:
+			FACE = south_east;
+			newY = (Pos.y < mapSize - 1 && (!Map.getGrid()[int(newX)][int(Pos.y + 1 + step)].subject && !Map.getGrid()[int(newX + 1)][int(Pos.y + 1 + step)].subject))
+				? Pos.y + step : Pos.y;
+			newX = (Pos.x < mapSize - 1 && (!Map.getGrid()[int(Pos.x + 1 + step)][int(newY)].subject && !Map.getGrid()[int(Pos.x + 1 + step)][int(newY + 1)].subject))
+				? Pos.x + step : Pos.x;
+			break;
+		case south_west:
+			newY = (Pos.y < mapSize - 1 && (!Map.getGrid()[int(newX)][int(Pos.y + 1 + step)].subject && !Map.getGrid()[int(newX + 1)][int(Pos.y + 1 + step)].subject))
+				? Pos.y + step : Pos.y;
+			newX = (Pos.x > 0 && (!Map.getGrid()[int(Pos.x - step)][int(newY)].subject && !Map.getGrid()[int(Pos.x - step)][int(newY + 1)].subject))
+				? Pos.x - step : Pos.x;
+			break;
 		case south: 
-			FACE = south;
-			newY = (Pos.y < mapSize - 1 && !Map.getGrid()[newX][Pos.y + 1].subject) ? Pos.y + 1 : Pos.y;
+			FACE = south;    //                                       ;:                                                            :;
+			newY = (Pos.y < mapSize - 1 && (!Map.getGrid()[int(newX)][int(Pos.y + 1 + step)].subject && !Map.getGrid()[int(newX + 1)][int(Pos.y + 1 + step)].subject))
+				? Pos.y + step : Pos.y;
 			break;
 		case north: 
-			FACE = north;
-			newY = (Pos.y > 0 && !Map.getGrid()[newX][Pos.y - 1].subject) ? Pos.y - 1 : Pos.y; 
+			FACE = north;   //                           ':                                                            :'
+			newY = (Pos.y > 0 && (!Map.getGrid()[int(newX)][int(Pos.y - step)].subject && !Map.getGrid()[int(newX + 1)][int(Pos.y - step)].subject))
+				? Pos.y - step : Pos.y; 
 			break;
 		case east:  
-			FACE = east;
-			newX = (Pos.x < mapSize - 1 && !Map.getGrid()[Pos.x + 1][newY].subject) ? Pos.x + 1 : Pos.x; 
+			FACE = east;   //                            :'                                                            :;
+			newX = (Pos.x < mapSize - 1 && (!Map.getGrid()[int(Pos.x + 1 + step)][int(newY)].subject && !Map.getGrid()[int(Pos.x + 1 + step)][int(newY + 1)].subject))
+				? Pos.x + step : Pos.x; 
 			break;
 		case west:  
-			FACE = west;
-			newX = (Pos.x > 0 && !Map.getGrid()[Pos.x - 1][newY].subject) ? Pos.x - 1 : Pos.x; 
+			FACE = west;   //                            ':                                                            ;:
+			newX = (Pos.x > 0 && (!Map.getGrid()[int(Pos.x - step)][int(newY)].subject && !Map.getGrid()[int(Pos.x - step)][int(newY+1)].subject))
+				? Pos.x - step : Pos.x; 
 			break;
 		}
 
@@ -808,22 +860,22 @@ public:
 			//cout << Name << " MOVED to (" << Pos.x << ", " << Pos.y << ")" << endl;
 		}
 		else {
-			cout << Name << " cant be moved to ";
-			switch (dir)
-			{
-			case 0:
-				cout << "NORTH\n";
-				break;
-			case 1:
-				cout << "SOUTH\n";
-				break;
-			case 2:
-				cout << "WEST\n";
-				break;
-			case 3:
-				cout << "EAST\n";
-				break;
-			}
+			//cout << Name << " cant be moved to ";
+			//switch (dir)
+			//{
+			//case 0:
+			//	cout << "NORTH\n";
+			//	break;
+			//case 1:
+			//	cout << "SOUTH\n";
+			//	break;
+			//case 2:
+			//	cout << "WEST\n";
+			//	break;
+			//case 3:
+			//	cout << "EAST\n";
+			//	break;
+			//}
 		}
 	}
 	virtual void takeDamage(int dmg) override
@@ -849,16 +901,16 @@ public:
 		switch (FACE)
 		{
 		case south:
-			return Map.destroy_sub({ Pos.x, Pos.y + 1 });
+			return (Map.destroy_sub({ int(Pos.x), int(Pos.y + 1) }) || Map.destroy_sub({ int(Pos.x + 1), int(Pos.y + 1) }));
 			break;
 		case north:
-			return Map.destroy_sub({ Pos.x, Pos.y - 1 });
+			return (Map.destroy_sub({ int(Pos.x), int(Pos.y - 1) }) || Map.destroy_sub({ int(Pos.x + 1), int(Pos.y - 1) }));
 			break;
 		case east:
-			return Map.destroy_sub({ Pos.x + 1, Pos.y });
+			return (Map.destroy_sub({ int(Pos.x + 1), int(Pos.y) }) || Map.destroy_sub({ int(Pos.x + 1), int(Pos.y + 1) }));
 			break;
 		case west:
-			return Map.destroy_sub({ Pos.x - 1, Pos.y });
+			return (Map.destroy_sub({ int(Pos.x - 1), int(Pos.y) }) || Map.destroy_sub({ int(Pos.x - 1), int(Pos.y + 1) }));
 			break;
 		}
 	}
@@ -867,7 +919,6 @@ public:
 	{
 		cout << "PLAYER: " << Name << " DELETED\n";
 	}
-
 };
 //           ||   
 //optimized	_||_ 
@@ -928,7 +979,7 @@ void SET_GRID_TILES(vector<vector<tile>>& map, vector<vector<sf::RectangleShape>
 		}
 	}
 }
-void UPDATE_GRID_TILE(vector<vector<tile>>& map, vector<vector<sf::RectangleShape>>& tiles, point dot)
+void UPDATE_GRID_TILE(vector<vector<tile>>& map, vector<vector<sf::RectangleShape>>& tiles, point_int dot)
 {
 	int x = dot.x;
 	int y = dot.y;
@@ -978,7 +1029,7 @@ void SET_PLAYER_TILE(PLAYER& p, sf::RectangleShape& tile)
 {
 	const int TILE_SIZE = 1024 / p.getMAP().getSize();
 	sf::RectangleShape rect({ (float)TILE_SIZE, (float)TILE_SIZE });
-	rect.setPosition({ (float)(p.getPos().x * TILE_SIZE), (float)(p.getPos().y * TILE_SIZE) });
+	rect.setPosition({ (float)(p.getPos().x * p.getSize()), (float)(p.getPos().y * p.getSize()) });
 	sf::Color color(180, 32, 32);
 	rect.setFillColor(color);
 	tile = rect;
@@ -986,7 +1037,7 @@ void SET_PLAYER_TILE(PLAYER& p, sf::RectangleShape& tile)
 void UPDATE_PLAYER_TILE(PLAYER& p, sf::RenderWindow& w, sf::RectangleShape& tile)
 {
 	const int TILE_SIZE = 1024 / p.getMAP().getSize();
-	tile.setPosition({ (float)(p.getPos().x * TILE_SIZE), (float)(p.getPos().y * TILE_SIZE) });
+	tile.setPosition({ (float)(p.getPos().x * p.getSize()), (float)(p.getPos().y * p.getSize()) });
 }
 void DRAW_PLAYER(sf::RenderWindow& w, sf::RectangleShape& tile)
 {
@@ -1003,89 +1054,125 @@ void REFRESH_DISPLAY(sf::RenderWindow& w, vector<vector<sf::RectangleShape>>& ti
 
 void GAME()
 {
-	const int MAP_SIZE = 48; // for gen
-	const int MAP_WIDTH = MAP_SIZE;  
-	const int MAP_HEIGHT = MAP_SIZE; 
+	const int MAP_SIZE = 48;
+	const int MAP_WIDTH = MAP_SIZE;
+	const int MAP_HEIGHT = MAP_SIZE;
 	const int TILE_SIZE = 1024 / MAP_SIZE;
 	sf::RenderWindow window(sf::VideoMode({ MAP_WIDTH * TILE_SIZE, MAP_HEIGHT * TILE_SIZE }), "Game");
-	window.setFramerateLimit(0);
+	window.setFramerateLimit(60);
+	window.setKeyRepeatEnabled(false); 
 
 	sf::Clock moveClock;
 	sf::Clock breakClock;
-	const float moveDelay = 0.16f; // задержка передвижения
-	const float breakDelay = 1.97f; // задержка копания
+	const float moveDelay = 0.0166f; 
+	const float breakDelay = 1.97f;
 
 	LEVEL game("Пещера", cave, rand(), MAP_SIZE);
-	PLAYER p1(game, game.getSpawn(), "HELLBOUND");
+	PLAYER p1(game, game.getSpawn(), "HELLBOUND", TILE_SIZE);
 
 	vector<vector<sf::RectangleShape>> tiles(MAP_SIZE, vector<sf::RectangleShape>(MAP_SIZE, sf::RectangleShape()));
 	sf::RectangleShape player_tile;
 	SET_GRID_TILES(game.getGrid(), tiles);
 	SET_PLAYER_TILE(p1, player_tile);
 
-	while (window.isOpen()) 
+	while (window.isOpen())
 	{
-		// event checker
-		while (const optional<sf::Event> p_event = window.pollEvent()) 
-		{ 
-			//closing
+		// Обработка событий
+		while (const optional<sf::Event> p_event = window.pollEvent())
+		{
 			if (p_event->is<sf::Event::Closed>())
 			{
 				window.close();
 			}
 
-			// digging button check
-			if (breakClock.getElapsedTime().asSeconds() >= breakDelay)
+			// Обработка нажатия пробела для копания
+			if (p_event->is<sf::Event::KeyPressed>())
 			{
-				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
-					if (p1.destroy_on_facing())
+				auto keyEvent = p_event->getIf<sf::Event::KeyPressed>();
+				if (keyEvent && keyEvent->code == sf::Keyboard::Key::Space)
+				{
+					if (breakClock.getElapsedTime().asSeconds() >= breakDelay)
 					{
-						switch (p1.getFacing())
+						if (p1.destroy_on_facing())
 						{
-						case 0: //north
-							UPDATE_GRID_TILE(game.getGrid(), tiles, { p1.getPos().x, p1.getPos().y - 1 });
-							break;
-						case 1: //south
-							UPDATE_GRID_TILE(game.getGrid(), tiles, { p1.getPos().x, p1.getPos().y + 1 });
-							break;
-						case 2: //west
-							UPDATE_GRID_TILE(game.getGrid(), tiles, { p1.getPos().x - 1, p1.getPos().y  });
-							break;
-						case 3: //east
-							UPDATE_GRID_TILE(game.getGrid(), tiles, { p1.getPos().x + 1, p1.getPos().y });
-							break;
-
+							switch (p1.getFacing())
+							{
+							case 0: //north
+								UPDATE_GRID_TILE(game.getGrid(), tiles, { int(p1.getPos().x), int(p1.getPos().y - 1) });
+								break;
+							case 1: //south
+								UPDATE_GRID_TILE(game.getGrid(), tiles, { int(p1.getPos().x), int(p1.getPos().y + 1) });
+								break;
+							case 2: //west
+								UPDATE_GRID_TILE(game.getGrid(), tiles, { int(p1.getPos().x - 1), int(p1.getPos().y) });
+								break;
+							case 3: //east
+								UPDATE_GRID_TILE(game.getGrid(), tiles, { int(p1.getPos().x + 1), int(p1.getPos().y) });
+								break;
+							}
+							breakClock.restart();
 						}
 					}
 				}
 			}
+		}
 
-			// movement control
-			if (moveClock.getElapsedTime().asSeconds() >= moveDelay) 
-			{ 
-				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) {
-					p1.move(north);
-					UPDATE_PLAYER_TILE(p1, window, player_tile);
-				}
-				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) {
-					p1.move(south);
-					UPDATE_PLAYER_TILE(p1, window, player_tile);
-				}
-				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) {
-					p1.move(west);
-					UPDATE_PLAYER_TILE(p1, window, player_tile);
-				}
-				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
-					p1.move(east);
-					UPDATE_PLAYER_TILE(p1, window, player_tile);
-				}
-					moveClock.restart();
+		// Обработка передвижения
+		if (moveClock.getElapsedTime().asSeconds() >= moveDelay)
+		{
+			bool moved = false;
+
+			// Определяем направление движения
+			bool up = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W);
+			bool down = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S);
+			bool left = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A);
+			bool right = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D);
+
+			// Диагональное движение
+			if (up && left) {
+				p1.move(north_west); 
+				moved = true;
+			}
+			else if (up && right) {
+				p1.move(north_east);
+				moved = true;
+			}
+			else if (down && left) {
+				p1.move(south_west);
+				moved = true;
+			}
+			else if (down && right) {
+				p1.move(south_east);
+				moved = true;
+			}
+			// Обычное движение (только если нет диагонали)
+			else if (up) {
+				p1.move(north);
+				moved = true;
+			}
+			else if (down) {
+				p1.move(south);
+				moved = true;
+			}
+			else if (left) {
+				p1.move(west);
+				moved = true;
+			}
+			else if (right) {
+				p1.move(east);
+				moved = true;
+			}
+
+			if (moved)
+			{
+				UPDATE_PLAYER_TILE(p1, window, player_tile);
+				moveClock.restart();
 			}
 		}
-		// screen updater
-		REFRESH_DISPLAY(window, tiles, player_tile); 
-	}
 
+		// Обновление экрана
+		REFRESH_DISPLAY(window, tiles, player_tile);
+	}
 }
 
 int main() {
