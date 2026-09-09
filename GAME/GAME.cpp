@@ -10,7 +10,13 @@
 
 using namespace std;
 
+struct texture
+{
+	string name;
+	sf::Texture draw;
 
+	texture(string n, sf::Texture dr) : name(n), draw(dr){}
+};
 struct tile {
 	int floor;
 	int subject;
@@ -802,7 +808,7 @@ public:
 		double newX = Pos.x;
 		double newY = Pos.y;
 		double mapSize = double(getMAP().getSize());
-		double step = 0.125;
+		double step = 0.01;
 		switch (dir)
 		{
 		case north_east:
@@ -924,11 +930,14 @@ public:
 //optimized	_||_ 
 //   graph  \  /
 //           \/
-void SET_GRID_TILES(vector<vector<tile>>& map, vector<vector<sf::RectangleShape>>& tiles)
+void SET_GRID_TILES(int TILE_SIZE, vector<vector<tile>>& map, vector<vector<sf::RectangleShape>>& tiles)
 {
+	sf::Texture stone;
+	if (!stone.loadFromFile("assets/textures/SUBJECTS/rock.png", false, sf::IntRect({ 0,0 }, { 32, 32 }))) {
+		return;
+	}
 	const int MAP_WIDTH = map.size();
 	const int MAP_HEIGHT = map.size();
-	const int TILE_SIZE = 1024 / map.size();
 	for (int x = 0; x < MAP_WIDTH; x++)
 	{
 		for (int y = 0; y < MAP_HEIGHT; y++)
@@ -969,12 +978,23 @@ void SET_GRID_TILES(vector<vector<tile>>& map, vector<vector<sf::RectangleShape>
 				}
 			}
 
+			if (map[x][y].subject == 1)
+			{
+				
+				rect.setTexture(&stone);
+				rect.setFillColor(color);
 
-			rect.setFillColor(color);
+				rect.setOutlineColor(sf::Color::Black);
+				rect.setOutlineThickness(1.0f);
+			}
+			else
+			{
+				rect.setFillColor(color);
 
-			rect.setOutlineColor(sf::Color::Black);
-			rect.setOutlineThickness(1.0f);
-
+				rect.setOutlineColor(sf::Color::Black);
+				rect.setOutlineThickness(1.0f);
+			}
+			
 			tiles[x][y] = rect;
 		}
 	}
@@ -1025,9 +1045,8 @@ void DRAW_GRID(sf::RenderWindow& w, vector<vector<sf::RectangleShape>>& tiles)
 			w.draw(tiles[x][y]);
 }
 
-void SET_PLAYER_TILE(PLAYER& p, sf::RectangleShape& tile)
+void SET_PLAYER_TILE(int TILE_SIZE, PLAYER& p, sf::RectangleShape& tile)
 {
-	const int TILE_SIZE = 1024 / p.getMAP().getSize();
 	sf::RectangleShape rect({ (float)TILE_SIZE, (float)TILE_SIZE });
 	rect.setPosition({ (float)(p.getPos().x * p.getSize()), (float)(p.getPos().y * p.getSize()) });
 	sf::Color color(180, 32, 32);
@@ -1036,7 +1055,6 @@ void SET_PLAYER_TILE(PLAYER& p, sf::RectangleShape& tile)
 }
 void UPDATE_PLAYER_TILE(PLAYER& p, sf::RenderWindow& w, sf::RectangleShape& tile)
 {
-	const int TILE_SIZE = 1024 / p.getMAP().getSize();
 	tile.setPosition({ (float)(p.getPos().x * p.getSize()), (float)(p.getPos().y * p.getSize()) });
 }
 void DRAW_PLAYER(sf::RenderWindow& w, sf::RectangleShape& tile)
@@ -1057,14 +1075,14 @@ void GAME()
 	const int MAP_SIZE = 48;
 	const int MAP_WIDTH = MAP_SIZE;
 	const int MAP_HEIGHT = MAP_SIZE;
-	const int TILE_SIZE = 1024 / MAP_SIZE;
+	const int TILE_SIZE = 1024 /  MAP_SIZE;
 	sf::RenderWindow window(sf::VideoMode({ MAP_WIDTH * TILE_SIZE, MAP_HEIGHT * TILE_SIZE }), "Game");
 	window.setFramerateLimit(60);
 	window.setKeyRepeatEnabled(false); 
 
 	sf::Clock moveClock;
 	sf::Clock breakClock;
-	const float moveDelay = 0.0166f; 
+	const float moveDelay = 0.0016f; 
 	const float breakDelay = 1.97f;
 
 	LEVEL game("Пещера", cave, rand(), MAP_SIZE);
@@ -1072,8 +1090,8 @@ void GAME()
 
 	vector<vector<sf::RectangleShape>> tiles(MAP_SIZE, vector<sf::RectangleShape>(MAP_SIZE, sf::RectangleShape()));
 	sf::RectangleShape player_tile;
-	SET_GRID_TILES(game.getGrid(), tiles);
-	SET_PLAYER_TILE(p1, player_tile);
+	SET_GRID_TILES(TILE_SIZE, game.getGrid(), tiles);
+	SET_PLAYER_TILE(TILE_SIZE, p1, player_tile);
 
 	while (window.isOpen())
 	{
