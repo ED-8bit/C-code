@@ -258,7 +258,7 @@ point_int find_player_spawn(vector<vector<tile>>& game, int R, int seed)
 
 	// Лямбда-функция для проверки, безопасна ли точка (нет ли стен в радиусе R)
 	auto is_safe = [&](int x, int y) {
-		if (game[x][y].subject != 0) return false;
+		if (game[x][y].subject != 0 || game[x][y].floor != 0) return false;
 
 		for (int dx = -R; dx <= R; dx++) {
 			for (int dy = -R; dy <= R; dy++) {
@@ -342,11 +342,11 @@ point_int find_LEVEL_escape(vector<vector<tile>>& game, int R, int seed)
 	unsigned int start = s();
 
 	// Направление перебора зависит от остатка деления сида на 4
-	int direction = start % 4;
+	int direction = (start % 4 + 2) % 4;  
 
 	// Лямбда-функция для проверки, безопасна ли точка (нет ли стен в радиусе R)
 	auto is_safe = [&](int x, int y) {
-		if (game[x][y].subject != 0) return false;
+		if (game[x][y].subject != 0 || game[x][y].floor != 0) return false;
 
 		for (int dx = -R; dx <= R; dx++) {
 			for (int dy = -R; dy <= R; dy++) {
@@ -425,7 +425,7 @@ point_int find_LEVEL_escape(vector<vector<tile>>& game, int R, int seed)
 }
 point_int set_LEVEL_escape(vector<vector<tile>>& game, int seed)
 {
-	point_int ESC = find_player_spawn(game, 1, seed);
+	point_int ESC = find_LEVEL_escape(game, 1, seed);
 	game[ESC.x][ESC.y].floor = 4;
 	return ESC;
 }
@@ -537,7 +537,6 @@ void set_ore(vector<vector<tile>>& game, int seed, int level = 0, bool grow = 0)
 	if (grow)
 		random_ore_grow(game, seed);
 }
-
 
 static int MAPs = 0;
 enum level_type { cave };
@@ -808,7 +807,7 @@ public:
 		double newX = Pos.x;
 		double newY = Pos.y;
 		double mapSize = double(getMAP().getSize());
-		double step = 0.01;
+		double step = 0.02;
 		switch (dir)
 		{
 		case north_east:
@@ -926,16 +925,12 @@ public:
 		cout << "PLAYER: " << Name << " DELETED\n";
 	}
 };
-//           ||   
-//optimized	_||_ 
+//           || 
+//optimized	_||_
 //   graph  \  /
-//           \/
+//           \/ 
 void SET_GRID_TILES(int TILE_SIZE, vector<vector<tile>>& map, vector<vector<sf::RectangleShape>>& tiles)
 {
-	sf::Texture stone;
-	if (!stone.loadFromFile("assets/textures/SUBJECTS/rock.png", false, sf::IntRect({ 0,0 }, { 32, 32 }))) {
-		return;
-	}
 	const int MAP_WIDTH = map.size();
 	const int MAP_HEIGHT = map.size();
 	for (int x = 0; x < MAP_WIDTH; x++)
@@ -978,22 +973,11 @@ void SET_GRID_TILES(int TILE_SIZE, vector<vector<tile>>& map, vector<vector<sf::
 				}
 			}
 
-			if (map[x][y].subject == 1)
-			{
-				
-				rect.setTexture(&stone);
-				rect.setFillColor(color);
+			rect.setFillColor(color);
 
-				rect.setOutlineColor(sf::Color::Black);
-				rect.setOutlineThickness(1.0f);
-			}
-			else
-			{
-				rect.setFillColor(color);
-
-				rect.setOutlineColor(sf::Color::Black);
-				rect.setOutlineThickness(1.0f);
-			}
+			rect.setOutlineColor(sf::Color::Black);
+			rect.setOutlineThickness(1.0f);
+			
 			
 			tiles[x][y] = rect;
 		}
@@ -1072,7 +1056,7 @@ void REFRESH_DISPLAY(sf::RenderWindow& w, vector<vector<sf::RectangleShape>>& ti
 
 void GAME()
 {
-	const int MAP_SIZE = 48;
+	const int MAP_SIZE = 64;
 	const int MAP_WIDTH = MAP_SIZE;
 	const int MAP_HEIGHT = MAP_SIZE;
 	const int TILE_SIZE = 1024 /  MAP_SIZE;
