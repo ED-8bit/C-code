@@ -258,7 +258,7 @@ point_int find_player_spawn(vector<vector<tile>>& game, int R, int seed)
 
 	// Лямбда-функция для проверки, безопасна ли точка (нет ли стен в радиусе R)
 	auto is_safe = [&](int x, int y) {
-		if (game[x][y].subject != 0 || game[x][y].floor != 0) return false;
+		if (game[x][y].subject != 0 || game[x][y].floor < 0) return false;
 
 		for (int dx = -R; dx <= R; dx++) {
 			for (int dy = -R; dy <= R; dy++) {
@@ -342,11 +342,15 @@ point_int find_LEVEL_escape(vector<vector<tile>>& game, int R, int seed)
 	unsigned int start = s();
 
 	// Направление перебора зависит от остатка деления сида на 4
-	int direction = (start % 4 + 2) % 4;  
+	int direction = (start % 4 + 1);
+	if (direction == 3 || direction == 4)
+	{
+		direction -= 2;
+	}
 
 	// Лямбда-функция для проверки, безопасна ли точка (нет ли стен в радиусе R)
 	auto is_safe = [&](int x, int y) {
-		if (game[x][y].subject != 0 || game[x][y].floor != 0) return false;
+		if (game[x][y].subject != 0 || game[x][y].floor < 1) return false;
 
 		for (int dx = -R; dx <= R; dx++) {
 			for (int dy = -R; dy <= R; dy++) {
@@ -1045,7 +1049,10 @@ void DRAW_PLAYER(sf::RenderWindow& w, sf::RectangleShape& tile)
 {
 	w.draw(tile);
 }
-
+//           /\  
+//optimized	/  \ 
+//   graph /_  _\
+//           ||  
 void REFRESH_DISPLAY(sf::RenderWindow& w, vector<vector<sf::RectangleShape>>& tiles, sf::RectangleShape& player)
 {
 	w.clear();
@@ -1054,15 +1061,45 @@ void REFRESH_DISPLAY(sf::RenderWindow& w, vector<vector<sf::RectangleShape>>& ti
 	w.display();
 }
 
-void GAME()
+void GAME(const float aspect, const unsigned int width)
 {
-	const int MAP_SIZE = 64;
+	const int MAP_SIZE = 128;
 	const int MAP_WIDTH = MAP_SIZE;
 	const int MAP_HEIGHT = MAP_SIZE;
-	const int TILE_SIZE = 1024 /  MAP_SIZE;
-	sf::RenderWindow window(sf::VideoMode({ MAP_WIDTH * TILE_SIZE, MAP_HEIGHT * TILE_SIZE }), "Game");
+	const int TILE_SIZE = 16;
+
+	const float ASPECT_RATIO = aspect;
+	const float WORLD_WIDTH = 25.f * float(TILE_SIZE);
+	const float WORLD_HEIGHT = WORLD_WIDTH / ASPECT_RATIO;
+
+	const unsigned int GAME_W = MAP_WIDTH * TILE_SIZE;   // 1024
+	const unsigned int GAME_H = MAP_HEIGHT * TILE_SIZE;   // 1024
+	const unsigned int WIN_W = width;   
+	const unsigned int WIN_H = (unsigned int)(WIN_W / ASPECT_RATIO);   
+
+	sf::RenderWindow window(sf::VideoMode({ WIN_W, WIN_H }), "Game", sf::Style::Default | sf::Style::Resize);
 	window.setFramerateLimit(60);
 	window.setKeyRepeatEnabled(false); 
+	window.setMinimumSize(sf::Vector2u{ (unsigned)WORLD_WIDTH, (unsigned)WORLD_HEIGHT });
+
+	sf::View camera(sf::FloatRect({ 0.f, 0.f }, { WORLD_WIDTH, WORLD_HEIGHT }));
+
+	auto applyViewport = [&](unsigned int w, unsigned int h)
+		{
+			float winAspect = (float)w / (float)h;
+			float vpX = 0.f, vpY = 0.f, vpW = 1.f, vpH = 1.f;
+
+			if (winAspect > ASPECT_RATIO) { // Окно шире камеры -> полосы по бокам
+				vpW = ASPECT_RATIO / winAspect;
+				vpX = (1.f - vpW) * 0.5f;
+			}
+			else {                       // Окно выше камеры -> полосы сверху/снизу
+				vpH = winAspect / ASPECT_RATIO;
+				vpY = (1.f - vpH) * 0.5f;
+			}
+			camera.setViewport(sf::FloatRect({ vpX, vpY }, { vpW, vpH }));
+		};
+	applyViewport(WIN_W, WIN_H); 
 
 	sf::Clock moveClock;
 	sf::Clock breakClock;
@@ -1072,10 +1109,12 @@ void GAME()
 	LEVEL game("Пещера", cave, rand(), MAP_SIZE);
 	PLAYER p1(game, game.getSpawn(), "HELLBOUND", TILE_SIZE);
 
+
 	vector<vector<sf::RectangleShape>> tiles(MAP_SIZE, vector<sf::RectangleShape>(MAP_SIZE, sf::RectangleShape()));
 	sf::RectangleShape player_tile;
 	SET_GRID_TILES(TILE_SIZE, game.getGrid(), tiles);
 	SET_PLAYER_TILE(TILE_SIZE, p1, player_tile);
+
 
 	while (window.isOpen())
 	{
@@ -1085,6 +1124,12 @@ void GAME()
 			if (p_event->is<sf::Event::Closed>())
 			{
 				window.close();
+			}
+
+			// Адаптивность
+			if (const sf::Event::Resized* resized = p_event->getIf<sf::Event::Resized>())
+			{
+				applyViewport(resized->size.x, resized->size.y);
 			}
 
 			// Обработка нажатия пробела для копания
@@ -1170,6 +1215,28 @@ void GAME()
 				UPDATE_PLAYER_TILE(p1, window, player_tile);
 				moveClock.restart();
 			}
+
+			sf::Vector2f center = {
+			(float)p1.getPos().x * TILE_SIZE + TILE_SIZE * 0.5f,
+			(float)p1.getPos().y * TILE_SIZE + TILE_SIZE * 0.5f
+			};
+
+			float halfW = WORLD_WIDTH * 0.5f;
+			float halfH = WORLD_HEIGHT * 0.5f;
+
+			// Ограничение, чтобы камера не выходила за пределы карты
+			if (GAME_W >= (unsigned)WORLD_WIDTH)
+				center.x = std::clamp(center.x, halfW, (float)GAME_W - halfW);
+			else
+				center.x = (float)GAME_W * 0.5f;
+
+			if (GAME_H >= (unsigned)WORLD_HEIGHT)
+				center.y = std::clamp(center.y, halfH, (float)GAME_H - halfH);
+			else
+				center.y = (float)GAME_H * 0.5f;
+
+			camera.setCenter(center);
+			window.setView(camera); // Применяем изменения камеры
 		}
 
 		// Обновление экрана
@@ -1180,7 +1247,8 @@ void GAME()
 int main() {
 	system("chcp 1251");
 	srand(time(0));
-	GAME();
+	GAME(16.f / 10.f, 800);
+
 
 	return 0;
 }
