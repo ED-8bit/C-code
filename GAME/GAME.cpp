@@ -713,7 +713,7 @@ public:
 	virtual Dir getFacing() const { return FACE; }
 	virtual void setFacing(Dir NewFACE) { FACE = NewFACE;}
 
-	virtual void move(Dir dir)
+	virtual void move(Dir dir, int TILE_SIZE)
 	{
 		if (!isALive())
 			return;
@@ -770,7 +770,7 @@ public:
 	{
 		cout << "PLAYER: " << Name << " CREATED\n";
 	}
-	PLAYER(LEVEL& game, point_int pos, string name, int size, int hp = 100, int dmg = 10, AI_type ai = None) : CHARACTER(game, point_double(pos), name, size, hp, dmg, ai)
+	PLAYER(LEVEL& game, point_int pos, string name, int size, int hp = 100, int dmg = 10, AI_type ai = None) : CHARACTER(game, { double(pos.x) + 0.5, double(pos.y) + 0.5 }, name, size, hp, dmg, ai)
 	{
 		cout << "PLAYER: " << Name << " CREATED\n";
 	}
@@ -804,61 +804,62 @@ public:
 	{
 		return HP > 0;
 	}
-	virtual void move(Dir dir) override
+	virtual void move(Dir dir, int TILE_SIZE) override
 	{
 		if (!isALive())
 			return;
 		double newX = Pos.x;
 		double newY = Pos.y;
 		double mapSize = double(getMAP().getSize());
-		double step = 0.02;
+		double step = 0.04;
+		double block = double(getSize()) / double(TILE_SIZE) / 2;
 		switch (dir)
 		{
 		case north_east:
 			FACE = north_east;   //                           ':                                                            :'
-			newY = (Pos.y > 0 && (!Map.getGrid()[int(newX)][int(Pos.y - step)].subject && !Map.getGrid()[int(newX + 1)][int(Pos.y - step)].subject))
+			newY = (Pos.y > 0 && (!Map.getGrid()[int(newX - block)][int(Pos.y - block - step)].subject) && (!Map.getGrid()[int(newX + block)][int(Pos.y - block - step)].subject))
 				? Pos.y - step : Pos.y;
-			newX = (Pos.x < mapSize - 1 && (!Map.getGrid()[int(Pos.x + 1 + step)][int(newY)].subject && !Map.getGrid()[int(Pos.x + 1 + step)][int(newY + 1)].subject))
+			newX = (Pos.x < mapSize - 1 && (!Map.getGrid()[int(Pos.x + block + step)][int(newY - block)].subject) && (!Map.getGrid()[int(Pos.x + block + step)][int(newY + block)].subject))
 				? Pos.x + step : Pos.x;
 			break;
 		case north_west:
 			FACE = north_west;
-			newY = (Pos.y > 0 && (!Map.getGrid()[int(newX)][int(Pos.y - step)].subject && !Map.getGrid()[int(newX + 1)][int(Pos.y - step)].subject))
+			newY = (Pos.y > 0 && (!Map.getGrid()[int(newX - block)][int(Pos.y - block - step)].subject) && (!Map.getGrid()[int(newX + block)][int(Pos.y - block - step)].subject))
 				? Pos.y - step : Pos.y;
-			newX = (Pos.x > 0 && (!Map.getGrid()[int(Pos.x - step)][int(newY)].subject && !Map.getGrid()[int(Pos.x - step)][int(newY + 1)].subject))
+			newX = (Pos.x > 0 && (!Map.getGrid()[int(Pos.x - block - step)][int(newY - block)].subject) && (!Map.getGrid()[int(Pos.x - block - step)][int(newY + block)].subject))
 				? Pos.x - step : Pos.x;
 			break;
 		case south_east:
 			FACE = south_east;
-			newY = (Pos.y < mapSize - 1 && (!Map.getGrid()[int(newX)][int(Pos.y + 1 + step)].subject && !Map.getGrid()[int(newX + 1)][int(Pos.y + 1 + step)].subject))
+			newY = (Pos.y < mapSize - 1 && (!Map.getGrid()[int(newX - block)][int(Pos.y + block + step)].subject) && (!Map.getGrid()[int(newX + block)][int(Pos.y + block + step)].subject))
 				? Pos.y + step : Pos.y;
-			newX = (Pos.x < mapSize - 1 && (!Map.getGrid()[int(Pos.x + 1 + step)][int(newY)].subject && !Map.getGrid()[int(Pos.x + 1 + step)][int(newY + 1)].subject))
+			newX = (Pos.x < mapSize - 1 && (!Map.getGrid()[int(Pos.x + block + step)][int(newY - block)].subject) && (!Map.getGrid()[int(Pos.x + block + step)][int(newY + block)].subject))
 				? Pos.x + step : Pos.x;
 			break;
 		case south_west:
-			newY = (Pos.y < mapSize - 1 && (!Map.getGrid()[int(newX)][int(Pos.y + 1 + step)].subject && !Map.getGrid()[int(newX + 1)][int(Pos.y + 1 + step)].subject))
+			newY = (Pos.y < mapSize - 1 && (!Map.getGrid()[int(newX - block)][int(Pos.y + block + step)].subject) && (!Map.getGrid()[int(newX + block)][int(Pos.y + block + step)].subject))
 				? Pos.y + step : Pos.y;
-			newX = (Pos.x > 0 && (!Map.getGrid()[int(Pos.x - step)][int(newY)].subject && !Map.getGrid()[int(Pos.x - step)][int(newY + 1)].subject))
+			newX = (Pos.x > 0 && (!Map.getGrid()[int(Pos.x - block - step)][int(newY - block)].subject) && (!Map.getGrid()[int(Pos.x - block - step)][int(newY + block)].subject))
 				? Pos.x - step : Pos.x;
 			break;
 		case south: 
 			FACE = south;    //                                       ;:                                                            :;
-			newY = (Pos.y < mapSize - 1 && (!Map.getGrid()[int(newX)][int(Pos.y + 1 + step)].subject && !Map.getGrid()[int(newX + 1)][int(Pos.y + 1 + step)].subject))
+			newY = (Pos.y < mapSize - 1 && (!Map.getGrid()[int(newX - block)][int(Pos.y + block + step)].subject) && (!Map.getGrid()[int(newX + block)][int(Pos.y + block + step)].subject))
 				? Pos.y + step : Pos.y;
 			break;
 		case north: 
 			FACE = north;   //                           ':                                                            :'
-			newY = (Pos.y > 0 && (!Map.getGrid()[int(newX)][int(Pos.y - step)].subject && !Map.getGrid()[int(newX + 1)][int(Pos.y - step)].subject))
+			newY = (Pos.y > 0 && (!Map.getGrid()[int(newX - block)][int(Pos.y - block - step)].subject) && (!Map.getGrid()[int(newX + block)][int(Pos.y - block - step)].subject))
 				? Pos.y - step : Pos.y; 
 			break;
 		case east:  
 			FACE = east;   //                            :'                                                            :;
-			newX = (Pos.x < mapSize - 1 && (!Map.getGrid()[int(Pos.x + 1 + step)][int(newY)].subject && !Map.getGrid()[int(Pos.x + 1 + step)][int(newY + 1)].subject))
+			newX = (Pos.x < mapSize - 1 && (!Map.getGrid()[int(Pos.x + block + step)][int(newY - block)].subject) && (!Map.getGrid()[int(Pos.x + block + step)][int(newY + block)].subject))
 				? Pos.x + step : Pos.x; 
 			break;
 		case west:  
 			FACE = west;   //                            ':                                                            ;:
-			newX = (Pos.x > 0 && (!Map.getGrid()[int(Pos.x - step)][int(newY)].subject && !Map.getGrid()[int(Pos.x - step)][int(newY+1)].subject))
+			newX = (Pos.x > 0 && (!Map.getGrid()[int(Pos.x - block - step)][int(newY - block)].subject) && (!Map.getGrid()[int(Pos.x - block - step)][int(newY + block)].subject))
 				? Pos.x - step : Pos.x; 
 			break;
 		}
@@ -929,10 +930,7 @@ public:
 		cout << "PLAYER: " << Name << " DELETED\n";
 	}
 };
-//           || 
-//optimized	_||_
-//   graph  \  /
-//           \/ 
+
 void SET_GRID_TILES(int TILE_SIZE, vector<vector<tile>>& map, vector<vector<sf::RectangleShape>>& tiles)
 {
 	const int MAP_WIDTH = map.size();
@@ -979,8 +977,8 @@ void SET_GRID_TILES(int TILE_SIZE, vector<vector<tile>>& map, vector<vector<sf::
 
 			rect.setFillColor(color);
 
-			rect.setOutlineColor(sf::Color::Black);
-			rect.setOutlineThickness(1.0f);
+			//rect.setOutlineColor(sf::Color::Black);
+			//rect.setOutlineThickness(1.0f);
 			
 			
 			tiles[x][y] = rect;
@@ -1035,24 +1033,23 @@ void DRAW_GRID(sf::RenderWindow& w, vector<vector<sf::RectangleShape>>& tiles)
 
 void SET_PLAYER_TILE(int TILE_SIZE, PLAYER& p, sf::RectangleShape& tile)
 {
-	sf::RectangleShape rect({ (float)TILE_SIZE, (float)TILE_SIZE });
-	rect.setPosition({ (float)(p.getPos().x * p.getSize()), (float)(p.getPos().y * p.getSize()) });
+	sf::RectangleShape rect({ (float)p.getSize(), (float)p.getSize()});
+	rect.setOrigin({ float(TILE_SIZE / 2), float(TILE_SIZE / 2) });
+	rect.setPosition({ (float)((p.getPos().x) * TILE_SIZE), (float)((p.getPos().y) * TILE_SIZE) });
+	
 	sf::Color color(180, 32, 32);
 	rect.setFillColor(color);
 	tile = rect;
 }
-void UPDATE_PLAYER_TILE(PLAYER& p, sf::RenderWindow& w, sf::RectangleShape& tile)
+void UPDATE_PLAYER_TILE(int TILE_SIZE, PLAYER& p, sf::RenderWindow& w, sf::RectangleShape& tile)
 {
-	tile.setPosition({ (float)(p.getPos().x * p.getSize()), (float)(p.getPos().y * p.getSize()) });
+	tile.setPosition({ (float)((p.getPos().x) * TILE_SIZE), (float)((p.getPos().y) * TILE_SIZE) });
 }
 void DRAW_PLAYER(sf::RenderWindow& w, sf::RectangleShape& tile)
 {
 	w.draw(tile);
 }
-//           /\  
-//optimized	/  \ 
-//   graph /_  _\
-//           ||  
+
 void REFRESH_DISPLAY(sf::RenderWindow& w, vector<vector<sf::RectangleShape>>& tiles, sf::RectangleShape& player)
 {
 	w.clear();
@@ -1069,21 +1066,20 @@ void GAME(const float aspect, const unsigned int width)
 	const int TILE_SIZE = 16;
 
 	const float ASPECT_RATIO = aspect;
-	const float WORLD_WIDTH = 25.f * float(TILE_SIZE);
+	const float WORLD_WIDTH = 28.f * float(TILE_SIZE);
 	const float WORLD_HEIGHT = WORLD_WIDTH / ASPECT_RATIO;
 
-	const unsigned int GAME_W = MAP_WIDTH * TILE_SIZE;   // 1024
-	const unsigned int GAME_H = MAP_HEIGHT * TILE_SIZE;   // 1024
+	const unsigned int GAME_W = MAP_WIDTH * TILE_SIZE;   
+	const unsigned int GAME_H = MAP_HEIGHT * TILE_SIZE;   
 	const unsigned int WIN_W = width;   
 	const unsigned int WIN_H = (unsigned int)(WIN_W / ASPECT_RATIO);   
 
 	sf::RenderWindow window(sf::VideoMode({ WIN_W, WIN_H }), "Game", sf::Style::Default | sf::Style::Resize);
-	window.setFramerateLimit(60);
-	window.setKeyRepeatEnabled(false); 
+	window.setFramerateLimit(0);
+	window.setKeyRepeatEnabled(false);
 	window.setMinimumSize(sf::Vector2u{ (unsigned)WORLD_WIDTH, (unsigned)WORLD_HEIGHT });
 
 	sf::View camera(sf::FloatRect({ 0.f, 0.f }, { WORLD_WIDTH, WORLD_HEIGHT }));
-
 	auto applyViewport = [&](unsigned int w, unsigned int h)
 		{
 			float winAspect = (float)w / (float)h;
@@ -1104,16 +1100,16 @@ void GAME(const float aspect, const unsigned int width)
 	sf::Clock moveClock;
 	sf::Clock breakClock;
 	const float moveDelay = 0.0016f; 
-	const float breakDelay = 1.97f;
+	const float breakDelay = 0.57f;
 
 	LEVEL game("Пещера", cave, rand(), MAP_SIZE);
-	PLAYER p1(game, game.getSpawn(), "HELLBOUND", TILE_SIZE);
+	PLAYER p1(game, game.getSpawn(), "HELLBOUND", 12);
 
 
 	vector<vector<sf::RectangleShape>> tiles(MAP_SIZE, vector<sf::RectangleShape>(MAP_SIZE, sf::RectangleShape()));
 	sf::RectangleShape player_tile;
 	SET_GRID_TILES(TILE_SIZE, game.getGrid(), tiles);
-	SET_PLAYER_TILE(TILE_SIZE, p1, player_tile);
+	SET_PLAYER_TILE(p1.getSize(), p1, player_tile);
 
 
 	while (window.isOpen())
@@ -1126,7 +1122,7 @@ void GAME(const float aspect, const unsigned int width)
 				window.close();
 			}
 
-			// Адаптивность
+			// Адаптивность окна и камера
 			if (const sf::Event::Resized* resized = p_event->getIf<sf::Event::Resized>())
 			{
 				applyViewport(resized->size.x, resized->size.y);
@@ -1177,42 +1173,42 @@ void GAME(const float aspect, const unsigned int width)
 
 			// Диагональное движение
 			if (up && left) {
-				p1.move(north_west); 
+				p1.move(north_west, TILE_SIZE);
 				moved = true;
 			}
 			else if (up && right) {
-				p1.move(north_east);
+				p1.move(north_east, TILE_SIZE);
 				moved = true;
 			}
 			else if (down && left) {
-				p1.move(south_west);
+				p1.move(south_west, TILE_SIZE);
 				moved = true;
 			}
 			else if (down && right) {
-				p1.move(south_east);
+				p1.move(south_east, TILE_SIZE);
 				moved = true;
 			}
 			// Обычное движение (только если нет диагонали)
 			else if (up) {
-				p1.move(north);
+				p1.move(north, TILE_SIZE);
 				moved = true;
 			}
 			else if (down) {
-				p1.move(south);
+				p1.move(south, TILE_SIZE);
 				moved = true;
 			}
 			else if (left) {
-				p1.move(west);
+				p1.move(west, TILE_SIZE);
 				moved = true;
 			}
 			else if (right) {
-				p1.move(east);
+				p1.move(east, TILE_SIZE);
 				moved = true;
 			}
 
 			if (moved)
 			{
-				UPDATE_PLAYER_TILE(p1, window, player_tile);
+				UPDATE_PLAYER_TILE(TILE_SIZE, p1, window, player_tile);
 				moveClock.restart();
 			}
 
@@ -1247,7 +1243,7 @@ void GAME(const float aspect, const unsigned int width)
 int main() {
 	system("chcp 1251");
 	srand(time(0));
-	GAME(16.f / 10.f, 800);
+	GAME(16.f / 9.f, 720);
 
 
 	return 0;
