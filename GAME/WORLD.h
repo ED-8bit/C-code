@@ -1,10 +1,8 @@
 #pragma once
-#include <iostream>
 #include <vector>
 #include <string>
 #include "STRUCTS.h"
 
-using namespace std;
 
 bool onBorder(std::vector<std::vector<tile>>& game, point_int dot);
 bool outBorder(std::vector<std::vector<tile>>& game, point_int dot);
@@ -26,6 +24,10 @@ void set_ore(std::vector<std::vector<tile>>& game, int seed, int level = 0, bool
 
 enum level_type {cave};
 extern int MAPs;
+//    0     1     2     3     4     5     6     7
+//  {"  ", "`.", "LV", "SP", "EN", "PL", "  ", "  "},   // Пол (floor)
+//  {"  ", "[]", "WA", "OR", "  ", "  ", "  ", "  "},   // Стены/объекты (subject)
+//  {"  ", "@@", "  ", "  ", "  ", "  ", "  ", "  "},   // Воздух (air)
 class LEVEL
 {
 protected:
@@ -38,81 +40,17 @@ protected:
 	level_type Type;
 
 public:
-	LEVEL(std::string n = "", level_type t = cave, int seed = 23, int size = 32) : Name(n), Type(t), Seed(seed)
-	{
-		ID = ++MAPs;
-		Grid.resize(size, vector<tile>(size, tile(1)));
-		if (Type == cave)
-		{
-			int i, iters = 7, fill = 75, need = 5, wall = 3, minzone = 50, debris = 2, smooth = 1, ore = 2;
-			seed_fill_CAVE(Grid, seed, fill);
-			for (i = 0; i < iters; i++)
-			{
-				iteration_CAVE(Grid, need);
-			}
-			border_fill_CAVE(Grid, wall);
-			fill_holes_CAVE(Grid, minzone);
-			for (i = 0; i < debris; i++)
-			{
-				destroy_debris_CAVE(Grid);
-			}
-			for (i = 0; i < smooth; i++)
-			{
-				build_smoothing_CAVE(Grid);
-			}
-			set_ore(Grid, seed, ore, true);
-			Spawn = set_player_spawn(Grid, seed);
-			Escape = set_LEVEL_escape(Grid, seed);
-			switch (Type)
-			{
-			case cave:
-				std::cout << "CAVE: ";
-				break;
-			default:
-				std::cout << "LEVEL: ";
-				break;
-			}
-			std::cout << Name << " with SEED: " << Seed << " GENERATED\n";
-		}
-	}
+	LEVEL(std::string n = "", level_type t = cave, int seed = 23, int size = 32); // Генерация уровня в конструкторе
 	int getID() { return ID; }
 	int getSeed() { return Seed; }
 	std::string getName() { return Name; }
-	int getSize() { return Grid.size(); }
+	size_t getSize() { return Grid.size(); }
 	std::vector<std::vector<tile>>& getGrid() { return Grid; }
 	point_int getSpawn() { return Spawn; }
 
 	void setName(std::string NewName) { Name = NewName; }
-	bool destroy_sub(point_int sub)
-	{
-		if (!outBorder(Grid, sub) && Grid[sub.x][sub.y].subject != 2)
-		{
-			Grid[sub.x][sub.y].subject = 0;
-			return true;
-		}
-		else
-		{
-			std::cout << "cant break " << sub.x << ',' << sub.y << '\n';
-			return false;
-		}
+	bool destroy_sub(point_int sub); // Уничтожить объект по координатам
 
-	}
-
-	~LEVEL()
-	{
-		switch (Type)
-		{
-		case cave:
-			std::cout << "CAVE: ";
-			break;
-		default:
-			std::cout << "LEVEL: ";
-			break;
-		}
-		std::cout << Name << " with SEED: " << Seed << " DELETED\n";
-	}
+	~LEVEL();
 };
-//    0     1     2     3     4     5     6     7
-//  {"  ", "`.", "LV", "SP", "EN", "PL", "  ", "  "},   // Пол (floor)
-//  {"  ", "[]", "WA", "OR", "  ", "  ", "  ", "  "},   // Стены/объекты (subject)
-//  {"  ", "@@", "  ", "  ", "  ", "  ", "  ", "  "},   // Воздух (air)
+

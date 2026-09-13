@@ -8,7 +8,7 @@ using namespace std;
 
 bool onBorder(vector<vector<tile>>& game, point_int dot)
 {
-	int size = game.size();
+	size_t size = game.size();
 	if (dot.x == 0 || dot.y == 0 || dot.x == size - 1 || dot.y == size - 1)
 		return true;
 	else
@@ -16,7 +16,7 @@ bool onBorder(vector<vector<tile>>& game, point_int dot)
 }
 bool outBorder(vector<vector<tile>>& game, point_int dot)
 {
-	int size = game.size();
+	size_t size = game.size();
 	if (dot.x < 0 || dot.y < 0 || dot.x >= size || dot.y >= size)
 		return true;
 	else
@@ -25,7 +25,7 @@ bool outBorder(vector<vector<tile>>& game, point_int dot)
 
 void seed_fill_CAVE(vector<vector<tile>>& game, int seed, int fill)
 {
-	int size = game.size();
+	size_t size = game.size();
 	mt19937 rng(seed);
 	uniform_int_distribution<int> dist(0, 99);
 
@@ -42,7 +42,7 @@ void seed_fill_CAVE(vector<vector<tile>>& game, int seed, int fill)
 void iteration_CAVE(vector<vector<tile>>& game, int need)
 {
 	int x, y;
-	int size = game.size();
+	size_t size = game.size();
 	vector<vector<tile>> newGame = game;
 	for (x = 0; size > x; x++)
 	{
@@ -85,7 +85,7 @@ void iteration_CAVE(vector<vector<tile>>& game, int need)
 }
 void fill_holes_CAVE(vector<vector<tile>>& game, int minzone)
 {
-	int size = game.size();
+	size_t size = game.size();
 	vector<vector<bool>> visited(size, vector<bool>(size, false));
 
 	for (int x = 0; x < size; x++)
@@ -141,7 +141,8 @@ void fill_holes_CAVE(vector<vector<tile>>& game, int minzone)
 }
 void destroy_debris_CAVE(vector<vector<tile>>& game)
 {
-	int x, y, size = game.size();
+	int x, y;
+	size_t size = game.size();
 	for (x = 0; x < size; x++)
 	{
 		for (y = 0; y < size; y++)
@@ -170,7 +171,8 @@ void destroy_debris_CAVE(vector<vector<tile>>& game)
 }
 void build_smoothing_CAVE(vector<vector<tile>>& game)
 {
-	int x, y, size = game.size();
+	int x, y;
+	size_t size = game.size();
 	for (x = 0; x < size; x++)
 	{
 		for (y = 0; y < size; y++)
@@ -200,7 +202,7 @@ void build_smoothing_CAVE(vector<vector<tile>>& game)
 void border_fill_CAVE(vector<vector<tile>>& game, int wall)
 {
 	int x, y, thickness;
-	int size = game.size();
+	size_t size = game.size();
 	for (thickness = 0; thickness < wall; thickness++)
 	{
 		for (x = thickness; x < size - thickness; x++)
@@ -216,7 +218,7 @@ void border_fill_CAVE(vector<vector<tile>>& game, int wall)
 
 point_int find_player_spawn(vector<vector<tile>>& game, int R, int seed)
 {
-	int size = game.size();
+	size_t size = game.size();
 	mt19937 s(seed);
 	unsigned int start = s();
 
@@ -304,7 +306,7 @@ point_int find_player_spawn(vector<vector<tile>>& game, int R, int seed)
 }
 point_int find_LEVEL_escape(vector<vector<tile>>& game, int R, int seed)
 {
-	int size = game.size();
+	size_t size = game.size();
 	mt19937 s(seed);
 	unsigned int start = s();
 
@@ -409,7 +411,7 @@ point_int set_player_spawn(vector<vector<tile>>& game, int seed)
 
 void random_ore_spawn(vector<vector<tile>>& game, int seed, int fill)
 {
-	int size = game.size();
+	size_t size = game.size();
 	mt19937 ore(seed);
 	for (int x = 0; x < size; x++)
 	{
@@ -417,7 +419,7 @@ void random_ore_spawn(vector<vector<tile>>& game, int seed, int fill)
 		{
 			if (game[x][y].subject == 1)
 			{
-				if ((ore() % 100 + 1) <= fill)
+				if ((ore() % 100 + 1) < fill)
 				{
 					game[x][y].subject = 3;
 				}
@@ -428,7 +430,7 @@ void random_ore_spawn(vector<vector<tile>>& game, int seed, int fill)
 }
 void random_ore_grow(vector<vector<tile>>& game, int seed)
 {
-	int size = game.size();
+	size_t size = game.size();
 	int r;
 	vector<vector<tile>> NewGame = game;
 	mt19937 ore(seed);
@@ -508,3 +510,70 @@ void set_ore(vector<vector<tile>>& game, int seed, int level, bool grow)
 	if (grow)
 		random_ore_grow(game, seed);
 }
+
+LEVEL::LEVEL(std::string n, level_type t, int seed, int size) : Name(n), Type(t), Seed(seed)
+{
+	ID = ++MAPs;
+	Grid.resize(size, vector<tile>(size, tile(1)));
+	if (Type == cave)
+	{
+		int i, iters = 7, fill = 75, need = 5, wall = 3, minzone = 50, debris = 2, smooth = 1, ore = 2;
+		seed_fill_CAVE(Grid, seed, fill);
+		for (i = 0; i < iters; i++)
+		{
+			iteration_CAVE(Grid, need);
+		}
+		border_fill_CAVE(Grid, wall);
+		fill_holes_CAVE(Grid, minzone);
+		for (i = 0; i < debris; i++)
+		{
+			destroy_debris_CAVE(Grid);
+		}
+		for (i = 0; i < smooth; i++)
+		{
+			build_smoothing_CAVE(Grid);
+		}
+		set_ore(Grid, seed, ore, true);
+		Spawn = set_player_spawn(Grid, seed);
+		Escape = set_LEVEL_escape(Grid, seed);
+		switch (Type)
+		{
+		case cave:
+			std::cout << "CAVE: ";
+			break;
+		default:
+			std::cout << "LEVEL: ";
+			break;
+		}
+		std::cout << Name << " with SEED: " << Seed << " GENERATED\n";
+	}
+}
+LEVEL::~LEVEL()
+{
+	switch (Type)
+	{
+	case cave:
+		std::cout << "CAVE: ";
+		break;
+	default:
+		std::cout << "LEVEL: ";
+		break;
+	}
+	std::cout << Name << " with SEED: " << Seed << " DELETED\n";
+}
+
+bool LEVEL::destroy_sub(point_int sub)
+{
+	if (!outBorder(Grid, sub) && Grid[sub.x][sub.y].subject != 2)
+	{
+		Grid[sub.x][sub.y].subject = 0;
+		return true;
+	}
+	else
+	{
+		std::cout << "cant break " << sub.x << ',' << sub.y << '\n';
+		return false;
+	}
+
+}
+

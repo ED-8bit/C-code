@@ -15,7 +15,7 @@ void GAME(const float aspect, const unsigned int width)
 	const int TILE_SIZE = 16;
 
 	const float ASPECT_RATIO = aspect;
-	const float WORLD_WIDTH = 28.f * float(TILE_SIZE);
+	const float WORLD_WIDTH = 24.f * float(TILE_SIZE);
 	const float WORLD_HEIGHT = WORLD_WIDTH / ASPECT_RATIO;
 
 	const unsigned int GAME_W = MAP_WIDTH * TILE_SIZE;   
@@ -52,13 +52,13 @@ void GAME(const float aspect, const unsigned int width)
 	const float breakDelay = 0.57f;
 
 	LEVEL game("Пещера", cave, rand(), MAP_SIZE);
-	PLAYER p1(game, game.getSpawn(), "HELLBOUND", 12);
+	PLAYER p1(game, game.getSpawn(), "HELLBOUND", int(0.75*TILE_SIZE));
 
 
 	vector<vector<sf::RectangleShape>> tiles(MAP_SIZE, vector<sf::RectangleShape>(MAP_SIZE, sf::RectangleShape()));
 	sf::RectangleShape player_tile;
 	SET_GRID_TILES(TILE_SIZE, game.getGrid(), tiles);
-	SET_PLAYER_TILE(p1.getSize(), p1, player_tile);
+	SET_PLAYER_TILE(TILE_SIZE, p1, player_tile);
 
 
 	while (window.isOpen())
