@@ -159,7 +159,18 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ENTS.cpp" />
     <ClCompile Include="GAME.cpp" />
+    <ClCompile Include="GRAPH.cpp" />
+    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="WORLD.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ENTS.h" />
+    <ClInclude Include="GRAPH.h" />
+    <ClInclude Include="Header.h" />
+    <ClInclude Include="STRUCTS.h" />
+    <ClInclude Include="WORLD.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
