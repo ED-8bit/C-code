@@ -2,7 +2,59 @@
 #include <vector>
 #include <string>
 #include "STRUCTS.h"
+enum subs
+{
+	S_none, S_stone, S_ore, S_endstone 
+};
+enum floors {
+	F_none, F_stone, F_stone_exit, F_stone_spawn
+};
+class SUBJECT {
+private:
+	subs type;
+	int toughness;
+public:
+	SUBJECT(){}
+	SUBJECT(subs t);
+	~SUBJECT();
 
+	void CalcToughness();
+
+	void setType(subs nt) { type = nt; }
+	void setToughness(int nt) { toughness = nt; }
+	subs getType() { return type; }
+	int getToughness() { return toughness; }
+};
+class FLOOR
+{
+private:
+	floors type;
+public:
+	FLOOR(){}
+	FLOOR(floors t);
+	~FLOOR();
+
+	void setType(floors nt) { type = nt; }
+	floors getType() { return type; }
+
+};
+
+class tile
+{
+private:
+	SUBJECT subject;
+	FLOOR floor;
+
+public:
+	tile(subs s, floors f);
+	~tile();
+
+	void setSubject(SUBJECT NewSub) { subject = NewSub; }
+	void setFloor(FLOOR NewFloor) { floor = NewFloor; }
+	SUBJECT& getSubject() { return subject; }
+	FLOOR& getFloor() { return floor; }
+
+};
 
 bool onBorder(std::vector<std::vector<tile>>& game, point_int dot);
 bool outBorder(std::vector<std::vector<tile>>& game, point_int dot);

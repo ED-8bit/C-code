@@ -101,49 +101,49 @@ void PLAYER::move(Dir dir, int TILE_SIZE)
 	{
 	case north_east:
 		FACE = north_east;   //                           ':                                                            :'
-		newY = (Pos.y > 0 && (!Map.getGrid()[int(newX - block)][int(Pos.y - block - step)].subject) && (!Map.getGrid()[int(newX + block)][int(Pos.y - block - step)].subject))
+		newY = (Pos.y > 0 && (!Map.getGrid()[int(newX - block)][int(Pos.y - block - step)].getSubject().getType()) && (!Map.getGrid()[int(newX + block)][int(Pos.y - block - step)].getSubject().getType()))
 			? Pos.y - step : Pos.y;
-		newX = (Pos.x < mapSize - 1 && (!Map.getGrid()[int(Pos.x + block + step)][int(newY - block)].subject) && (!Map.getGrid()[int(Pos.x + block + step)][int(newY + block)].subject))
+		newX = (Pos.x < mapSize - 1 && (!Map.getGrid()[int(Pos.x + block + step)][int(newY - block)].getSubject().getType()) && (!Map.getGrid()[int(Pos.x + block + step)][int(newY + block)].getSubject().getType()))
 			? Pos.x + step : Pos.x;
 		break;
 	case north_west:
 		FACE = north_west;
-		newY = (Pos.y > 0 && (!Map.getGrid()[int(newX - block)][int(Pos.y - block - step)].subject) && (!Map.getGrid()[int(newX + block)][int(Pos.y - block - step)].subject))
+		newY = (Pos.y > 0 && (!Map.getGrid()[int(newX - block)][int(Pos.y - block - step)].getSubject().getType()) && (!Map.getGrid()[int(newX + block)][int(Pos.y - block - step)].getSubject().getType()))
 			? Pos.y - step : Pos.y;
-		newX = (Pos.x > 0 && (!Map.getGrid()[int(Pos.x - block - step)][int(newY - block)].subject) && (!Map.getGrid()[int(Pos.x - block - step)][int(newY + block)].subject))
+		newX = (Pos.x > 0 && (!Map.getGrid()[int(Pos.x - block - step)][int(newY - block)].getSubject().getType()) && (!Map.getGrid()[int(Pos.x - block - step)][int(newY + block)].getSubject().getType()))
 			? Pos.x - step : Pos.x;
 		break;
 	case south_east:
 		FACE = south_east;
-		newY = (Pos.y < mapSize - 1 && (!Map.getGrid()[int(newX - block)][int(Pos.y + block + step)].subject) && (!Map.getGrid()[int(newX + block)][int(Pos.y + block + step)].subject))
+		newY = (Pos.y < mapSize - 1 && (!Map.getGrid()[int(newX - block)][int(Pos.y + block + step)].getSubject().getType()) && (!Map.getGrid()[int(newX + block)][int(Pos.y + block + step)].getSubject().getType()))
 			? Pos.y + step : Pos.y;
-		newX = (Pos.x < mapSize - 1 && (!Map.getGrid()[int(Pos.x + block + step)][int(newY - block)].subject) && (!Map.getGrid()[int(Pos.x + block + step)][int(newY + block)].subject))
+		newX = (Pos.x < mapSize - 1 && (!Map.getGrid()[int(Pos.x + block + step)][int(newY - block)].getSubject().getType()) && (!Map.getGrid()[int(Pos.x + block + step)][int(newY + block)].getSubject().getType()))
 			? Pos.x + step : Pos.x;
 		break;
 	case south_west:
-		newY = (Pos.y < mapSize - 1 && (!Map.getGrid()[int(newX - block)][int(Pos.y + block + step)].subject) && (!Map.getGrid()[int(newX + block)][int(Pos.y + block + step)].subject))
+		newY = (Pos.y < mapSize - 1 && (!Map.getGrid()[int(newX - block)][int(Pos.y + block + step)].getSubject().getType()) && (!Map.getGrid()[int(newX + block)][int(Pos.y + block + step)].getSubject().getType()))
 			? Pos.y + step : Pos.y;
-		newX = (Pos.x > 0 && (!Map.getGrid()[int(Pos.x - block - step)][int(newY - block)].subject) && (!Map.getGrid()[int(Pos.x - block - step)][int(newY + block)].subject))
+		newX = (Pos.x > 0 && (!Map.getGrid()[int(Pos.x - block - step)][int(newY - block)].getSubject().getType()) && (!Map.getGrid()[int(Pos.x - block - step)][int(newY + block)].getSubject().getType()))
 			? Pos.x - step : Pos.x;
 		break;
 	case south:
 		FACE = south;    //                                       ;:                                                            :;
-		newY = (Pos.y < mapSize - 1 && (!Map.getGrid()[int(newX - block)][int(Pos.y + block + step)].subject) && (!Map.getGrid()[int(newX + block)][int(Pos.y + block + step)].subject))
+		newY = (Pos.y < mapSize - 1 && (!Map.getGrid()[int(newX - block)][int(Pos.y + block + step)].getSubject().getType()) && (!Map.getGrid()[int(newX + block)][int(Pos.y + block + step)].getSubject().getType()))
 			? Pos.y + step : Pos.y;
 		break;
 	case north:
 		FACE = north;   //                           ':                                                            :'
-		newY = (Pos.y > 0 && (!Map.getGrid()[int(newX - block)][int(Pos.y - block - step)].subject) && (!Map.getGrid()[int(newX + block)][int(Pos.y - block - step)].subject))
+		newY = (Pos.y > 0 && (!Map.getGrid()[int(newX - block)][int(Pos.y - block - step)].getSubject().getType()) && (!Map.getGrid()[int(newX + block)][int(Pos.y - block - step)].getSubject().getType()))
 			? Pos.y - step : Pos.y;
 		break;
 	case east:
 		FACE = east;   //                            :'                                                            :;
-		newX = (Pos.x < mapSize - 1 && (!Map.getGrid()[int(Pos.x + block + step)][int(newY - block)].subject) && (!Map.getGrid()[int(Pos.x + block + step)][int(newY + block)].subject))
+		newX = (Pos.x < mapSize - 1 && (!Map.getGrid()[int(Pos.x + block + step)][int(newY - block)].getSubject().getType()) && (!Map.getGrid()[int(Pos.x + block + step)][int(newY + block)].getSubject().getType()))
 			? Pos.x + step : Pos.x;
 		break;
 	case west:
 		FACE = west;   //                            ':                                                            ;:
-		newX = (Pos.x > 0 && (!Map.getGrid()[int(Pos.x - block - step)][int(newY - block)].subject) && (!Map.getGrid()[int(Pos.x - block - step)][int(newY + block)].subject))
+		newX = (Pos.x > 0 && (!Map.getGrid()[int(Pos.x - block - step)][int(newY - block)].getSubject().getType()) && (!Map.getGrid()[int(Pos.x - block - step)][int(newY + block)].getSubject().getType()))
 			? Pos.x - step : Pos.x;
 		break;
 	}
@@ -205,6 +205,9 @@ bool PLAYER::destroy_on_facing()
 		break;
 	case west:
 		return (Map.destroy_sub({ int(Pos.x - 1), int(Pos.y) }) || Map.destroy_sub({ int(Pos.x - 1), int(Pos.y + 1) }));
+		break;
+	default:
+		return false;
 		break;
 	}
 }

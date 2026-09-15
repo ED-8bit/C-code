@@ -15,8 +15,8 @@ void GAME(const float aspect, const unsigned int width)
 	const int TILE_SIZE = 16;
 
 	const float ASPECT_RATIO = aspect;
-	const float WORLD_WIDTH = 24.f * float(TILE_SIZE);
-	const float WORLD_HEIGHT = WORLD_WIDTH / ASPECT_RATIO;
+	const float VIEW_WIDTH = 24.f * float(TILE_SIZE);
+	const float VIEW_HEIGHT = VIEW_WIDTH / ASPECT_RATIO;
 
 	const unsigned int GAME_W = MAP_WIDTH * TILE_SIZE;   
 	const unsigned int GAME_H = MAP_HEIGHT * TILE_SIZE;   
@@ -24,11 +24,11 @@ void GAME(const float aspect, const unsigned int width)
 	const unsigned int WIN_H = (unsigned int)(WIN_W / ASPECT_RATIO);   
 
 	sf::RenderWindow window(sf::VideoMode({ WIN_W, WIN_H }), "Game", sf::Style::Default | sf::Style::Resize);
-	window.setFramerateLimit(0);
+	window.setFramerateLimit(60);
 	window.setKeyRepeatEnabled(false);
-	window.setMinimumSize(sf::Vector2u{ (unsigned)WORLD_WIDTH, (unsigned)WORLD_HEIGHT });
+	window.setMinimumSize(sf::Vector2u{ (unsigned)VIEW_WIDTH, (unsigned)VIEW_HEIGHT });
 
-	sf::View camera(sf::FloatRect({ 0.f, 0.f }, { WORLD_WIDTH, WORLD_HEIGHT }));
+	sf::View camera(sf::FloatRect({ 0.f, 0.f }, { VIEW_WIDTH, VIEW_HEIGHT }));
 	auto applyViewport = [&](unsigned int w, unsigned int h)
 		{
 			float winAspect = (float)w / (float)h;
@@ -172,16 +172,16 @@ void GAME(const float aspect, const unsigned int width)
 			(float)p1.getPos().y * TILE_SIZE + TILE_SIZE * 0.5f
 			};
 
-			float halfW = WORLD_WIDTH * 0.5f;
-			float halfH = WORLD_HEIGHT * 0.5f;
+			float halfW = VIEW_WIDTH * 0.5f;
+			float halfH = VIEW_HEIGHT * 0.5f;
 
 			// Ограничение, чтобы камера не выходила за пределы карты
-			if (GAME_W >= (unsigned)WORLD_WIDTH)
+			if (GAME_W >= (unsigned)VIEW_WIDTH)
 				center.x = std::clamp(center.x, halfW, (float)GAME_W - halfW);
 			else
 				center.x = (float)GAME_W * 0.5f;
 
-			if (GAME_H >= (unsigned)WORLD_HEIGHT)
+			if (GAME_H >= (unsigned)VIEW_HEIGHT)
 				center.y = std::clamp(center.y, halfH, (float)GAME_H - halfH);
 			else
 				center.y = (float)GAME_H * 0.5f;

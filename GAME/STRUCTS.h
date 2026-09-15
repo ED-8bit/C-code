@@ -1,13 +1,11 @@
 #pragma once
 
-struct tile {
+
+struct Tile {
 	int floor;
 	int subject;
-	int air;
-	float temp;
-	int biome;
 
-	tile(int f = 0, int s = 0, int a = 0, float t = 0, int b = 0) : floor(f), subject(s), air(a), temp(t), biome(b) {}
+	Tile(int f = 0, int s = 0) : floor(f), subject(s){}
 };
 struct point_int {
 	int x;

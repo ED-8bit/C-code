@@ -21,15 +21,15 @@ void SET_GRID_TILES(int TILE_SIZE, vector<vector<tile>>& map, vector<vector<sf::
 			rect.setPosition({ (float)(x * TILE_SIZE), (float)(y * TILE_SIZE) });
 
 			sf::Color color;
-			if (!map[x][y].subject)
+			if (!map[x][y].getSubject().getType())
 			{
-				if (map[x][y].floor == 1) {
+				if (map[x][y].getFloor().getType() == F_stone) {
 					color = sf::Color(61, 56, 56);      //stone
 				}
-				else if (map[x][y].floor == 3) {
+				else if (map[x][y].getFloor().getType() == F_stone_spawn) {
 					color = sf::Color::Green; // SP
 				}
-				else if (map[x][y].floor == 4) {
+				else if (map[x][y].getFloor().getType() == F_stone_exit) {
 					color = sf::Color::Black; // ESC
 				}
 				else {
@@ -38,13 +38,13 @@ void SET_GRID_TILES(int TILE_SIZE, vector<vector<tile>>& map, vector<vector<sf::
 			}
 			else
 			{
-				if (map[x][y].subject == 1) {
+				if (map[x][y].getSubject().getType() == S_stone) {
 					color = sf::Color(44, 40, 43);
 				}
-				else if (map[x][y].subject == 2) {
+				else if (map[x][y].getSubject().getType() == S_endstone) {
 					color = sf::Color(31, 31, 31);
 				}
-				else if (map[x][y].subject == 3) {
+				else if (map[x][y].getSubject().getType() == S_ore) {
 					color = sf::Color(115, 83, 64);
 				}
 			}
@@ -64,18 +64,15 @@ void UPDATE_GRID_TILE(vector<vector<tile>>& map, vector<vector<sf::RectangleShap
 	int x = dot.x;
 	int y = dot.y;
 	sf::Color color;
-	if (!map[x][y].subject)
+	if (!map[x][y].getSubject().getType())
 	{
-		if (map[x][y].floor == 1) {
+		if (map[x][y].getFloor().getType() == F_stone) {
 			color = sf::Color(61, 56, 56);      //stone
 		}
-		else if (map[x][y].floor == 2) {
-			color = sf::Color(209, 83, 10); //lava
-		}
-		else if (map[x][y].floor == 3) {
+		else if (map[x][y].getFloor().getType() == F_stone_spawn) {
 			color = sf::Color::Green; // SP
 		}
-		else if (map[x][y].floor == 4) {
+		else if (map[x][y].getFloor().getType() == F_stone_exit) {
 			color = sf::Color::Black; // ESC
 		}
 		else {
@@ -84,13 +81,13 @@ void UPDATE_GRID_TILE(vector<vector<tile>>& map, vector<vector<sf::RectangleShap
 	}
 	else
 	{
-		if (map[x][y].subject == 1) {
+		if (map[x][y].getSubject().getType() == S_stone) {
 			color = sf::Color(44, 40, 43);
 		}
-		else if (map[x][y].subject == 2) {
+		else if (map[x][y].getSubject().getType() == S_endstone) {
 			color = sf::Color(31, 31, 31);
 		}
-		else if (map[x][y].subject == 3) {
+		else if (map[x][y].getSubject().getType() == S_ore) {
 			color = sf::Color(115, 83, 64);
 		}
 	}
