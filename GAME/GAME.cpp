@@ -177,12 +177,12 @@ void GAME(const float aspect, const unsigned int width)
 
 			// Ограничение, чтобы камера не выходила за пределы карты
 			if (GAME_W >= (unsigned)VIEW_WIDTH)
-				center.x = std::clamp(center.x, halfW, (float)GAME_W - halfW);
+				center.x = clamp(center.x, halfW, (float)GAME_W - halfW);
 			else
 				center.x = (float)GAME_W * 0.5f;
 
 			if (GAME_H >= (unsigned)VIEW_HEIGHT)
-				center.y = std::clamp(center.y, halfH, (float)GAME_H - halfH);
+				center.y = clamp(center.y, halfH, (float)GAME_H - halfH);
 			else
 				center.y = (float)GAME_H * 0.5f;
 
