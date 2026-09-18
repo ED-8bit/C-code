@@ -178,33 +178,52 @@ private:
 	double* coeffs;
 
 	bool outOfRange(int i) {
-		return i >= degree;
+		return i < 0 || i > degree;   
 	}
 public:
-	Polynomial(int deg): degree(deg){
+	Polynomial(int deg) : degree(deg) {
 		coeffs = new double[degree + 1];
-		for (int i = 0; i < degree; i++)
+		for (int i = 0; i <= degree; i++) 
 			coeffs[i] = 0.0;
 	}
-	Polynomial(const Polynomial &copy): degree(copy.degree) {
+	Polynomial(const Polynomial& copy) : degree(copy.degree) {
 		coeffs = new double[degree + 1];
-		for (int i = 0; i < degree; i++)
+		for (int i = 0; i <= degree; i++)
 			coeffs[i] = copy.coeffs[i];
 	}
 	~Polynomial() { delete[] coeffs; }
 
 	void SetCoeff(int power, double value) {
 		if (!outOfRange(power))
-		coeffs[power] = value;
+			coeffs[power] = value;
 	}
 	double GetCoeff(int power) {
 		if (!outOfRange(power))
-		return coeffs[power];
+			return coeffs[power];
+		return 0.0;
 	}
+	int GetDegree() { return degree; }
 	void print() {
-
+		bool first = true;
+		for (int i = degree; i >= 0; i--) {
+			double c = coeffs[i];
+			if (c == 0) continue;
+			if (!first && c > 0) cout << "+ ";
+			cout << c;
+			if (i > 0) cout << "x^" << i << " ";
+			first = false;
+		}
+		if (first) cout << "0";
+		cout << '\n';
 	}
 };
+Polynomial Add( Polynomial& a, Polynomial& b) {
+	int big_deg = max(a.GetDegree(), b.GetDegree());
+	Polynomial answer(big_deg);
+	for (int i = 0; i <= big_deg; i++)
+		answer.SetCoeff(i, a.GetCoeff(i) + b.GetCoeff(i));
+	return answer;
+}
 
 int main()
 {
@@ -238,17 +257,26 @@ int main()
 
 	//cout << "\n\n";
 
-	Matrix m(3, 2);
-	m.Set(0, 0, 1.5);
-	m.Set(0, 1, 2.0);
-	m.Set(2, 0, 3.5);
-	m.print();
-	printElement(m, 0, 1);
+	//Matrix m(3, 2);
+	//m.Set(0, 0, 1.5);
+	//m.Set(0, 1, 2.0);
+	//m.Set(2, 0, 3.5);
+	//m.print();
+	//printElement(m, 0, 1);
 
-	
-
-
-
+	Polynomial a(3), b(5);
+	a.SetCoeff(0, 2);
+	a.SetCoeff(1, -5);
+	a.SetCoeff(2, 1);
+	b.SetCoeff(0, 2);
+	b.SetCoeff(1, 7);
+	b.SetCoeff(2, -6);
+	b.SetCoeff(3, 1);
+	b.SetCoeff(4, 9);
+	a.print();
+	b.print();
+	Polynomial c = Add(a, b);
+	c.print();
 
 	return 0;
 }
