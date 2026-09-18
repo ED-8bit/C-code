@@ -42,7 +42,6 @@ void TextFile::WriteLine(string text) {
         cerr << "Ошибка. Файл закрыт, запись невозможна\n";
     }
 }
-
 void TextFile::PrintContents() {
     if (!file.is_open()) {
         cerr << "Ошибка. Файл закрыт.\n";
@@ -116,7 +115,6 @@ public:
         cout << "]\n";
     }
 };
-
 class tiger {
 private:
     string name;
