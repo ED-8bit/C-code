@@ -187,7 +187,7 @@ void PLAYER::giveDamage(CHARACTER& enemy)
 	else
 		enemy.takeDamage(DMG);
 }
-bool PLAYER::destroy_on_facing()
+bool PLAYER::damage_sub_on_facing()
 {
 	if (!isALive())
 		return false;
@@ -195,16 +195,16 @@ bool PLAYER::destroy_on_facing()
 	switch (FACE)
 	{
 	case south:
-		return (Map.destroy_sub({ int(Pos.x), int(Pos.y + 1) }) || Map.destroy_sub({ int(Pos.x + 1), int(Pos.y + 1) }));
+		return (Map.give_damage_to_sub({ int(Pos.x), int(Pos.y + 1) }, getDMG()));
 		break;
 	case north:
-		return (Map.destroy_sub({ int(Pos.x), int(Pos.y - 1) }) || Map.destroy_sub({ int(Pos.x + 1), int(Pos.y - 1) }));
+		return (Map.give_damage_to_sub({ int(Pos.x), int(Pos.y - 1) }, getDMG()));
 		break;
 	case east:
-		return (Map.destroy_sub({ int(Pos.x + 1), int(Pos.y) }) || Map.destroy_sub({ int(Pos.x + 1), int(Pos.y + 1) }));
+		return (Map.give_damage_to_sub({ int(Pos.x + 1), int(Pos.y) }, getDMG()));
 		break;
 	case west:
-		return (Map.destroy_sub({ int(Pos.x - 1), int(Pos.y) }) || Map.destroy_sub({ int(Pos.x - 1), int(Pos.y + 1) }));
+		return (Map.give_damage_to_sub({ int(Pos.x - 1), int(Pos.y) }, getDMG()));
 		break;
 	default:
 		return false;

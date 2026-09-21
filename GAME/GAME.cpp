@@ -9,7 +9,7 @@ using namespace std;
 
 void GAME(const float aspect, const unsigned int width)
 {
-	const int MAP_SIZE = 64;
+	const int MAP_SIZE = 48;
 	const int MAP_WIDTH = MAP_SIZE;
 	const int MAP_HEIGHT = MAP_SIZE;
 	const int TILE_SIZE = 16;
@@ -23,30 +23,39 @@ void GAME(const float aspect, const unsigned int width)
 	const unsigned int WIN_W = width;   
 	const unsigned int WIN_H = (unsigned int)(WIN_W / ASPECT_RATIO);   
 
+	//			\/ Textures \/
 	int textures_size = 16;
 	string textures_path = "assets/textures/SUBJECTS/CavePack.png";
-	//Textures
+	
 	vector<sf::Texture> sub_tiles_pic;
 	sub_tiles_pic.resize(3);
 	for (int i = 0; i < 3; i++)
 	{
-		sub_tiles_pic[i].loadFromFile(textures_path, false, sf::IntRect({ i * textures_size, 0 }, { textures_size, textures_size }));
+		if (!sub_tiles_pic[i].loadFromFile(textures_path, false, sf::IntRect({ i * textures_size, 0 }, { textures_size, textures_size })))
+			return;
 	}
 	vector<sf::Texture> floor_tiles_pic;
 	floor_tiles_pic.resize(3);
 	for (int i = 0; i < 3; i++)
 	{
-		floor_tiles_pic[i].loadFromFile(textures_path, false, sf::IntRect({ i * textures_size, textures_size }, { textures_size, textures_size }));
+		if (!floor_tiles_pic[i].loadFromFile(textures_path, false, sf::IntRect({ i * textures_size, textures_size }, { textures_size, textures_size })))
+			return;
 	}
-	//Textures
+	//			/\ Textures /\
 
+	//=============================================================================================================
 
-
+	//			 \/ Window \/
 	sf::RenderWindow window(sf::VideoMode({ WIN_W, WIN_H }), "Game", sf::Style::Default | sf::Style::Resize);
-	window.setFramerateLimit(60);
+	window.setFramerateLimit(120);
+	window.setVerticalSyncEnabled(true);
 	window.setKeyRepeatEnabled(false);
 	window.setMinimumSize(sf::Vector2u{ (unsigned)VIEW_WIDTH, (unsigned)VIEW_HEIGHT });
+	//		     /\ Window /\
+	
+	//=============================================================================================================
 
+	//			 \/ Camera \/
 	sf::View camera(sf::FloatRect({ 0.f, 0.f }, { VIEW_WIDTH, VIEW_HEIGHT }));
 	auto applyViewport = [&](unsigned int w, unsigned int h)
 		{
@@ -64,6 +73,11 @@ void GAME(const float aspect, const unsigned int width)
 			camera.setViewport(sf::FloatRect({ vpX, vpY }, { vpW, vpH }));
 		};
 	applyViewport(WIN_W, WIN_H); 
+	//			 /\ Camera /\
+
+	//=============================================================================================================
+
+
 
 	sf::Clock moveClock;
 	sf::Clock breakClock;
@@ -72,7 +86,6 @@ void GAME(const float aspect, const unsigned int width)
 
 	LEVEL game("Пещера", cave, rand(), MAP_SIZE);
 	PLAYER p1(game, game.getSpawn(), "HELLBOUND", int(0.75*TILE_SIZE));
-
 
 	vector<vector<sf::RectangleShape>> tiles(MAP_SIZE, vector<sf::RectangleShape>(MAP_SIZE, sf::RectangleShape()));
 	sf::RectangleShape player_tile;
@@ -104,7 +117,7 @@ void GAME(const float aspect, const unsigned int width)
 				{
 					if (breakClock.getElapsedTime().asSeconds() >= breakDelay)
 					{
-						if (p1.destroy_on_facing())
+						if (p1.damage_sub_on_facing())
 						{
 							switch (p1.getFacing())
 							{

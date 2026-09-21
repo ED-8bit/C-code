@@ -80,8 +80,8 @@ protected:
 
 
 public:
-	PLAYER(LEVEL& game, point_double pos, std::string name, int size, int hp = 100, int dmg = 10, AI_type ai = None);
-	PLAYER(LEVEL& game, point_int pos, std::string name, int size, int hp = 100, int dmg = 10, AI_type ai = None);
+	PLAYER(LEVEL& game, point_double pos, std::string name, int size, int hp = 100, int dmg = 100, AI_type ai = None);
+	PLAYER(LEVEL& game, point_int pos, std::string name, int size, int hp = 100, int dmg = 100, AI_type ai = None);
 
 	virtual void setName(std::string NewName) override { Name = NewName; }
 	virtual void setSize(int NewSize) override { Size = NewSize; }
@@ -112,7 +112,7 @@ public:
 	virtual void move(Dir dir, int TILE_SIZE) override;
 	virtual void takeDamage(int dmg) override;
 	virtual void giveDamage(CHARACTER& enemy) override;
-	virtual bool destroy_on_facing();
+	virtual bool damage_sub_on_facing();
 
 	virtual ~PLAYER() override;
 };

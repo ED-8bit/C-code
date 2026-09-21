@@ -511,8 +511,14 @@ void set_ore(vector<vector<tile>>& game, int seed, int level, bool grow)
 		random_ore_grow(game, seed);
 }
 
-SUBJECT::SUBJECT(){}
-SUBJECT::SUBJECT(subs t): type(t)
+void init_subs(std::vector<std::vector<tile>>& game) {
+	size_t size = game.size();
+	for (int x = 0; x < size; x++)
+		for (int y = 0; y < size; y++)
+			game[x][y].getSubject().CalcToughness();
+}
+
+SUBJECT::SUBJECT(subs t = S_none): type(t)
 {
 	CalcToughness();
 }
@@ -532,9 +538,16 @@ void SUBJECT::CalcToughness() {
 		break;
 	}
 }
-
-FLOOR::FLOOR(){}
-FLOOR::FLOOR(floors t): type(t){}
+void SUBJECT::DecreaseToughness(int dmg) {
+	toughness -= dmg;
+	if (toughness <= 0)
+	{
+		toughness = 0;
+		type = S_none;
+	}
+		
+}
+FLOOR::FLOOR(floors t = F_none): type(t){}
 FLOOR::~FLOOR(){}
 
 tile::tile(subs s, floors f): subject(s), floor(f) {}
@@ -565,6 +578,7 @@ LEVEL::LEVEL(std::string n, level_type t, int seed, int size) : Name(n), Type(t)
 		set_ore(Grid, seed, ore, true);
 		Spawn = set_player_spawn(Grid, seed);
 		Escape = set_LEVEL_escape(Grid, seed);
+		init_subs(Grid);
 		switch (Type)
 		{
 		case cave:
@@ -591,11 +605,11 @@ LEVEL::~LEVEL()
 	std::cout << Name << " with SEED: " << Seed << " DELETED\n";
 }
 
-bool LEVEL::destroy_sub(point_int sub)
+bool LEVEL::give_damage_to_sub(point_int sub, int dmg)
 {
 	if (!outBorder(Grid, sub) && Grid[sub.x][sub.y].getSubject().getType() != S_endstone)
 	{
-		Grid[sub.x][sub.y].getSubject().setType(subs::S_none);
+		Grid[sub.x][sub.y].getSubject().DecreaseToughness(dmg);
 		return true;
 	}
 	else

@@ -14,11 +14,11 @@ private:
 	subs type;
 	int toughness;
 public:
-	SUBJECT();
 	SUBJECT(subs t);
 	~SUBJECT();
 
 	void CalcToughness();
+	void DecreaseToughness(int dmg);
 
 	void setType(subs nt) { type = nt; }
 	void setToughness(int nt) { toughness = nt; }
@@ -30,7 +30,6 @@ class FLOOR
 private:
 	floors type;
 public:
-	FLOOR();
 	FLOOR(floors t);
 	~FLOOR();
 
@@ -44,16 +43,14 @@ class tile
 private:
 	SUBJECT subject;
 	FLOOR floor;
-
 public:
 	tile(subs s, floors f);
 	~tile();
-
+	
 	void setSubject(SUBJECT NewSub) { subject = NewSub; }
 	void setFloor(FLOOR NewFloor) { floor = NewFloor; }
 	SUBJECT& getSubject() { return subject; }
 	FLOOR& getFloor() { return floor; }
-
 };
 
 bool onBorder(std::vector<std::vector<tile>>& game, point_int dot);
@@ -73,6 +70,8 @@ point_int set_player_spawn(std::vector<std::vector<tile>>& game, int seed);
 void random_ore_spawn(std::vector<std::vector<tile>>& game, int seed, int fill);
 void random_ore_grow(std::vector<std::vector<tile>>& game, int seed);
 void set_ore(std::vector<std::vector<tile>>& game, int seed, int level = 0, bool grow = 0);
+
+void init_subs(std::vector<std::vector<tile>>& game);
 
 enum level_type {cave};
 extern int MAPs;
@@ -101,7 +100,7 @@ public:
 	point_int getSpawn() { return Spawn; }
 
 	void setName(std::string NewName) { Name = NewName; }
-	bool destroy_sub(point_int sub); // Уничтожить объект по координатам
+	bool give_damage_to_sub(point_int sub, int dmg); // Нанести урон объекту по координатам
 
 	~LEVEL();
 };
