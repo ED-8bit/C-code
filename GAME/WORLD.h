@@ -14,7 +14,7 @@ private:
 	subs type;
 	int toughness;
 public:
-	SUBJECT(){}
+	SUBJECT();
 	SUBJECT(subs t);
 	~SUBJECT();
 
@@ -30,7 +30,7 @@ class FLOOR
 private:
 	floors type;
 public:
-	FLOOR(){}
+	FLOOR();
 	FLOOR(floors t);
 	~FLOOR();
 

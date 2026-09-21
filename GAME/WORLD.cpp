@@ -511,7 +511,7 @@ void set_ore(vector<vector<tile>>& game, int seed, int level, bool grow)
 		random_ore_grow(game, seed);
 }
 
-
+SUBJECT::SUBJECT(){}
 SUBJECT::SUBJECT(subs t): type(t)
 {
 	CalcToughness();
@@ -533,6 +533,7 @@ void SUBJECT::CalcToughness() {
 	}
 }
 
+FLOOR::FLOOR(){}
 FLOOR::FLOOR(floors t): type(t){}
 FLOOR::~FLOOR(){}
 

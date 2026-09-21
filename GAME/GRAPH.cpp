@@ -8,90 +8,89 @@
 using namespace std;
 
 
-void SET_GRID_TILES(int TILE_SIZE, vector<vector<tile>>& map, vector<vector<sf::RectangleShape>>& tiles)
+void SET_GRID_TILES(int TILE_SIZE, vector<vector<tile>>& map, std::vector<sf::Texture>& subs, std::vector<sf::Texture> &floors, vector<vector<sf::RectangleShape>>& tiles)
 {
 	const size_t MAP_WIDTH = map.size();
-	const size_t MAP_HEIGHT = map.size();
+	const size_t MAP_HEIGHT = map[0].size();
 	for (int x = 0; x < MAP_WIDTH; x++)
 	{
 		for (int y = 0; y < MAP_HEIGHT; y++)
 		{
-			sf::RectangleShape rect({ (float)TILE_SIZE, (float)TILE_SIZE });
+			tiles[x][y].setSize({ (float)TILE_SIZE, (float)TILE_SIZE });
 
-			rect.setPosition({ (float)(x * TILE_SIZE), (float)(y * TILE_SIZE) });
+			tiles[x][y].setPosition({ (float)(x * TILE_SIZE), (float)(y * TILE_SIZE) });
 
-			sf::Color color;
+			sf::Texture *pic = nullptr;
 			if (!map[x][y].getSubject().getType())
 			{
 				if (map[x][y].getFloor().getType() == F_stone) {
-					color = sf::Color(61, 56, 56);      //stone
-				}
-				else if (map[x][y].getFloor().getType() == F_stone_spawn) {
-					color = sf::Color::Green; // SP
+					pic = &floors[0];      //stone
 				}
 				else if (map[x][y].getFloor().getType() == F_stone_exit) {
-					color = sf::Color::Black; // ESC
+					pic = &floors[1]; // ESC
+				}
+				else if (map[x][y].getFloor().getType() == F_stone_spawn) {
+					pic = &floors[2]; // SP
 				}
 				else {
-					color = sf::Color::Black;     // По умолчанию
+					tiles[x][y].setFillColor(sf::Color::Black); // По умолчанию
 				}
+				tiles[x][y].setTexture(pic);
 			}
 			else
 			{
 				if (map[x][y].getSubject().getType() == S_stone) {
-					color = sf::Color(44, 40, 43);
-				}
-				else if (map[x][y].getSubject().getType() == S_endstone) {
-					color = sf::Color(31, 31, 31);
+					pic = &subs[0];
 				}
 				else if (map[x][y].getSubject().getType() == S_ore) {
-					color = sf::Color(115, 83, 64);
+					pic = &subs[1];
 				}
+				else if (map[x][y].getSubject().getType() == S_endstone) {
+					pic = &subs[2];
+				}
+				tiles[x][y].setTexture(pic);
 			}
-
-			rect.setFillColor(color);
-
-			//rect.setOutlineColor(sf::Color::Black);
-			//rect.setOutlineThickness(1.0f);
-
-
-			tiles[x][y] = rect;
+			//tiles[x][y].setOutlineColor(sf::Color::Black);
+			//tiles[x][y].setOutlineThickness(0.1f);
 		}
 	}
 }
-void UPDATE_GRID_TILE(vector<vector<tile>>& map, vector<vector<sf::RectangleShape>>& tiles, point_int dot)
+void UPDATE_GRID_TILE(vector<vector<tile>>& map, std::vector<sf::Texture>& subs, std::vector<sf::Texture>& floors, vector<vector<sf::RectangleShape>>& tiles, point_int dot)
 {
 	int x = dot.x;
 	int y = dot.y;
-	sf::Color color;
+	sf::Texture* pic = nullptr;
 	if (!map[x][y].getSubject().getType())
 	{
 		if (map[x][y].getFloor().getType() == F_stone) {
-			color = sf::Color(61, 56, 56);      //stone
+			pic = &floors[0];      //stone
 		}
 		else if (map[x][y].getFloor().getType() == F_stone_spawn) {
-			color = sf::Color::Green; // SP
+			pic = &floors[1]; // SP
 		}
 		else if (map[x][y].getFloor().getType() == F_stone_exit) {
-			color = sf::Color::Black; // ESC
+			pic = &floors[2]; // ESC
 		}
 		else {
-			color = sf::Color::Black;     // По умолчанию
+			tiles[x][y].setFillColor(sf::Color::Black); // По умолчанию
 		}
+		tiles[x][y].setTexture(pic);
 	}
 	else
 	{
 		if (map[x][y].getSubject().getType() == S_stone) {
-			color = sf::Color(44, 40, 43);
-		}
-		else if (map[x][y].getSubject().getType() == S_endstone) {
-			color = sf::Color(31, 31, 31);
+			pic = &subs[0];
 		}
 		else if (map[x][y].getSubject().getType() == S_ore) {
-			color = sf::Color(115, 83, 64);
+			pic = &subs[1];
 		}
+		else if (map[x][y].getSubject().getType() == S_endstone) {
+			pic = &subs[2];
+		}
+		tiles[x][y].setTexture(pic);
 	}
-	tiles[x][y].setFillColor(color);
+	//tiles[x][y].setOutlineColor(sf::Color::Black);
+	//tiles[x][y].setOutlineThickness(0.5f);
 
 }
 void DRAW_GRID(sf::RenderWindow& w, vector<vector<sf::RectangleShape>>& tiles)
@@ -129,5 +128,3 @@ void REFRESH_DISPLAY(sf::RenderWindow& w, vector<vector<sf::RectangleShape>>& ti
 	w.display();
 }
 
-TILE_TEXTURES::TILE_TEXTURES(){}
-TILE_TEXTURES::~TILE_TEXTURES(){}

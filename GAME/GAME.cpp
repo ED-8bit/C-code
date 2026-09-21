@@ -9,7 +9,7 @@ using namespace std;
 
 void GAME(const float aspect, const unsigned int width)
 {
-	const int MAP_SIZE = 128;
+	const int MAP_SIZE = 64;
 	const int MAP_WIDTH = MAP_SIZE;
 	const int MAP_HEIGHT = MAP_SIZE;
 	const int TILE_SIZE = 16;
@@ -22,6 +22,25 @@ void GAME(const float aspect, const unsigned int width)
 	const unsigned int GAME_H = MAP_HEIGHT * TILE_SIZE;   
 	const unsigned int WIN_W = width;   
 	const unsigned int WIN_H = (unsigned int)(WIN_W / ASPECT_RATIO);   
+
+	int textures_size = 16;
+	string textures_path = "assets/textures/SUBJECTS/CavePack.png";
+	//Textures
+	vector<sf::Texture> sub_tiles_pic;
+	sub_tiles_pic.resize(3);
+	for (int i = 0; i < 3; i++)
+	{
+		sub_tiles_pic[i].loadFromFile(textures_path, false, sf::IntRect({ i * textures_size, 0 }, { textures_size, textures_size }));
+	}
+	vector<sf::Texture> floor_tiles_pic;
+	floor_tiles_pic.resize(3);
+	for (int i = 0; i < 3; i++)
+	{
+		floor_tiles_pic[i].loadFromFile(textures_path, false, sf::IntRect({ i * textures_size, textures_size }, { textures_size, textures_size }));
+	}
+	//Textures
+
+
 
 	sf::RenderWindow window(sf::VideoMode({ WIN_W, WIN_H }), "Game", sf::Style::Default | sf::Style::Resize);
 	window.setFramerateLimit(60);
@@ -57,7 +76,7 @@ void GAME(const float aspect, const unsigned int width)
 
 	vector<vector<sf::RectangleShape>> tiles(MAP_SIZE, vector<sf::RectangleShape>(MAP_SIZE, sf::RectangleShape()));
 	sf::RectangleShape player_tile;
-	SET_GRID_TILES(TILE_SIZE, game.getGrid(), tiles);
+	SET_GRID_TILES(TILE_SIZE, game.getGrid(), sub_tiles_pic, floor_tiles_pic, tiles);
 	SET_PLAYER_TILE(TILE_SIZE, p1, player_tile);
 
 
@@ -90,16 +109,16 @@ void GAME(const float aspect, const unsigned int width)
 							switch (p1.getFacing())
 							{
 							case 0: //north
-								UPDATE_GRID_TILE(game.getGrid(), tiles, { int(p1.getPos().x), int(p1.getPos().y - 1) });
+								UPDATE_GRID_TILE(game.getGrid(), sub_tiles_pic, floor_tiles_pic, tiles, { int(p1.getPos().x), int(p1.getPos().y - 1) });
 								break;
 							case 1: //south
-								UPDATE_GRID_TILE(game.getGrid(), tiles, { int(p1.getPos().x), int(p1.getPos().y + 1) });
+								UPDATE_GRID_TILE(game.getGrid(), sub_tiles_pic, floor_tiles_pic, tiles, { int(p1.getPos().x), int(p1.getPos().y + 1) });
 								break;
 							case 2: //west
-								UPDATE_GRID_TILE(game.getGrid(), tiles, { int(p1.getPos().x - 1), int(p1.getPos().y) });
+								UPDATE_GRID_TILE(game.getGrid(), sub_tiles_pic, floor_tiles_pic, tiles, { int(p1.getPos().x - 1), int(p1.getPos().y) });
 								break;
 							case 3: //east
-								UPDATE_GRID_TILE(game.getGrid(), tiles, { int(p1.getPos().x + 1), int(p1.getPos().y) });
+								UPDATE_GRID_TILE(game.getGrid(), sub_tiles_pic, floor_tiles_pic, tiles, { int(p1.getPos().x + 1), int(p1.getPos().y) });
 								break;
 							}
 							breakClock.restart();
