@@ -7,8 +7,26 @@
 
 using namespace std;
 
+sf::Sprite CREATE_SPRITE(sf::Texture& Pic, point_double dot) {
+	sf::Sprite sprite(Pic);
+	sprite.setPosition({ float(dot.x), float(dot.y) });
+	return sprite;
+}
+void CHANGE_SPRITE(sf::Sprite& spr, sf::Texture& NewPic, point_double dot) {
+	spr.setTexture(NewPic);
+	if (dot.x != NULL && dot.y != NULL)
+	{
+		spr.setPosition({ float(dot.x), float(dot.y) });
+	}
+}
+void DRAW_SPRITES(sf::RenderWindow& w, vector<sf::Sprite>& sprites)
+{
+	size_t size = sprites.size();
+	for (int x = 0; x < size; x++)
+		w.draw(sprites[x]);
+}
 
-void SET_GRID_TILES(int TILE_SIZE, vector<vector<tile>>& map, std::vector<sf::Texture>& subs, std::vector<sf::Texture> &floors, vector<vector<sf::RectangleShape>>& tiles)
+void SET_GRID(int TILE_SIZE, vector<vector<tile>>& map, std::vector<sf::Texture>& subs, std::vector<sf::Texture> &floors, vector<vector<sf::RectangleShape>>& tiles)
 {
 	const size_t MAP_WIDTH = map.size();
 	const size_t MAP_HEIGHT = map[0].size();
@@ -20,7 +38,7 @@ void SET_GRID_TILES(int TILE_SIZE, vector<vector<tile>>& map, std::vector<sf::Te
 
 			tiles[x][y].setPosition({ (float)(x * TILE_SIZE), (float)(y * TILE_SIZE) });
 
-			sf::Texture *pic = nullptr;
+			sf::Texture* pic = nullptr;
 			if (!map[x][y].getSubject().getType())
 			{
 				if (map[x][y].getFloor().getType() == F_stone) {
@@ -55,7 +73,7 @@ void SET_GRID_TILES(int TILE_SIZE, vector<vector<tile>>& map, std::vector<sf::Te
 		}
 	}
 }
-void UPDATE_GRID_TILE(vector<vector<tile>>& map, std::vector<sf::Texture>& subs, std::vector<sf::Texture>& floors, vector<vector<sf::RectangleShape>>& tiles, point_int dot)
+void UPDATE_TILE(vector<vector<tile>>& map, std::vector<sf::Texture>& subs, std::vector<sf::Texture>& floors, vector<vector<sf::RectangleShape>>& tiles, point_int dot)
 {
 	int x = dot.x;
 	int y = dot.y;
@@ -101,7 +119,7 @@ void DRAW_GRID(sf::RenderWindow& w, vector<vector<sf::RectangleShape>>& tiles)
 			w.draw(tiles[x][y]);
 }
 
-void SET_PLAYER_TILE(int TILE_SIZE, PLAYER& p, sf::RectangleShape& tile)
+void SET_PLAYER(int TILE_SIZE, PLAYER& p, sf::RectangleShape& tile)
 {
 	sf::RectangleShape rect({ (float)p.getSize(), (float)p.getSize() });
 	rect.setOrigin({ float(p.getSize() / 2), float(p.getSize() / 2) });
@@ -111,7 +129,7 @@ void SET_PLAYER_TILE(int TILE_SIZE, PLAYER& p, sf::RectangleShape& tile)
 	rect.setFillColor(color);
 	tile = rect;
 }
-void UPDATE_PLAYER_TILE(int TILE_SIZE, PLAYER& p, sf::RenderWindow& w, sf::RectangleShape& tile)
+void UPDATE_PLAYER(int TILE_SIZE, PLAYER& p, sf::RenderWindow& w, sf::RectangleShape& tile)
 {
 	tile.setPosition({ (float)((p.getPos().x) * TILE_SIZE), (float)((p.getPos().y) * TILE_SIZE) });
 }
@@ -120,11 +138,12 @@ void DRAW_PLAYER(sf::RenderWindow& w, sf::RectangleShape& tile)
 	w.draw(tile);
 }
 
-void REFRESH_DISPLAY(sf::RenderWindow& w, vector<vector<sf::RectangleShape>>& tiles, sf::RectangleShape& player)
+void REFRESH_DISPLAY(sf::RenderWindow& w, vector<vector<sf::RectangleShape>>& tiles, vector<sf::Sprite>& sprites, sf::RectangleShape& player)
 {
 	w.clear();
 	DRAW_GRID(w, tiles);
 	DRAW_PLAYER(w, player);
+	DRAW_SPRITES(w, sprites);
 	w.display();
 }
 

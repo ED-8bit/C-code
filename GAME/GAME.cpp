@@ -7,6 +7,7 @@ int MAPs = 0;
 int ENTs = 0;
 using namespace std;
 
+
 void GAME(const float aspect, const unsigned int width)
 {
 	const int MAP_SIZE = 48;
@@ -25,20 +26,29 @@ void GAME(const float aspect, const unsigned int width)
 
 	//			\/ Textures \/
 	int textures_size = 16;
-	string textures_path = "assets/textures/SUBJECTS/CavePack.png";
-	
+	string Cave_textures_path = "assets/textures/SUBJECTS/CavePack.png";
+	string Cracks_on_subs_path = "assets/textures/SUBJECTS/sub_cracks.png";
 	vector<sf::Texture> sub_tiles_pic;
 	sub_tiles_pic.resize(3);
 	for (int i = 0; i < 3; i++)
 	{
-		if (!sub_tiles_pic[i].loadFromFile(textures_path, false, sf::IntRect({ i * textures_size, 0 }, { textures_size, textures_size })))
+		if (!sub_tiles_pic[i].loadFromFile(Cave_textures_path, false, sf::IntRect({ i * textures_size, 0 }, { textures_size, textures_size })))
 			return;
 	}
 	vector<sf::Texture> floor_tiles_pic;
 	floor_tiles_pic.resize(3);
 	for (int i = 0; i < 3; i++)
 	{
-		if (!floor_tiles_pic[i].loadFromFile(textures_path, false, sf::IntRect({ i * textures_size, textures_size }, { textures_size, textures_size })))
+		if (!floor_tiles_pic[i].loadFromFile(Cave_textures_path, false, sf::IntRect({ i * textures_size, textures_size }, { textures_size, textures_size })))
+			return;
+	}
+	vector<sf::Texture> cracks_tiles_pic;
+	cracks_tiles_pic.resize(9);
+	for (int i = 0; i < 3; i++)
+	{
+		int x = (i + 3) % 3;
+		int y = (i + 1) / 3;
+		if (!cracks_tiles_pic[i].loadFromFile(Cracks_on_subs_path, false, sf::IntRect({ i * textures_size, y * textures_size }, { textures_size, textures_size })))
 			return;
 	}
 	//			/\ Textures /\
@@ -46,7 +56,7 @@ void GAME(const float aspect, const unsigned int width)
 	//=============================================================================================================
 
 	//			 \/ Window \/
-	sf::RenderWindow window(sf::VideoMode({ WIN_W, WIN_H }), "Game", sf::Style::Default | sf::Style::Resize);
+	sf::RenderWindow window(sf::VideoMode({ WIN_W, WIN_H }), "Cave", sf::Style::Default | sf::Style::Resize);
 	window.setFramerateLimit(120);
 	window.setVerticalSyncEnabled(true);
 	window.setKeyRepeatEnabled(false);
@@ -82,16 +92,17 @@ void GAME(const float aspect, const unsigned int width)
 	sf::Clock moveClock;
 	sf::Clock breakClock;
 	const float moveDelay = 0.0016f; 
-	const float breakDelay = 0.57f;
+	const float breakDelay = 0.4f;
 
 	LEVEL game("Пещера", cave, rand(), MAP_SIZE);
-	PLAYER p1(game, game.getSpawn(), "HELLBOUND", int(0.75*TILE_SIZE));
+	PLAYER p1(game, game.getSpawn(), "HELLBOUND", int(0.5*TILE_SIZE));
 
 	vector<vector<sf::RectangleShape>> tiles(MAP_SIZE, vector<sf::RectangleShape>(MAP_SIZE, sf::RectangleShape()));
+	vector<sf::Sprite> sprites;
 	sf::RectangleShape player_tile;
-	SET_GRID_TILES(TILE_SIZE, game.getGrid(), sub_tiles_pic, floor_tiles_pic, tiles);
-	SET_PLAYER_TILE(TILE_SIZE, p1, player_tile);
 
+	SET_GRID(TILE_SIZE, game.getGrid(), sub_tiles_pic, floor_tiles_pic, tiles);
+	SET_PLAYER(TILE_SIZE, p1, player_tile);
 
 	while (window.isOpen())
 	{
@@ -122,16 +133,16 @@ void GAME(const float aspect, const unsigned int width)
 							switch (p1.getFacing())
 							{
 							case 0: //north
-								UPDATE_GRID_TILE(game.getGrid(), sub_tiles_pic, floor_tiles_pic, tiles, { int(p1.getPos().x), int(p1.getPos().y - 1) });
+								UPDATE_TILE(game.getGrid(), sub_tiles_pic, floor_tiles_pic, tiles, { int(p1.getPos().x), int(p1.getPos().y - 1) });
 								break;
 							case 1: //south
-								UPDATE_GRID_TILE(game.getGrid(), sub_tiles_pic, floor_tiles_pic, tiles, { int(p1.getPos().x), int(p1.getPos().y + 1) });
+								UPDATE_TILE(game.getGrid(), sub_tiles_pic, floor_tiles_pic, tiles, { int(p1.getPos().x), int(p1.getPos().y + 1) });
 								break;
 							case 2: //west
-								UPDATE_GRID_TILE(game.getGrid(), sub_tiles_pic, floor_tiles_pic, tiles, { int(p1.getPos().x - 1), int(p1.getPos().y) });
+								UPDATE_TILE(game.getGrid(), sub_tiles_pic, floor_tiles_pic, tiles, { int(p1.getPos().x - 1), int(p1.getPos().y) });
 								break;
 							case 3: //east
-								UPDATE_GRID_TILE(game.getGrid(), sub_tiles_pic, floor_tiles_pic, tiles, { int(p1.getPos().x + 1), int(p1.getPos().y) });
+								UPDATE_TILE(game.getGrid(), sub_tiles_pic, floor_tiles_pic, tiles, { int(p1.getPos().x + 1), int(p1.getPos().y) });
 								break;
 							}
 							breakClock.restart();
@@ -195,7 +206,7 @@ void GAME(const float aspect, const unsigned int width)
 
 			if (moved)
 			{
-				UPDATE_PLAYER_TILE(TILE_SIZE, p1, window, player_tile);
+				UPDATE_PLAYER(TILE_SIZE, p1, window, player_tile);
 				moveClock.restart();
 			}
 
@@ -223,7 +234,7 @@ void GAME(const float aspect, const unsigned int width)
 		}
 
 		// Обновление экрана
-		REFRESH_DISPLAY(window, tiles, player_tile);
+		REFRESH_DISPLAY(window, tiles, sprites, player_tile);
 	}
 }
 

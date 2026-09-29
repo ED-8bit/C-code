@@ -35,7 +35,6 @@ public:
 
 void TextFile::WriteLine(string text) {
     if (file.is_open()) {
-        file.clear(); 
         file << text << '\n';
     }
     else {
@@ -47,7 +46,6 @@ void TextFile::PrintContents() {
         cerr << "Ошибка. Файл закрыт.\n";
         return;
     }
-    file.clear();
     file.seekg(0, ios::beg);
 
     string line;
@@ -235,12 +233,10 @@ int main() {
 
 
     cout << "\n";
-    {
-        TextFile myFile("test.txt");
-        myFile.WriteLine("Привет, мир!");
-        myFile.WriteLine("Это TextFile на C++.");
-        myFile.PrintContents();
-    }
+    TextFile myFile("test.txt");
+    myFile.WriteLine("Привет, мир!");
+    myFile.WriteLine("Это TextFile на C++.");
+    myFile.PrintContents();
 
     cout << "\n\n";
     tiger T1, T2("Kuzya");
@@ -288,5 +284,6 @@ int main() {
     playlist.PrintAll();
     cout << "Общая длительность: " << playlist.TotalDuration() << " секунд\n";
 
+    getchar();
     return 0;
 }

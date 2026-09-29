@@ -582,7 +582,7 @@ LEVEL::LEVEL(std::string n, level_type t, int seed, int size) : Name(n), Type(t)
 		switch (Type)
 		{
 		case cave:
-			std::cout << "CAVE: ";
+			std::cout << "CAVE " << ID <<": ";
 			break;
 		default:
 			std::cout << "LEVEL: ";
@@ -596,13 +596,13 @@ LEVEL::~LEVEL()
 	switch (Type)
 	{
 	case cave:
-		std::cout << "CAVE: ";
+		std::cout << "CAVE ";
 		break;
 	default:
 		std::cout << "LEVEL: ";
 		break;
 	}
-	std::cout << Name << " with SEED: " << Seed << " DELETED\n";
+	std::cout << ID << ": " << Name << " with SEED: " << Seed << " DELETED\n";
 }
 
 bool LEVEL::give_damage_to_sub(point_int sub, int dmg)
@@ -619,4 +619,3 @@ bool LEVEL::give_damage_to_sub(point_int sub, int dmg)
 	}
 
 }
-

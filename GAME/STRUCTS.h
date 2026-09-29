@@ -1,6 +1,4 @@
 #pragma once
-
-
 struct Tile {
 	int floor;
 	int subject;
