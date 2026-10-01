@@ -44,7 +44,6 @@ void ShipOrder(Order o, Warehouse& w) {
 		cout << "Заказ не может быть выполнен\n";
 		
 }
-
 class Classroom;
 class Student
 {
@@ -126,7 +125,47 @@ Student& BestStudent(Classroom& c) {
 	return *best;
 }
 
+class Truck {
+	string num;
+	string model;
+	double km;
+public:
+	Truck(string n = "", string m = "", double k = 0) : num(n), model(m), km(k) {}
+	friend Truck& MaxKM(Truck* arr[], int size);
 
+	void printInfo() {
+		if (num != "")
+			cout << num << " ";
+		if (model != "")
+			cout << model << " ";
+		if (km)
+			cout << km << " ";
+		cout << '\n';
+	}
+};
+Truck& MaxKM(Truck* arr[], int size) {
+	Truck** p = arr;
+	Truck* max = *p;
+	for (int i = 0; i < size; i++, p++)
+	{
+		if (max->km < (*p)->km)
+		{
+			max = *p;
+		}
+	}
+	return *max;
+}
+
+class Product
+{
+	string name;
+	double price;
+public:
+	Product(string n, double p): name(n), price(p) {}
+	~Product(){}
+
+	void setName(string name) { name = name; }
+};
 
 int main() {
 	system("chcp 1251");
@@ -147,6 +186,17 @@ int main() {
 	//AddStudent(A2, Student{ "Вася", 5, 5, 4 });
 	//cout << "Лучший Студент: " << BestStudent(A2).getName() << "\n";
 	//cout << "Средний балл: " << AverageGrade(A2, 0) << "\n";
+
+	//Truck arr[5](
+	//	{ "E147BH", "Mercedes Actros", 1200.0 },
+	//	{ "A034KK", "Volvo E350", 75000.0 },
+	//	{ "X059EP", "Mercedes Actros", 270000.0 },
+	//	{ "O001OO", "Renault 'noname'", 810000.0 },
+	//	{ "H537KM", "Volvo E450", 100000.1 }
+	//	);
+	//Truck* ptrs[5] = { &arr[0], &arr[1], &arr[2], &arr[3], &arr[4] };
+	//MaxKM(ptrs, 5).printInfo();
+
 
 
 }
