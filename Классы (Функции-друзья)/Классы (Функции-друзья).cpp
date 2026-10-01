@@ -45,6 +45,10 @@ void ShipOrder(Order o, Warehouse& w) {
 		
 }
 
+
+
+
+
 class Truck
 {
 	string num;
@@ -64,7 +68,6 @@ public:
 		cout << '\n';
 	}
 };
-
 Truck& MaxKM(Truck* arr[], int size) {
 	Truck* p = arr[0];
 	Truck* max = arr[0];
@@ -79,13 +82,14 @@ Truck& MaxKM(Truck* arr[], int size) {
 	return *max;
 }
 
-
 int main() {
 	system("chcp 1251");
 	cout << "\n";
 
 	//Order a("лемминги", 200);
+	//Order b("гномы", 13);
 	//Warehouse A("лемминги", 300);
+	//ShipOrder(b, A);
 	//ShipOrder(a, A);
 
 	Truck arr[5](
@@ -96,8 +100,4 @@ int main() {
 		{ "H537KM", "Volvo E450", 1000000.1 }
 		);
 	MaxKM(arr, 5).printInfo();
-	
-
-
-
 }
