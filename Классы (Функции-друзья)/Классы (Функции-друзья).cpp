@@ -45,18 +45,39 @@ void ShipOrder(Order o, Warehouse& w) {
 		
 }
 
-class Student
+class Truck
 {
-	string name;
-	int grades[3];
+	string num;
+	string model;
+	double km;
 public:
-	Student(string n, int a, int b, int c): name(n){
-	
+	Truck(string n = "", string m = "", double k = 0) : num(n), model(m), km(k) {}
+	friend Truck& MaxKM(Truck* arr[], int size);
+
+	void printInfo() {
+		if (num != "")
+			cout << num << " ";
+		if (model != "")
+			cout << model << " ";
+		if (km)
+			cout << km << " ";
+		cout << '\n';
 	}
-	~Student(){}
 };
 
-
+Truck& MaxKM(Truck* arr[], int size) {
+	Truck* p = arr[0];
+	Truck* max = arr[0];
+	for (int i = 0; i < size; i++)
+	{
+		if (max->km < p->km)
+		{
+			max = p;
+		}
+		p++;
+	}
+	return *max;
+}
 
 
 int main() {
@@ -67,7 +88,15 @@ int main() {
 	//Warehouse A("лемминги", 300);
 	//ShipOrder(a, A);
 
-
+	Truck arr[5](
+		{ "E147BH", "Mercedes Actros", 1200.0 },
+		{ "A034KK", "Volvo E350", 75000.0 },
+		{ "X059EP", "Mercedes Actros", 270000.0 },
+		{ "O001OO", "Renault 'noname'", 810000.0 },
+		{ "H537KM", "Volvo E450", 1000000.1 }
+		);
+	MaxKM(arr, 5).printInfo();
+	
 
 
 
