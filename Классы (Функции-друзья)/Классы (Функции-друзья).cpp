@@ -44,6 +44,7 @@ void ShipOrder(Order o, Warehouse& w) {
 		cout << "Заказ не может быть выполнен\n";
 		
 }
+
 class Classroom;
 class Student
 {
@@ -161,11 +162,75 @@ class Product
 	string name;
 	double price;
 public:
-	Product(string n, double p): name(n), price(p) {}
-	~Product(){}
+	Product(string n = "", double p = 0.0) : name(n), price(p) {}
+	~Product() {}
 
-	void setName(string name) { name = name; }
+	void setName(string name) { this->name = name; }
+	void setPrice(double price) { this->price = price; }
+	void Print() {
+		if (name != "")
+			cout << name << " ";
+		if (price)
+			cout << price << " ";
+		cout << '\n';
+
+	}
+	bool IsSameObject(Product* other) {
+		return this == other ? true : false;
+	}
+	friend void ApplyDiscount(Product& p, double percent);
 };
+void ApplyDiscount(Product& p, double percent) {
+	p.price -= (p.price / 100.0 * percent);
+}
+// не часть класса, поэтому this не работает
+
+class Player
+{
+	string name;
+	int rate;
+public:
+	Player(string n = "", int r = 0): name(n), rate(r) {}
+	friend Player& MaxRate(Player* arr[], int size);
+	friend Player& Favorite(Player& p1, Player& p2);
+	void PrintInfo() {
+		if (name != "")
+			cout << name << " ";
+		if (rate)
+			cout << rate << " ";
+		cout << '\n';
+	}
+	
+};
+Player& MaxRate(Player* arr[], int size) {
+	Player** p = arr;
+	Player* max = *p;
+	for (int i = 0; i < size; i++, p++)
+	{
+		if (max->rate < (*p)->rate)
+		{
+			max = *p;
+		}
+	}
+	return *max;
+}
+Player& Favorite(Player& p1, Player& p2) {
+	return p1.rate > p2.rate ? p1 : p2;
+}
+void PrintAll(Player* arr[], int size) {
+	for (int i = 0; i < size; i++)
+	{
+		arr[i]->PrintInfo();
+	}
+}
+void Tournament1(Player arr[], int size) {
+	int n = 0;
+		for (int i = 0; i < size; i += 2)
+		{
+			cout << "Победитель " << ++n << " пары: "; Favorite(arr[i], arr[i + 1]).PrintInfo();
+		}
+}
+
 
 int main() {
 	system("chcp 1251");
@@ -189,14 +254,41 @@ int main() {
 
 	//Truck arr[5](
 	//	{ "E147BH", "Mercedes Actros", 1200.0 },
-	//	{ "A034KK", "Volvo E350", 75000.0 },
+	//	{ "A034KK", "Volvo FM", 75000.0 },
 	//	{ "X059EP", "Mercedes Actros", 270000.0 },
-	//	{ "O001OO", "Renault 'noname'", 810000.0 },
-	//	{ "H537KM", "Volvo E450", 100000.1 }
+	//	{ "O001OO", "Renault T", 810000.0 },
+	//	{ "H537KM", "Volvo FMX", 100000.1 }
 	//	);
 	//Truck* ptrs[5] = { &arr[0], &arr[1], &arr[2], &arr[3], &arr[4] };
 	//MaxKM(ptrs, 5).printInfo();
 
+	//Product ob1("hleb", 55.99);
+	//Product ob2("moloko", 120.59);
+	//ob1.Print();
+	//ob2.Print();
+	//cout << '\n';
+	//ob1.setName("Snickers");
+	//ob1.setPrice(69.49);
+	//ob1.Print();
+	//cout << '\n';
 
+	//cout << ob1.IsSameObject(&ob2) << '\n';
+	//cout << ob1.IsSameObject(&ob1) << '\n';
+
+	Player roster[8](
+		{"Anatoliy Karpov", 10500},
+		{"Magnus Carlsen", 13800},
+		{"Arsen Christokyan", 16400},
+		{"Elon Musk", 5300},
+		{"Sergei Aslanyan", 7500},
+		{"Moriarty ???", 11800},
+		{"Albert \"2 steps ahead\"", 14999},
+		{"Nathan Drake", 14000}
+		);
+	Player* P_ptrs[8] = { &roster[0], &roster[1], &roster[2], &roster[3], &roster[4], &roster[5], &roster[6], &roster[7], };
+	cout << "Участники турнира: \n"; PrintAll(P_ptrs, 8); cout << '\n';
+	cout << "Сильнейший игрок/рейтинг: "; MaxRate(P_ptrs, 8).PrintInfo();
+	cout << '\n';
+	Tournament1(*P_ptrs, 8);
 
 }
