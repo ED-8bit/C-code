@@ -231,7 +231,6 @@ void Tournament1(Player arr[], int size) {
 		}
 }
 
-
 int main() {
 	system("chcp 1251");
 	cout << "\n";
@@ -278,7 +277,7 @@ int main() {
 	Player roster[8](
 		{"Anatoliy Karpov", 10500},
 		{"Magnus Carlsen", 13800},
-		{"Arsen Christokyan", 16400},
+		{"Arsen Khristokyan", 16400},
 		{"Elon Musk", 5300},
 		{"Sergei Aslanyan", 7500},
 		{"Moriarty ???", 11800},

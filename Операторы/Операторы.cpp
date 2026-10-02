@@ -89,6 +89,7 @@ int main()
 {
 	system("chcp 1251");
 	cout << '\n';
+
 	//three_d d1(3, 5, 1);
 	//three_d d2(2, 0, 7);
 	//d1.show();
@@ -99,12 +100,15 @@ int main()
 	//d3 = d3 + d1;
 	//d3.show();
 
-	CL a;
-	a.count = 5;
-	CL b;
-	b.count = 3;
-	b + 2;
-	a = b;
+	//CL a;
+	//a.count = 5;
+	//CL b;
+	//b.count = 3;
+	//b + 2;
+	//a = b;
+
+
+
 
 }
 
