@@ -1,5 +1,6 @@
 #pragma once
 #include "STRUCTS.h"
+#include <vector>
 enum class Materials
 {
 	None, Wood, Stone, Iron
@@ -32,8 +33,11 @@ public:
 	Item(Including_Materials m = {Materials::None, Materials::None}, int c = 0);
 	~Item();
 	double CalcWeight();
-	void AddCount(int add = 1);
+	void IncreaseCount(int add = 1);
 	void SetCount(int set);
+	bool DecreaseCount(int dec = 1);
+
+	int GetCount() { return Count; }
 };
 class Tool: public Item
 {
@@ -55,6 +59,25 @@ public:
 	Block(Blocks t = Blocks::NotBlock, int c = 0);
 	~Block();
 	void DefineMaterials();
+};
+
+class Inventory
+{
+private:
+	std::vector<Item> Data;
+	int Count;
+	double CurWeight;
+	double MaxWeight;
+public:
+	Inventory(double m = 100.0);
+	~Inventory();
+
+	void AddItem(Item n);
+	Item& GetItem(int i);
+	void InvUpdate();
+	double CalcCurWeight();
+	
+
 };
 
 

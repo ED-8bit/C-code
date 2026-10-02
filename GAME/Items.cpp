@@ -3,7 +3,7 @@
 Item::Item(Including_Materials m, int c) : Materials(m), Count(c) {
 	Weight = CalcWeight() * Count;
 }
-Item::~Item() {}
+Item::~Item(){}
 double Item::CalcWeight(){
 	double a, b;
 	switch(Materials.primary)
@@ -42,13 +42,24 @@ double Item::CalcWeight(){
 	}
 	return (a + b);
 }
-void Item::AddCount(int add) {
+void Item::IncreaseCount(int add) {
 	Count += add;
 	Weight = CalcWeight() * Count;
 }
 void Item::SetCount(int set) {
-	///////////////
+	Count = set;
+	Weight = CalcWeight() * Count;
 }
+bool Item::DecreaseCount(int dec) {
+	if (dec >= Count)
+	{
+		Count -= dec;
+		return true;
+	}
+	else
+		return false;
+}
+
 Tool::Tool(Tools t, Including_Materials m): ToolType(t), Item(m, 1){
 	CalcEffiency();
 	CalcDurability();
@@ -116,7 +127,7 @@ void Tool::CalcDurability(){
 
 Block::Block(Blocks t, int c) : BlockType(t) {
 	DefineMaterials();
-	AddCount(c);
+	IncreaseCount(c);
 	Weight = CalcWeight() * Count;
 }
 Block::~Block(){}
@@ -140,5 +151,34 @@ void Block::DefineMaterials(){
 		Materials.secondary = Materials::Iron;
 		break;
 	}
+}
+
+Inventory::Inventory(double m): MaxWeight(m), Count(0){
+	CurWeight = CalcCurWeight();
+}
+Inventory::~Inventory(){}
+void Inventory::AddItem(Item n){
+	Data.push_back(n);
+	Count++;
+}
+double Inventory::CalcCurWeight() {
+	double sum = 0;
+	for (int i = 0; i < Count; i++)
+		sum += Data[i].CalcWeight();
+	return sum;
+}
+Item& Inventory::GetItem(int i) {
+	return Data[i];
+}
+void Inventory::InvUpdate() {
+	for (int i = 0; i < Data.size(); i++)
+	{
+		if (Data[i].GetCount() == 0)
+		{
+			Data.erase(Data.begin() + i);
+			Data.pop_back();
+		}
+	}
+	CurWeight = CalcCurWeight();
 }
 
