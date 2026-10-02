@@ -1,10 +1,10 @@
-#include "Items.h"
+#include "ITEMS.h"
 
 Item::Item(Including_Materials m, int c) : Materials(m), Count(c) {
-	CalcWeight();
+	Weight = CalcWeight() * Count;
 }
 Item::~Item() {}
-void Item::CalcWeight(){
+double Item::CalcWeight(){
 	double a, b;
 	switch(Materials.primary)
 	{
@@ -40,18 +40,19 @@ void Item::CalcWeight(){
 	default:
 		b = 6.5;
 	}
-	Weight = (a + b)*Count;
+	return (a + b);
 }
-void Item::AddItems(int add) {
+void Item::AddCount(int add) {
 	Count += add;
-	CalcWeight();
+	Weight = CalcWeight() * Count;
 }
-
-
+void Item::SetCount(int set) {
+	///////////////
+}
 Tool::Tool(Tools t, Including_Materials m): ToolType(t), Item(m, 1){
 	CalcEffiency();
 	CalcDurability();
-	CalcWeight();
+	Weight = CalcWeight() * Count;
 }
 Tool::~Tool(){}
 void Tool::CalcEffiency() {
@@ -113,9 +114,10 @@ void Tool::CalcDurability(){
 	Durability = a * 15 + b * 8;
 }
 
-Block::Block(Blocks t, int c): BlockType(t){
+Block::Block(Blocks t, int c) : BlockType(t) {
 	DefineMaterials();
-	CalcWeight();
+	AddCount(c);
+	Weight = CalcWeight() * Count;
 }
 Block::~Block(){}
 void Block::DefineMaterials(){

@@ -31,10 +31,10 @@ protected:
 public:
 	Item(Including_Materials m = {Materials::None, Materials::None}, int c = 0);
 	~Item();
-	void CalcWeight();
-	void AddItems(int add = 1);
+	double CalcWeight();
+	void AddCount(int add = 1);
+	void SetCount(int set);
 };
-
 class Tool: public Item
 {
 protected:
@@ -47,13 +47,12 @@ public:
 	void CalcEffiency();
 	void CalcDurability();
 };
-
 class Block: public Item
 {
 protected:
 	Blocks BlockType;
 public:
-	Block(Blocks t = Blocks::NotBlock, int c);
+	Block(Blocks t = Blocks::NotBlock, int c = 0);
 	~Block();
 	void DefineMaterials();
 };
