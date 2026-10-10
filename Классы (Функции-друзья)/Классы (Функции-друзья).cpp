@@ -235,44 +235,45 @@ int main() {
 	system("chcp 1251");
 	cout << "\n";
 
-	//Order a("лемминги", 200);
-	//Order b("гномы", 13);
-	//Warehouse A("лемминги", 300);
-	//ShipOrder(b, A);
-	//ShipOrder(a, A);
+	Order a("лемминги", 200);
+	Order b("гномы", 13);
+	Warehouse A("лемминги", 300);
+	ShipOrder(b, A);
+	ShipOrder(a, A);
 
-	//Student init[] = {
-	//	Student{"Аня",   3, 4, 5},
-	//	Student{"Боря",  5, 5, 5},
-	//	Student{"Трамп", 3, 5, 2}
-	//};
-	//Classroom A2(init, 3);
-	//AddStudent(A2, Student{ "Вася", 5, 5, 4 });
-	//cout << "Лучший Студент: " << BestStudent(A2).getName() << "\n";
-	//cout << "Средний балл: " << AverageGrade(A2, 0) << "\n";
+	Student init[] = {
+		Student{"Аня",   3, 4, 5},
+		Student{"Боря",  5, 5, 5},
+		Student{"Трамп", 3, 5, 2}
+	};
+	Classroom A2(init, 3);
+	AddStudent(A2, Student{ "Вася", 5, 5, 4 });
+	cout << "Лучший Студент: " << BestStudent(A2).getName() << "\n";
+	cout << "Средний балл: " << AverageGrade(A2, 0) << "\n";
 
-	//Truck arr[5](
-	//	{ "E147BH", "Mercedes Actros", 1200.0 },
-	//	{ "A034KK", "Volvo FM", 75000.0 },
-	//	{ "X059EP", "Mercedes Actros", 270000.0 },
-	//	{ "O001OO", "Renault T", 810000.0 },
-	//	{ "H537KM", "Volvo FMX", 100000.1 }
-	//	);
-	//Truck* ptrs[5] = { &arr[0], &arr[1], &arr[2], &arr[3], &arr[4] };
-	//MaxKM(ptrs, 5).printInfo();
+	Truck arr[5](
+		{ "E147BH", "Mercedes Actros", 1200.0 },
+		{ "A034KK", "Volvo FM", 75000.0 },
+		{ "X059EP", "Mercedes Actros", 270000.0 },
+		{ "O001OO", "Renault T", 810000.0 },
+		{ "H537KM", "Volvo FMX", 100000.1 }
+		);
+	Truck* ptrs[5] = { &arr[0], &arr[1], &arr[2], &arr[3], &arr[4] };
+	MaxKM(ptrs, 5).printInfo();
 
-	//Product ob1("hleb", 55.99);
-	//Product ob2("moloko", 120.59);
-	//ob1.Print();
-	//ob2.Print();
-	//cout << '\n';
-	//ob1.setName("Snickers");
-	//ob1.setPrice(69.49);
-	//ob1.Print();
-	//cout << '\n';
+	Product ob1("hleb", 55.99);
+	Product ob2("moloko", 120.59);
+	ob1.Print();
+	ob2.Print();
+	cout << '\n';
+	ob1.setName("Snickers");
+	ob1.setPrice(69.49);
+	ApplyDiscount(ob1, 15);
+	ob1.Print();
+	cout << '\n';
 
-	//cout << ob1.IsSameObject(&ob2) << '\n';
-	//cout << ob1.IsSameObject(&ob1) << '\n';
+	cout << ob1.IsSameObject(&ob2) << '\n';
+	cout << ob1.IsSameObject(&ob1) << '\n';
 
 	Player roster[8](
 		{"Anatoliy Karpov", 10500},
