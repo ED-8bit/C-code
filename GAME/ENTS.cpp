@@ -95,7 +95,7 @@ void PLAYER::move(Dir dir, int TILE_SIZE)
 	double newX = Pos.x;
 	double newY = Pos.y;
 	double mapSize = double(getMAP().getSize());
-	double step = 0.02;
+	double step = 0.04;
 	double block = double(getSize()) / double(TILE_SIZE) / 2;
 	switch (dir)
 	{

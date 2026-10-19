@@ -81,7 +81,7 @@ void UPDATE_TILE(vector<vector<tile>>& map, std::vector<sf::Texture>& subs, std:
 	if (!map[x][y].getSubject().getType())
 	{
 		if (map[x][y].getFloor().getType() == F_stone) {
-			pic = &floors[0];      //stone
+			pic = &floors[0]; //stone
 		}
 		else if (map[x][y].getFloor().getType() == F_stone_spawn) {
 			pic = &floors[1]; // SP

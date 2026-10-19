@@ -22,7 +22,6 @@ struct Including_Materials
 
 	Including_Materials(Materials p, Materials s = Materials::None): primary(p), secondary(s){}
 };
-
 class Item
 {
 protected:

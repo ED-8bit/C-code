@@ -13,13 +13,14 @@ class SUBJECT {
 private:
 	subs type;
 	int toughness;
+	int maxtoughness;
 public:
 	SUBJECT(subs t);
 	~SUBJECT();
 
 	void CalcToughness();
 	void DecreaseToughness(int dmg);
-
+	
 	void setType(subs nt) { type = nt; }
 	void setToughness(int nt) { toughness = nt; }
 	subs getType() { return type; }

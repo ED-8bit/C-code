@@ -353,17 +353,22 @@ public:
 	}
 
 	Fraction operator+(const Fraction& other) const {
-		return Fraction(num * other.den + other.num * den, den * other.den);
+		Fraction temp(num * other.den + other.num * den, den * other.den);
+		temp.Reduce();
+		return temp;
+		
 	}
 	Fraction operator-(const Fraction& other) const {
-		return Fraction(num * other.den - other.num * den, den * other.den);
+		Fraction temp(num * other.den - other.num * den, den * other.den);
+		temp.Reduce();
+		return temp;
 	}
 	Fraction operator*(const Fraction& other) const {
 		return Fraction(num * other.num, den * other.den);
 	}
 	Fraction operator/(const Fraction& other) const {
 		if (other.num == 0)
-			return;
+			exit(1);
 		else
 		return Fraction(num * other.den, den * other.num);
 	}
@@ -387,12 +392,20 @@ class Matrix {
 			data = nullptr;
 			return;
 		}
+
 		data = new double* [rows];
 		for (int i = 0; i < rows; ++i) {
-			data[i] = new double[cols] {0.0};
+			data[i] = new double[cols];
+		}
+
+		for (int i = 0; i < rows; i++)
+		{
+			for (int j = 0; j < cols; j++)
+			{
+				data[i][j] = 0.0;
+			}
 		}
 	}
-
 	void del() {
 		if (data) {
 			for (int i = 0; i < rows; ++i) delete[] data[i];
@@ -467,6 +480,35 @@ public:
 				res.data[i][j] = data[i][j] * scalar;
 		return res;
 	}
+
+	void SetByIndex(double el, int r, int c) {
+		if ((r >= 0 && r < rows) && (c >= 0 && c < cols))
+			data[r][c] = el;
+		else
+			return;
+	}
+	void Print()
+	{
+		int size = rows;
+		int insize = cols;
+		int i, j;
+
+		for (i = 0; i < size; i++)
+		{
+			
+			cout << "[";
+			for (j = 0; j < insize; j++)
+			{
+				if (j + 1 != insize)
+					cout << data[i][j] << ", ";
+				else
+					cout << data[i][j];
+
+			}
+			cout << "]\n";
+		}
+		cout << '\n';
+	}
 };
 
 class Complex {
@@ -488,7 +530,11 @@ public:
 	}
 	Complex operator/(const Complex& other) const {
 		double denominator = other.re * other.re + other.im * other.im;
-		if (denominator == 0) throw std::invalid_argument("Деление на ноль.");
+		if (denominator == 0)
+		{
+			cout << "Деление на ноль";
+			exit(1);
+		}
 		return Complex((re * other.re + im * other.im) / denominator,
 			(im * other.re - re * other.im) / denominator);
 	}
@@ -499,8 +545,17 @@ public:
 		return (re == other.re) && (im == other.im);
 	}
 
-};
 
+	void Print() {
+		if (im > 0)
+			cout << re << " + " << im << "i";
+		if (im < 0)
+			cout << re << " - " << abs(im) << "i";
+		if (im = 0)
+			cout << re;
+		cout << '\n';
+	}
+};
 class Date {
 	int day, month, year;
 
@@ -563,6 +618,10 @@ public:
 	bool operator>(const Date& o) const { return o < *this; }
 	bool operator<=(const Date& o) const { return !(o < *this); }
 	bool operator>=(const Date& o) const { return !(*this < o); }
+
+	void Print() {
+		cout << day << "." << month << "." << year << '\n';
+	}
 };
 
 int main()
@@ -653,10 +712,34 @@ int main()
 	//}
 
 	//Matrix m1(2, 2);
+	//m1.SetByIndex(2.5, 0, 0);
+	//m1.SetByIndex(4.2, 0, 1);
+	//m1.SetByIndex(-1.7, 1, 0);
+	//m1.SetByIndex(7.0, 1, 1);
 	//Matrix m2(2, 2);
+	//m2.SetByIndex(-5.3, 0, 0);
+	//m2.SetByIndex(6.5, 0, 1);
+	//m2.SetByIndex(1.2, 1, 0);
+	//m2.SetByIndex(-8.3, 1, 1);
+
+	//m1.Print();
+	//m2.Print();
+
+	//cout << "Сложение: \n";
 	//Matrix m3 = m1 + m2;
+	//m3.Print();
+	//cout << "Умножение: \n";
 	//Matrix m4 = m1 * m2;
-	//Matrix m5 = m1 * 2.5;
+	//m4.Print();
+	//double n = 2.5;
+	//cout << "Умножение на число " << n <<" : \n";
+	//Matrix m5 = m1 * n;
+	//m5.Print();
+	
+	
+	
+	
+	
 
 	//cout << "\n\n";
 
@@ -666,34 +749,40 @@ int main()
 	//Complex c4 = c1 * c2;
 	//Complex c5 = c1 / c2;
 
+	//c1.Print();
+	//c2.Print();
+	//c3.Print();
+	//c4.Print();
+	//c5.Print();
+
 	//if (c1 == Complex(2.0, 3.0)) {
 	//	cout << "Оператор == для Complex работает\n";
 	//}
 
 	//cout << "\n\n";
 
-	//Date d1(28, 2, 2024); // Високосный год
-	//Date d2(1, 3, 2024);
+	Date d1(28, 2, 2024); // Високосный год
+	Date d2(1, 3, 2024);
 
-	//if (d1 < d2) {
-	//	cout << "d1 раньше чем d2\n";
-	//}
-	//else if (d1 > d2)
-	//	cout << "d1 позже чем d2\n";
-	//else
-	//	cout << "d1 = d2\n";
+	if (d1 < d2) {
+		cout << "d1 раньше чем d2\n";
+	}
+	else if (d1 > d2)
+		cout << "d1 позже чем d2\n";
+	else
+		cout << "d1 = d2\n";
 
-	//++d1; // d1 должен стать 29.02.2024
+	++d1; // d1 должен стать 29.02.2024
 
-	//d1++; // d1 должен стать 01.03.2024
+	d1++; // d1 должен стать 01.03.2024
 
-	//if (d1 < d2) {
-	//	cout << "d1 раньше чем d2\n";
-	//}
-	//else if (d1 > d2)
-	//	cout << "d1 позже чем d2\n";
-	//else
-	//	cout << "d1 = d2\n";
+	if (d1 < d2) {
+		cout << "d1 раньше чем d2\n";
+	}
+	else if (d1 > d2)
+		cout << "d1 позже чем d2\n";
+	else
+		cout << "d1 = d2\n";
 
 	//cout << "\n\n";
 

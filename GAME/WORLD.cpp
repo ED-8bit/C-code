@@ -529,12 +529,15 @@ void SUBJECT::CalcToughness() {
 	{
 	case S_stone:
 		toughness = 300;
+		maxtoughness = toughness;
 		break;
 	case S_ore:
 		toughness = 450;
+		maxtoughness = toughness;
 		break;
 	case S_endstone:
 		toughness = -1;
+		maxtoughness = toughness;
 		break;
 	}
 }

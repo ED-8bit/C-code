@@ -479,6 +479,7 @@ public:
 		return (maxSpeedKmh * 0.5) - (numDoors * 10) + 100;
 	}
 };
+
 class SportsCar : public Car {
 protected:
 	double turboBoostKmh;
@@ -544,6 +545,7 @@ int main()
 			// СР с 08:30 до 14:40 | СР с 12:00 до 22:00
 			// ЧТ c 08:30 до 13:10 | ЧТ ----------------
 			// ПТ с 08:30 до 13:10 | ПТ ----------------
+
 			cout << "Суммарное количество часов пересечения в неделю: " << ws.getOverlap() << " ч.\n";
 			break;
 		}
@@ -597,3 +599,4 @@ int main()
 		system("pause");
 	}
 }
+
