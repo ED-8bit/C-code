@@ -74,7 +74,7 @@ void set_ore(std::vector<std::vector<tile>>& game, int seed, int level = 0, bool
 
 void init_subs(std::vector<std::vector<tile>>& game);
 
-enum level_type {cave};
+enum level_type {cave, save_cave};
 extern int MAPs;
 //    0     1     2     3     4     5     6     7
 //  {"  ", "`.", "LV", "SP", "EN", "PL", "  ", "  "},   // Пол (floor)
@@ -90,7 +90,6 @@ protected:
 	point_int Spawn;
 	point_int Escape;
 	level_type Type;
-
 public:
 	LEVEL(std::string n = "", level_type t = cave, int seed = 23, int size = 32); // Генерация уровня в конструкторе
 	int getID() { return ID; }

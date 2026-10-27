@@ -4,21 +4,56 @@
 #include <vector>
 #include "WORLD.h"
 #include "ENTS.h"
-
 using namespace std;
 
-sf::Sprite CREATE_SPRITE(sf::Texture& Pic, point_double dot) {
-	sf::Sprite sprite(Pic);
-	sprite.setPosition({ float(dot.x), float(dot.y) });
-	return sprite;
-}
-void CHANGE_SPRITE(sf::Sprite& spr, sf::Texture& NewPic, point_double dot) {
-	spr.setTexture(NewPic);
-	if (dot.x != NULL && dot.y != NULL)
-	{
-		spr.setPosition({ float(dot.x), float(dot.y) });
-	}
-}
+//bool SpriteManager::outlayer(int l) {
+//	int actual_layers = 3;
+//	if (l < 0 || l >= actual_layers)
+//		return true;
+//	else
+//		return false;
+//}
+//bool SpriteManager::outBorder(point_int dot) {
+//	size_t size = FieldSize;
+//	if (dot.x < 0 || dot.y < 0 || dot.x >= size || dot.y >= size)
+//		return true;
+//	else
+//		return false;
+//}
+//bool SpriteManager::outData(point_int dot, int l){
+//	if (outlayer(l) || outBorder(dot))
+//		return true;
+//	else
+//		return false;
+//}
+//
+//SpriteManager::SpriteManager(int Map_Size){
+//	for (int i = 0; i < 3; i++)
+//	{
+//		data[i].resize(Map_Size);
+//		for (int j = 0; j < Map_Size; j++)
+//		{
+//			data[i][j].resize(Map_Size);
+//		}
+//	}
+//	FieldSize = Map_Size;
+//}
+//SpriteManager::~SpriteManager(){}
+//void SpriteManager::CREATE_SPRITE(sf::Texture& Pic, point_int dot, int layer) {
+//	sf::Sprite sprite(Pic);
+//	sprite.setPosition({ float(dot.x), float(dot.y) });
+//	data[layer][dot.x][dot.y] = sprite;
+//}
+//void SpriteManager::CHANGE_SPRITE(point_int dot, int l, sf::Texture& NewPic, point_int NewDot, int NewL) {
+//	if (outData(dot, l)) return;
+//	data[l][dot.x][dot.y].setTexture(NewPic);
+//	if ((!outData(NewDot, NewL)) && (NewDot != dot))
+//	{
+//		data[NewL][NewDot.x][NewDot.y] = data[l][dot.x][dot.y];
+//		// data[l][dot.x][dot.y] = sf::Sprite();
+//	}
+//}
+
 void DRAW_SPRITES(sf::RenderWindow& w, vector<sf::Sprite>& sprites)
 {
 	size_t size = sprites.size();

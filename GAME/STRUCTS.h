@@ -10,6 +10,14 @@ struct point_int {
 	int y;
 
 	point_int(int x = 0, int y = 0) : x(x), y(y) {}
+
+	bool operator==(point_int other) const {
+		return x == other.x && y == other.y;
+	}
+	bool operator!=(point_int other) const {
+		return !(*this == other);
+	}
+
 };
 struct point_double {
 	double x;

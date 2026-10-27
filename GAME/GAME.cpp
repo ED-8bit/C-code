@@ -44,11 +44,10 @@ void GAME(const float aspect, const unsigned int width)
 	}
 	vector<sf::Texture> cracks_tiles_pic;
 	cracks_tiles_pic.resize(9);
-	for (int i = 0; i < 3; i++)
+	for (int x = 0; x < 3; x++)
 	{
-		int x = (i + 3) % 3;
-		int y = (i + 1) / 3;
-		if (!cracks_tiles_pic[i].loadFromFile(Cracks_on_subs_path, false, sf::IntRect({ i * textures_size, y * textures_size }, { textures_size, textures_size })))
+		int y = (x + 1) / 3;
+		if (!cracks_tiles_pic[x].loadFromFile(Cracks_on_subs_path, false, sf::IntRect({ x * textures_size, y * textures_size }, { textures_size, textures_size })))
 			return;
 	}
 	//			/\ Textures /\
