@@ -7,7 +7,6 @@ int MAPs = 0;
 int ENTs = 0;
 using namespace std;
 
-
 void GAME(const float aspect, const unsigned int width)
 {
 	const int MAP_SIZE = 48;

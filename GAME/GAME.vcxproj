@@ -161,14 +161,18 @@
   <ItemGroup>
     <ClCompile Include="ENTS.cpp" />
     <ClCompile Include="GAME.cpp" />
+    <ClCompile Include="GENERATORS.cpp" />
     <ClCompile Include="GRAPH.cpp" />
     <ClCompile Include="ITEMS.cpp" />
+    <ClCompile Include="OBJECTS.cpp" />
     <ClCompile Include="WORLD.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ENTS.h" />
+    <ClInclude Include="GENERATORS.h" />
     <ClInclude Include="GRAPH.h" />
     <ClInclude Include="ITEMS.h" />
+    <ClInclude Include="OBJECTS.h" />
     <ClInclude Include="STRUCTS.h" />
     <ClInclude Include="WORLD.h" />
   </ItemGroup>

@@ -511,114 +511,75 @@ void set_ore(vector<vector<tile>>& game, int seed, int level, bool grow)
 		random_ore_grow(game, seed);
 }
 
-void init_subs(std::vector<std::vector<tile>>& game) {
-	size_t size = game.size();
-	for (int x = 0; x < size; x++)
-		for (int y = 0; y < size; y++)
-			game[x][y].getSubject().CalcToughness();
+tile::tile(){}
+tile::~tile(){}
+
+void tile::setSubject(std::unique_ptr<SUBJECT> s) { subject = std::move(s); }
+void tile::setFloor(std::unique_ptr<FLOOR> f) { floor = std::move(f); }
+SUBJECT* tile::getSubject() const { return subject.get(); }
+FLOOR* tile::getFloor() const { return floor.get(); }
+
+bool tile::DamageToSubject(int dmg) {
+	if (!getSubject())
+		return false;
+	else
+	{
+		getSubject()->DecreaseToughness(dmg);
+		return true;
+	}
+
 }
 
-SUBJECT::SUBJECT(subs t = S_none): type(t)
+LEVEL::LEVEL(std::string n, int size, CA_gen_settings level) : Name(n), Seed(level.seed), Size(size)
 {
-	CalcToughness();
-}
-SUBJECT::~SUBJECT(){}
-
-void SUBJECT::CalcToughness() {
-	switch (type)
-	{
-	case S_stone:
-		toughness = 300;
-		maxtoughness = toughness;
-		break;
-	case S_ore:
-		toughness = 450;
-		maxtoughness = toughness;
-		break;
-	case S_endstone:
-		toughness = -1;
-		maxtoughness = toughness;
-		break;
-	}
-}
-void SUBJECT::DecreaseToughness(int dmg) {
-	toughness -= dmg;
-	if (toughness <= 0)
-	{
-		toughness = 0;
-		type = S_none;
-	}
-		
-}
-FLOOR::FLOOR(floors t = F_none): type(t){}
-FLOOR::~FLOOR(){}
-
-tile::tile(subs s, floors f): subject(s), floor(f) {}
-tile::~tile() {}
-
-LEVEL::LEVEL(std::string n, level_type t, int seed, int size) : Name(n), Type(t), Seed(seed)
-{
-	ID = ++MAPs;
-	Grid.resize(size, vector<tile>(size, tile(subs::S_none, floors::F_stone)));
-	if (Type == cave)
-	{
-		int i, iters = 7, fill = 75, need = 5, wall = 3, minzone = 50, debris = 2, smooth = 1, ore = 2;
-		seed_fill_CAVE(Grid, seed, fill);
-		for (i = 0; i < iters; i++)
-		{
-			iteration_CAVE(Grid, need);
-		}
-		border_fill_CAVE(Grid, wall);
-		fill_holes_CAVE(Grid, minzone);
-		for (i = 0; i < debris; i++)
-		{
-			destroy_debris_CAVE(Grid);
-		}
-		for (i = 0; i < smooth; i++)
-		{
-			build_smoothing_CAVE(Grid);
-		}
-		set_ore(Grid, seed, ore, true);
-		Spawn = set_player_spawn(Grid, seed);
-		Escape = set_LEVEL_escape(Grid, seed);
-		init_subs(Grid);
-		switch (Type)
-		{
-		case cave:
-			std::cout << "CAVE " << ID <<": ";
-			break;
-		default:
-			std::cout << "LEVEL: ";
-			break;
-		}
-		std::cout << Name << " with SEED: " << Seed << " GENERATED\n";
-	}
+	cout << "LEVEL" << ID << ": " << Name << " with SEED: " << Seed << " GENERATED\n";
 }
 LEVEL::~LEVEL()
 {
-	switch (Type)
-	{
-	case cave:
-		std::cout << "CAVE ";
-		break;
-	default:
-		std::cout << "LEVEL: ";
-		break;
-	}
-	std::cout << ID << ": " << Name << " with SEED: " << Seed << " DELETED\n";
+	cout << "LEVEL" << ID << ": " << Name << " with SEED: " << Seed << " DELETED\n";
 }
 
-bool LEVEL::give_damage_to_sub(point_int sub, int dmg)
-{
-	if (!outBorder(Grid, sub) && Grid[sub.x][sub.y].getSubject().getType() != S_endstone)
-	{
-		Grid[sub.x][sub.y].getSubject().DecreaseToughness(dmg);
-		return true;
-	}
-	else
-	{
-		std::cout << "cant break " << sub.x << ',' << sub.y << '\n';
-		return false;
-	}
+int LEVEL::getID() { return ID; } 
+int LEVEL::getSeed() { return Seed; }
+void LEVEL::setName(std::string NewName) { Name = NewName; }
+string LEVEL::getName() { return Name; }
+size_t LEVEL::getSize() { return Size; } 
+vector<vector<tile>>& LEVEL::getGrid() { return Grid; } 
+point_int LEVEL::getSpawn() { return Spawn; }
+point_int LEVEL::getExit() { return Exit; }
 
+bool LEVEL::DamageSubject(point_int sub, int dmg)
+{
+	return Grid[sub.x][sub.y].DamageToSubject(dmg);
+}
+
+LEVEL_CAVE::LEVEL_CAVE(string n, int size, CA_gen_settings cave): LEVEL(n, size, cave)
+{
+	ID = ++MAPs;
+	Grid.resize(Size, vector<tile>(Size, tile())); // пусты
+	seed_fill_CAVE(Grid, cave.seed, cave.initial_population_percent);
+	for (int i = 0; i < cave.iterations; i++)
+	{
+		iteration_CAVE(Grid, cave.required_neighbors);
+	}
+	border_fill_CAVE(Grid, cave.wall_level);
+	fill_holes_CAVE(Grid, cave.area_minzone);
+	for (int i = 0; i < cave.debris_destruction_level; i++)
+	{
+		destroy_debris_CAVE(Grid);
+	}
+	for (int i = 0; i < cave.aliasing_level; i++)
+	{
+		build_smoothing_CAVE(Grid);
+	}
+	set_ore(Grid, cave.seed, cave.ore_richness_level, true);
+	Spawn = set_player_spawn(Grid, cave.seed);
+	Exit = set_LEVEL_escape(Grid, cave.seed);
+	init_subs(Grid);
+
+	cout << "CAVE " << ID << ": " << Name << " with SEED: " << Seed << " GENERATED\n";
+}
+LEVEL_CAVE::~LEVEL_CAVE()
+{
+	cout << "CAVE " << ID << ": " << Name << " with SEED: " << Seed << " DELETED\n";
 }

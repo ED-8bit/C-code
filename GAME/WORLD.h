@@ -1,57 +1,26 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <memory>
 #include "STRUCTS.h"
-enum subs
-{
-	S_none, S_stone, S_ore, S_endstone 
-};
-enum floors {
-	F_none, F_stone, F_stone_exit, F_stone_spawn
-};
-class SUBJECT {
-private:
-	subs type;
-	int toughness;
-	int maxtoughness;
-public:
-	SUBJECT(subs t);
-	~SUBJECT();
-
-	void CalcToughness();
-	void DecreaseToughness(int dmg);
-	
-	void setType(subs nt) { type = nt; }
-	void setToughness(int nt) { toughness = nt; }
-	subs getType() { return type; }
-	int getToughness() { return toughness; }
-};
-class FLOOR
-{
-private:
-	floors type;
-public:
-	FLOOR(floors t);
-	~FLOOR();
-
-	void setType(floors nt) { type = nt; }
-	floors getType() { return type; }
-
-};
+#include "OBJECTS.h"
+// test
 
 class tile
 {
 private:
-	SUBJECT subject;
-	FLOOR floor;
+	unique_ptr<SUBJECT> subject;
+	unique_ptr<FLOOR> floor;
 public:
-	tile(subs s, floors f);
+	tile();
 	~tile();
 	
-	void setSubject(SUBJECT NewSub) { subject = NewSub; }
-	void setFloor(FLOOR NewFloor) { floor = NewFloor; }
-	SUBJECT& getSubject() { return subject; }
-	FLOOR& getFloor() { return floor; }
+	void setSubject(std::unique_ptr<SUBJECT> s); // Установливает новый объект в тайл
+	void setFloor(std::unique_ptr<FLOOR> f); // Устанавливает новую поверхность в тайл
+	SUBJECT* getSubject() const; // Возвращает указатель на объект из тайла
+	FLOOR* getFloor() const; // Возвращает указатель на поверхность из тайла
+
+	bool DamageToSubject(int dmg); // Возвращает результат действия. Наносит урон объекту тайла. Удаляет его когда прочность достигает нуля
 };
 
 bool onBorder(std::vector<std::vector<tile>>& game, point_int dot);
@@ -72,36 +41,46 @@ void random_ore_spawn(std::vector<std::vector<tile>>& game, int seed, int fill);
 void random_ore_grow(std::vector<std::vector<tile>>& game, int seed);
 void set_ore(std::vector<std::vector<tile>>& game, int seed, int level = 0, bool grow = 0);
 
-void init_subs(std::vector<std::vector<tile>>& game);
-
-enum level_type {cave, save_cave};
 extern int MAPs;
+
 //    0     1     2     3     4     5     6     7
 //  {"  ", "`.", "LV", "SP", "EN", "PL", "  ", "  "},   // Пол (floor)
 //  {"  ", "[]", "WA", "OR", "  ", "  ", "  ", "  "},   // Стены/объекты (subject)
 //  {"  ", "@@", "  ", "  ", "  ", "  ", "  ", "  "},   // Воздух (air)
+
 class LEVEL
 {
 protected:
 	int ID;
 	int Seed;
 	std::string Name;
+	int Size;
 	std::vector<std::vector<tile>> Grid;
 	point_int Spawn;
-	point_int Escape;
-	level_type Type;
+	point_int Exit;
 public:
-	LEVEL(std::string n = "", level_type t = cave, int seed = 23, int size = 32); // Генерация уровня в конструкторе
-	int getID() { return ID; }
-	int getSeed() { return Seed; }
-	std::string getName() { return Name; }
-	size_t getSize() { return Grid.size(); }
-	std::vector<std::vector<tile>>& getGrid() { return Grid; }
-	point_int getSpawn() { return Spawn; }
-
-	void setName(std::string NewName) { Name = NewName; }
-	bool give_damage_to_sub(point_int sub, int dmg); // Нанести урон объекту по координатам
-
+	LEVEL(std::string n = "", int size, CA_gen_settings level); // Генерация уровня по базовому набору параметров
 	~LEVEL();
+
+	int getID(); // Возвращает ID уровня
+	int getSeed(); // Возвращает зерно генерации уровня
+	void setName(std::string NewName); // Устанавливает имя уровня
+	std::string getName(); // Возвращает имя уровня
+	size_t getSize(); // Возвращает размер сетки уровня
+	std::vector<std::vector<tile>>& getGrid(); // Возвращает сетку уровня
+	point_int getSpawn(); // Возвращает точку появления на уровне
+	point_int getExit(); // Возвращает точку выхода с уровня
+	
+	bool DamageSubject(point_int sub, int dmg); // Возвращает результат действия. Наносит урон объекту уровня в указанном тайле 
+};
+
+class LEVEL_CAVE: public LEVEL
+{
+public:
+	LEVEL_CAVE(std::string n, int size, CA_gen_settings cave);
+	~LEVEL_CAVE();
+
+private:
+
 };
 
