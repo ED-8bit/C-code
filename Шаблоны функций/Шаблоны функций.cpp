@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <cmath>
 using namespace std;
 
 template <class X> X MaxInArray(X arr[], int size)
@@ -44,6 +45,11 @@ public:
 	Animal(string name, double weight): Name(name), Weight(weight){}
 	~Animal(){}
 
+	string getName() { return Name; }
+	double getWeight() { return Weight; }
+	void setName(string NewName) { Name = NewName; }
+	void setWeight(double NewWeight) { Weight = NewWeight; }
+
 	bool operator>(Animal other) {
 		return this->Weight > other.Weight;
 	}
@@ -73,6 +79,64 @@ template <class item> void ShowArray(item arr[], int size) {
 	cout << " ]\n";
 }
 
+
+template <class A, class B> void PrintKeyValue(A key, B value) {
+	cout << key << ": " << value << '\n';
+}
+
+template <class X> void PrintValue(X val) {
+	cout << val << '\n';
+}
+template<> void PrintValue(bool val) {
+	if (val == true)
+		cout << "True\n";
+	else
+		cout << "False\n";
+}
+
+template <class C> C Clamp(C value, C minVal, C maxVal) {
+	if (value < minVal)
+		return minVal;
+	else if (value > maxVal)
+		return maxVal;
+	else
+		return value;
+}
+template <class C> C Clamp(C value) {
+	return Clamp(value, C(0), C(1));
+}
+
+template <class F> F Transform(F val) {
+	return pow(val, 2);
+}
+template<> string Transform(string val)
+{
+	if (!val.empty())
+	{
+		unsigned char r = val[0];
+		if ((r > 223) && (r < 255))
+		{
+			r -= 32;
+			val[0] = r;
+		}
+		else if (r == 184)
+		{
+			r = 168;
+			val[0] = r;
+		}
+		else
+			val[0] = toupper(val[0]);
+	}
+	return val;
+}
+template<> Animal Transform(Animal val) {
+	string name = val.getName();
+	name = Transform(val.getName());
+	val.setName(name);
+	return val;
+}
+
+
 int main()
 {
 	system("chcp 1251");
@@ -83,6 +147,8 @@ int main()
 	const char* arr4[3] = { "cout << ","Hello ", "World" };
 	char arr5[3] = { 'b', 'a', 'c' };
 	Animal arr6[3] = { {"tigr", 250}, {"slon", 5000}, {"monkey", 15}};
+	bool arr7[3] = { true, false, true };
+	string arr8[3] = { "баребук", "купец", "чернобыль" };
 
 
 	int number = 1;
@@ -96,7 +162,6 @@ int main()
 		{
 		case 1:
 		{
-			
 			cout << MaxInArray(arr1, 3) << '\n';
 			cout << MaxInArray(arr2, 3) << '\n';
 			cout << MaxInArray(arr3, 3) << '\n';
@@ -120,22 +185,31 @@ int main()
 		}
 		case 3:
 		{
-			
+			PrintKeyValue(arr4[2], arr3[2]);
+			PrintKeyValue(arr6[1], arr2[0]);
+			PrintKeyValue(arr1[0], arr5[1]);
 			break;
 		}
 		case 4:
 		{
-			
+			PrintValue(arr1[1]);
+			PrintValue(arr4[2]);
+			PrintValue(arr7[0]);
 			break;
 		}
 		case 5:
 		{
-
+			cout << Clamp(arr1[1], 0, 50) << '\n';
+			cout << Clamp(arr1[0]) << '\n';
+			cout << Clamp(arr2[0]) << '\n';
 			break;
 		}
 		case 6:
 		{
-
+			cout << Transform(arr1[0]) << '\n';
+			cout << Transform(arr2[2]) << '\n';
+			cout << Transform(arr8[0]) << '\n';
+			cout << Transform(arr6[0]) << '\n';
 			break;
 		}
 		case 0:
