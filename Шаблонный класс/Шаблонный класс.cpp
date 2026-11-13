@@ -1,6 +1,6 @@
 ﻿#include <iostream>
+#include <vector>
 using namespace std;
-const int SIZE = 100;
 
 //template <class QType>
 //class queue
@@ -37,92 +37,176 @@ const int SIZE = 100;
 //	data[sloc] = put;
 //	sloc++;
 //}
+//
+//template<class Type1, class Type2>
+//class MyClass
+//{
+//	Type1 i;
+//	Type2 j;
+//public:
+//	MyClass(Type1 a, Type2 b) { i = a, j = b; }
+//	~MyClass(){}
+//
+//	void show() { cout << i << ' ' << j << '\n'; }
+//};
+//
+//template<class AType, int size>
+//class arr 
+//{
+//private:
+//	AType a[size];
+//public:
+//	arr() { for (int i = 0; i < size; i++) { a[i] = 0; } }
+//	AType &operator[](int i);
+//};
+//
+//template<class AType, int size>
+//AType &arr<AType, size>::operator[](int i) 
+//{
+//	if (i < 0 || i >= size)
+//	{
+//		cout << "Значение индекса " << i << " за пределами границ массива.\n";
+//		exit(1);
+//	}
+//	return a[i];
+//}
 
-
-template<class Type1, class Type2>
-class MyClass
+template<class T>
+class Set
 {
-	Type1 i;
-	Type2 j;
+	vector<T> data;
 public:
-	MyClass(Type1 a, Type2 b) { i = a, j = b; }
-	~MyClass(){}
-
-	void show() { cout << i << ' ' << j << '\n'; }
-};
-
-template<class AType, int size>
-class arr 
-{
-private:
-	AType a[size];
-public:
-	arr() { for (int i = 0; i < size; i++) { a[i] = 0; } }
-	AType &operator[](int i);
-};
-
-template<class AType, int size>
-AType &arr<AType, size>::operator[](int i) 
-{
-	if (i < 0 || i >= size)
-	{
-		cout << "Значение индекса " << i << " за пределами границ массива.\n";
-		exit(1);
+	Set(){}
+	~Set(){}
+	size_t size() { return data.size(); }
+	void Add(T elem) {
+		if (!In(elem))
+		data.push_back(elem);
 	}
-	return a[i];
-}
+	bool Del(T elem) {
+		for (int i = 0; i < *this->size(); i++)
+		{
+			if (data[i] == elem)
+			{
+				data.erase(data.begin() + i);
+				return true;
+			}
+		}
+		return false;
+	}
+	bool In(T elem) {
+		for (int i = 0; i < *this->size(); i++)
+		{
+			if (data[i] == elem)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	T getElem(size_t i) 
+	{ 
+		if (i >= 0 && i < *this->size())
+			return data[i];
+		else
+			exit(1);
+	}
+
+	Set operator*(Set other) {
+
+		Set* bigger, smaller;
+		if (*this->size() >= other.size()) { bigger = this; smaller = &other; }
+		else { bigger = &other; smaller = this; }
+
+		Set result;
+		int i;
+		for (i = 0; i < smaller->size(); i++)
+		{
+			if (*smaller.In(bigger->getElem(i)))
+				result.Add(bigger->getElem(i));
+		}
+		for (i; bigger->size(); i++)
+		{
+			result.Add(bigger->getElem(i));
+		}
+
+		return result;
+	}
+	Set operator+(Set other) {
+		Set* bigger, smaller;
+		if (*this->size() >= other.size()) { bigger = this; smaller = &other; }
+		else { bigger = &other; smaller = this; }
+
+		Set result;
+		int i;
+		for (i = 0; i < smaller->size(); i++)
+		{
+			if (*smaller.In(bigger->getElem(i)))
+				result.Add(bigger->getElem(i));
+		}
+		for (i; bigger->size(); i++)
+		{
+			result.Add(bigger->getElem(i));
+		}
+
+		return result;
+	}
+};
 
 
-int main() {
+
+
+
+
+int main()
+{
 	system("chcp 1251");
-	//queue<int> d;
-	//d.qput(55);
-	//d.qput(23);
-	//d.qput(89);
-	//d.qput(1);
-	//cout << d.qget() << '\n';
-	//cout << d.qget() << '\n';
-	//cout << d.qget() << '\n';
-	//cout << d.qget() << '\n';
+	int arr1[3] = { 64, 54, 100 };
+	double arr2[3] = { 5.3, 2.5, 4.9 };
+	long int arr3[3] = { 14135, 2456, 34535 };
+	const char* arr4[3] = { "cout << ","Hello ", "World" };
+	char arr5[3] = { 'b', 'a', 'c' };
+	bool arr7[3] = { true, false, true };
+	string arr8[3] = { "баребук", "купец", "чернобыль" };
 
-	//queue<double> a;
-	//a.qput(3.7);
-	//a.qput(7.98);
-	//a.qput(89.23);
-	//a.qput(3.14);
-	//cout << a.qget() << '\n';
-	//cout << a.qget() << '\n';
-	//cout << a.qget() << '\n';
-	//cout << a.qget() << '\n';
-
-	MyClass<int, double> ob1(10, 0.23);
-	MyClass<char, const char*> ob2('X', " Это тест.");
-	ob1.show();
-	ob2.show();
-
-	arr<int, 10> a;
-	for (int i = 0; i < 10; i++)
-		a[i] = i;
-	arr<double, 5> b;
-	for (int i = 0; i < 5; i++)
-		b[i] = i / 3.0;
-
-	cout << "Массив int значений: ";
-	for (int i = 0; i < 10; i++)
+	int number = 1;
+	while (number > 0 && number <= 6)
 	{
-		cout << a[i] << ' ';
+		system("cls");
+		cout << "Выберите номер задания: ";
+		cin >> number;
+		cout << "\n";
+		switch (number)
+		{
+		case 1:
+		{
+			
+			break;
+		}
+		case 2:
+		{
+			
+			break;
+		}
+		case 3:
+		{
+			
+			break;
+		}
+		case 4:
+		{
+			
+			break;
+		}
+		case 5:
+		{
+			
+			break;
+		}
+		case 0:
+			return 0;
+		}
+		cout << "\n";
+		system("pause");
 	}
-	cout << '\n';
-
-	cout << "Массив double значений: ";
-	for (int i = 0; i < 5; i++)
-	{
-		cout << b[i] << ' ';
-	}
-	cout << '\n';
-
-
-	return 0;
-
-
 }

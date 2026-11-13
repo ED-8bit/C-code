@@ -4,7 +4,8 @@
 #include <memory>
 #include "STRUCTS.h"
 #include "OBJECTS.h"
-// test
+#include "GENERATORS.h"
+extern int MAPs;
 
 class tile
 {
@@ -22,31 +23,6 @@ public:
 
 	bool DamageToSubject(int dmg); // Возвращает результат действия. Наносит урон объекту тайла. Удаляет его когда прочность достигает нуля
 };
-
-bool onBorder(std::vector<std::vector<tile>>& game, point_int dot);
-bool outBorder(std::vector<std::vector<tile>>& game, point_int dot);
-void seed_fill_CAVE(std::vector<std::vector<tile>>& game, int seed, int fill = 0);
-void iteration_CAVE(std::vector<std::vector<tile>>& game, int need);
-void fill_holes_CAVE(std::vector<std::vector<tile>>& game, int minzone = 0);
-void destroy_debris_CAVE(std::vector<std::vector<tile>>& game);
-void build_smoothing_CAVE(std::vector<std::vector<tile>>& game);
-void border_fill_CAVE(std::vector<std::vector<tile>>& game, int wall = 0);
-
-point_int find_player_spawn(std::vector<std::vector<tile>>& game, int R, int seed);
-point_int find_LEVEL_escape(std::vector<std::vector<tile>>& game, int R, int seed);
-point_int set_LEVEL_escape(std::vector<std::vector<tile>>& game, int seed);
-point_int set_player_spawn(std::vector<std::vector<tile>>& game, int seed);
-
-void random_ore_spawn(std::vector<std::vector<tile>>& game, int seed, int fill);
-void random_ore_grow(std::vector<std::vector<tile>>& game, int seed);
-void set_ore(std::vector<std::vector<tile>>& game, int seed, int level = 0, bool grow = 0);
-
-extern int MAPs;
-
-//    0     1     2     3     4     5     6     7
-//  {"  ", "`.", "LV", "SP", "EN", "PL", "  ", "  "},   // Пол (floor)
-//  {"  ", "[]", "WA", "OR", "  ", "  ", "  ", "  "},   // Стены/объекты (subject)
-//  {"  ", "@@", "  ", "  ", "  ", "  ", "  ", "  "},   // Воздух (air)
 
 class LEVEL
 {
@@ -73,8 +49,7 @@ public:
 	
 	bool DamageSubject(point_int sub, int dmg); // Возвращает результат действия. Наносит урон объекту уровня в указанном тайле 
 };
-
-class LEVEL_CAVE: public LEVEL
+class LEVEL_CAVE: public LEVEL, public CA_GEN
 {
 public:
 	LEVEL_CAVE(std::string n, int size, CA_gen_settings cave);

@@ -38,3 +38,15 @@ struct CA_gen_settings {
 		ore_richness_level(ore) {
 	}
 };
+
+enum dir {
+	north,
+	west,
+	south,
+	east,
+	north_west,
+	north_east,
+	south_west,
+	south_east
+	
+};

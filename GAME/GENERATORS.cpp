@@ -5,7 +5,7 @@
 #include <queue>
 using namespace std;
 
-CA_GEN::CA_GEN(vector<vector<tile>>& GG, int s) : GEN_Grid(GG), Seed(s) { Size = GEN_Grid.size();}
+CA_GEN::CA_GEN(vector<vector<tile>>& GG, int seed, point_int spawn, point_int exit): GEN_Grid(GG), Seed(seed), Spawn(spawn), Exit(exit) { Size = GEN_Grid.size();}
 CA_GEN::~CA_GEN(){}
 
 bool CA_GEN::onBorder(point_int Dot) {
@@ -26,7 +26,7 @@ bool CA_GEN::isPointSafe(point_int Dot, int R) {
 
 	for (int dx = -R; dx <= R; dx++) {
 		for (int dy = -R; dy <= R; dy++) {
-			if (Dot.x + dx < 0 || Dot.x + dx >= Size || Dot.y + dy < 0 || Dot.y + dy >= Size) return false;
+			if (outBorder({ Dot.x + dx,Dot.y + dy })) return false;
 			if (GEN_Grid[Dot.x + dx][Dot.y + dy].getSubject() != nullptr) return false;
 		}
 	}
@@ -195,23 +195,305 @@ void CA_GEN::WallExpansion(int Additional) {
 		}
 	}
 }
-point_int CA_GEN::SetSpawn(int Radius) {
+void CA_GEN::SetSpawn(int Radius) {
 	mt19937 s(Seed);
 	unsigned int start = s();
-	int direction = start % 4;
-
-
-}
-point_int CA_GEN::SetExit(int Radius) {
-	mt19937 s(Seed);
-	unsigned int start = s();
-
-	int direction = (start % 4 + 1);
-	if (direction == 3 || direction == 4)
+	dir Dir = dir(start % 4 + 4);
+	// Основной обход
+	switch (Dir)
 	{
-		direction -= 2;
+	case south_east:
+		for (int x = Radius; x < Size - Radius; x++)
+		{
+			for (int y = Radius; y < Size - Radius; y++)
+			{
+				if (isPointSafe({ x, y }, Radius))
+				{
+					Spawn = { x, y };
+					GEN_Grid[x][y].setFloor(make_unique<StoneFloorSPWN>());
+					return;
+				}
+			}
+		}
+		break;
+	case north_east:
+		for (int x = Radius; x < Size - Radius; x++)
+		{
+			for (int y = Size - 1 - Radius; y >= Radius; y--)
+			{
+				if (isPointSafe({ x, y }, Radius))
+				{
+					Spawn = { x, y };
+					GEN_Grid[x][y].setFloor(make_unique<StoneFloorSPWN>());
+					return;
+				}
+			}
+		}
+		break;
+	case north_west:
+		for (int x = Size - 1 - Radius; x >= Radius; x--)
+		{
+			for (int y = Radius; y < Size - Radius; y++)
+			{
+				if (isPointSafe({ x, y }, Radius))
+				{
+					Spawn = { x, y };
+					GEN_Grid[x][y].setFloor(make_unique<StoneFloorSPWN>());
+					return;
+				}
+			}
+		}
+		break;
+	case south_west:
+		for (int x = Size - 1 - Radius; x >= Radius; x--)
+		{
+			for (int y = Size - 1 - Radius; y >=  Radius; y--)
+			{
+				if (isPointSafe({ x, y }, Radius))
+				{
+					Spawn = { x, y };
+					GEN_Grid[x][y].setFloor(make_unique<StoneFloorSPWN>());
+					return;
+				}
+			}
+		}
+		break;
 	}
+	// Упрощенный обход
+	switch (Dir)
+	{
+	case south_east:
+		for (int x = 0; x < Size; x++)
+		{
+			for (int y = 0; y < Size; y++)
+			{
+				if (isPointSafe({ x, y }))
+				{
+					Spawn = { x, y };
+					GEN_Grid[x][y].setFloor(make_unique<StoneFloorSPWN>());
+					return;
+				}
+			}
+		}
+		break;
+	case north_east:
+		for (int x = 0; x < Size; x++)
+		{
+			for (int y = Size - 1; y >= 0; y--)
+			{
+				if (isPointSafe({ x, y }))
+				{
+					Spawn = { x, y };
+					GEN_Grid[x][y].setFloor(make_unique<StoneFloorSPWN>());
+					return;
+				}
+			}
+		}
+		break;
+	case north_west:
+		for (int x = Size - 1; x >= 0; x--)
+		{
+			for (int y = 0; y < Size; y++)
+			{
+				if (isPointSafe({ x, y }))
+				{
+					Spawn = { x, y };
+					GEN_Grid[x][y].setFloor(make_unique<StoneFloorSPWN>());
+					return;
+				}
+			}
+		}
+		break;
+	case south_west:
+		for (int x = Size - 1; x >= 0; x--)
+		{
+			for (int y = Size - 1; y >= 0; y--)
+			{
+				if (isPointSafe({ x, y }))
+				{
+					Spawn = { x, y };
+					GEN_Grid[x][y].setFloor(make_unique<StoneFloorSPWN>());
+					return;
+				}
+			}
+		}
+		break;
+	}
+	// По умолчанию
+	Spawn = { 0, 0 };
+	GEN_Grid[0][0].setFloor(make_unique<StoneFloorSPWN>());
+	return;
+}
+void CA_GEN::SetExit(int Radius) {
+	mt19937 s(Seed);
+	unsigned int start = s();
+	dir Dir = dir(start % 4 + 4);
+	// Основной обход
+	switch (Dir)
+	{
+	case north_west:
+		for (int x = Radius; x < Size - Radius; x++)
+		{
+			for (int y = Radius; y < Size - Radius; y++)
+			{
+				if (isPointSafe({ x, y }, Radius))
+				{
+					Exit = { x, y };
+					GEN_Grid[x][y].setFloor(make_unique<StoneFloorEXT>());
+					return;
+				}
+			}
+		}
+		break;
+	case south_west:
+		for (int x = Radius; x < Size - Radius; x++)
+		{
+			for (int y = Size - 1 - Radius; y >= Radius; y--)
+			{
+				if (isPointSafe({ x, y }, Radius))
+				{
+					Exit = { x, y };
+					GEN_Grid[x][y].setFloor(make_unique<StoneFloorEXT>());
+					return;
+				}
+			}
+		}
+		break;
+	case south_east:
+		for (int x = Size - 1 - Radius; x >= Radius; x--)
+		{
+			for (int y = Radius; y < Size - Radius; y++)
+			{
+				if (isPointSafe({ x, y }, Radius))
+				{
+					Exit = { x, y };
+					GEN_Grid[x][y].setFloor(make_unique<StoneFloorEXT>());
+					return;
+				}
+			}
+		}
+		break;
+	case north_east:
+		for (int x = Size - 1 - Radius; x >= Radius; x--)
+		{
+			for (int y = Size - 1 - Radius; y >= Radius; y--)
+			{
+				if (isPointSafe({ x, y }, Radius))
+				{
+					Exit = { x, y };
+					GEN_Grid[x][y].setFloor(make_unique<StoneFloorEXT>());
+					return;
+				}
+			}
+		}
+		break;
+	}
+	// Упрощенный обход
+	switch (Dir)
+	{
+	case north_west:
+		for (int x = 0; x < Size; x++)
+		{
+			for (int y = 0; y < Size; y++)
+			{
+				if (isPointSafe({ x, y }))
+				{
+					Exit = { x, y };
+					GEN_Grid[x][y].setFloor(make_unique<StoneFloorEXT>());
+					return;
+				}
+			}
+		}
+		break;
+	case south_west:
+		for (int x = 0; x < Size; x++)
+		{
+			for (int y = Size - 1; y >= 0; y--)
+			{
+				if (isPointSafe({ x, y }))
+				{
+					Exit = { x, y };
+					GEN_Grid[x][y].setFloor(make_unique<StoneFloorEXT>());
+					return;
+				}
+			}
+		}
+		break;
+	case south_east:
+		for (int x = Size - 1; x >= 0; x--)
+		{
+			for (int y = 0; y < Size; y++)
+			{
+				if (isPointSafe({ x, y }))
+				{
+					Exit = { x, y };
+					GEN_Grid[x][y].setFloor(make_unique<StoneFloorEXT>());
+					return;
+				}
+			}
+		}
+		break;
+	case north_east:
+		for (int x = Size - 1; x >= 0; x--)
+		{
+			for (int y = Size - 1; y >= 0; y--)
+			{
+				if (isPointSafe({ x, y }))
+				{
+					Exit = { x, y };
+					GEN_Grid[x][y].setFloor(make_unique<StoneFloorEXT>());
+					return;
+				}
+			}
+		}
+		break;
+	}
+	// По умолчанию
+	Spawn = { 0, 0 };
+	GEN_Grid[0][0].setFloor(make_unique<StoneFloorEXT>());
+	return;
 }
 void CA_GEN::SetOre(int BaseRichness, bool Growing) {
+	mt19937 ore(Seed);
+	for (int x = 0; x < Size; x++)
+	{
+		for (int y = 0; y < Size; y++)
+		{
+			if (typeid(GEN_Grid[x][y].getSubject()).name() == "Stone")
+			{
+				if ((ore() % 100 + 1) < BaseRichness)
+				{
+					GEN_Grid[x][y].setSubject(make_unique<OreInStone>());
+				}
+			}
+		}
+	}
+	if (Growing)
+	{
+		vector<vector<tile>> newGrid = GEN_Grid;
+		mt19937 growing(Seed);
 
+		int dg;
+		int dx[9] = { -1, -1, 0, 1, 1, 1, 0, -1 };
+		int dy[9] = { 0, -1, -1, -1, 0, 1, 1, 1 };
+
+		for (int x = 0; x < Size; x++)
+		{
+			for (int y = 0; y < Size; y++)
+			{
+				if ((typeid(GEN_Grid[x][y].getSubject()).name() == "OreInStone") && (!onBorder({x, y})))
+				{
+					do
+					{
+						dg = growing() % 8;
+						if (typeid(GEN_Grid[x + dx[dg]][y + dy[dg]].getSubject()).name() == "Stone")
+							newGrid[x + dx[dg]][y + dy[dg]].setSubject(make_unique<OreInStone>());
+
+
+					} while(growing() % 5 != 3);
+				}
+			}
+		}
+		GEN_Grid = newGrid;
+	}
 }
