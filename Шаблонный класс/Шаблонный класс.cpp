@@ -71,6 +71,13 @@ using namespace std;
 //	return a[i];
 //}
 
+class InvalidIndex : public exception {
+public:
+	const char* what() const noexcept override {
+		return "Индекс выходит за пределы объекта\n";
+	}
+};
+
 template<class T>
 class Set
 {
@@ -106,7 +113,7 @@ public:
 	}
 	T getElem(size_t i) 
 	{ 
-		if (i >= 0 && i < size_t(this->size()))
+		if (i >= 0 && i < size())
 			return data[i];
 		else
 			exit(1);
@@ -159,8 +166,105 @@ public:
 		}
 		return result;
 	}
-
+	T& operator[](size_t id) {
+		try {
+			if (id >= 0 && id < size())
+				return data[id];
+			else
+				throw id;
+		}
+		catch (size_t i) {
+			cout << "Индекс " << int(i) << " выходит за пределы множества. Возврат последнего элемента.\n";
+			return data[size() - 1];
+		}
+		
+	}
 };
+
+
+template<class T1>
+class List
+{
+	struct Node {
+		T1 elem;
+		Node* next;
+		Node(T1 e, Node* n = nullptr) : elem(e), next(n) {}
+	};
+
+	Node* root;
+	Node** last;
+public:
+	List(): root(nullptr), last(&root) {}
+	~List() 
+	{
+		if (!IsEmpty())
+		{
+			Node* CurNode = root;
+			Node* NextNode;
+			while (CurNode != nullptr)
+			{
+				NextNode = CurNode->next;
+				delete CurNode;
+				CurNode = NextNode;
+			};
+		}
+	}
+	bool IsEmpty() {
+		return root == nullptr;
+	}
+	void AddFront(T1 value)
+	{
+		Node* NewRoot = new Node(value, root);
+		root = NewRoot;
+		if (last == &root)
+			last = &NewRoot->next;
+	}
+	void AddBack(T1 value)
+	{
+		Node* NewLast = new Node(value);
+		*last = NewLast;
+		last = &NewLast->next;
+	}
+	void Remove(T1 value)
+	{
+		Node* back = nullptr, *cur = root, *forward = nullptr;
+		while (cur != nullptr)
+		{
+			forward = cur->next;
+			if (*cur = value)
+			{
+				if (back != nullptr && forward != nullptr)
+					back->next = forward;
+				else if (back == nullptr && forward != nullptr)
+					root = forward;
+				else if (back != nullptr && forward == nullptr)
+					back->next = nullptr;
+				delete cur;
+				break;
+			}
+
+			back = cur;
+			cur = forward;
+			
+		}
+	}
+	void Print()
+	{
+		if (!IsEmpty())
+		{
+			Node* CurNode = root;
+			Node* NextNode;
+			while (CurNode != nullptr)
+			{
+				NextNode = CurNode->next;
+				cout << CurNode->elem << ' ';
+				CurNode = NextNode;
+			};
+			cout << '\n';
+		}
+	}
+};
+
 
 
 
@@ -224,7 +328,15 @@ int main()
 		}
 		case 2:
 		{
-			
+			List<int> l1;
+			List<string> l2;
+			for (int i : arr1)
+			{
+				l1.AddFront(i);
+			}
+			l1.Print();
+
+
 			break;
 		}
 		case 3:
