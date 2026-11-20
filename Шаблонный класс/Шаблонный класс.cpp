@@ -231,7 +231,7 @@ public:
 		while (cur != nullptr)
 		{
 			forward = cur->next;
-			if (*cur = value)
+			if (cur->elem == value)
 			{
 				if (back != nullptr && forward != nullptr)
 					back->next = forward;
@@ -265,6 +265,168 @@ public:
 	}
 };
 
+template<class T>
+class Result
+{
+	T Value{};
+	bool Success;
+	string Error;
+
+	Result(): Success(false) {}
+public: 
+	Result(T val): Value(val), Success(true), Error("") {}
+	Result(string err) : Success(false), Error(err) {}
+	~Result(){}
+	bool IsOk() const
+	{
+		return Success;
+	}
+	const T* GetValue() const
+	{
+		if(IsOk())
+			return &Value;
+		return nullptr;
+	}
+	const string* GetError() const
+	{
+		return &Error;
+	}
+
+	friend ostream& operator<<(ostream& os, const Result<T>& p) {
+		if (p.IsOk())
+		{
+			os << *p.GetValue() << '\n';
+		}
+		else
+			os << *p.GetError() << '\n';
+		return os;
+	}
+};
+
+template<class T>
+Result<T> SafeDivide(T a, T b)
+{
+	if (b == 0)
+		return Result<T>("Деление на ноль");
+	return Result<T>(a / b);
+}
+
+
+class Product
+{
+	string name;
+	double price;
+	int count;
+public:
+	Product(): name("product"), price(0.0), count(0) {}
+	Product(string n, double p, int c = 0): name(n), price(p), count(c){}
+	~Product(){}
+
+	friend ostream& operator<<(ostream& os, const Product& p) {
+		os << p.name << " - " << p.price << " руб. (На складе: "
+			<< p.count << " шт.)";
+		return os;
+	}
+
+};
+
+template<class T, int capacity>
+class Inventory
+{
+	string name;
+	T items[capacity];
+	size_t count;
+public:
+	Inventory(string n): name(n), count(0){}
+	~Inventory(){}
+
+	bool AddItem(T item)
+	{
+		if (count < capacity)
+		{
+			items[count++] = item;
+			return true;
+		}
+		else 
+			return false;
+	}
+	bool RemoveItem(size_t id)
+	{
+		if (id <= count - 1)
+		{
+			for (size_t i = id; i < capacity - 1; i++)
+			{
+				items[i] = items[i + 1];
+			}
+			count--;
+			return true;
+		}
+		else
+			return false;
+	}
+	bool IsFull()
+	{
+		return count == capacity - 1;
+	}
+	size_t TotalCount()
+	{
+		return count;
+	}
+	void PrintAll()
+	{
+		cout << "Склад: "<< name << '\n';
+		for (size_t i = 0; i < count; i++)
+		{
+			cout <<"[ " << items[i] << " ]\n";
+		}
+	}
+};
+
+
+template<class T>
+class Statistics
+{
+	T min;
+	T max;
+	T sum;
+	int count;
+public:
+	Statistics():min(0), max(0), sum(0), count(0){}
+	~Statistics(){}
+	void AddValue(T value)
+	{
+		if (value > max || count == 0)
+		{
+			max = value;
+		}
+		if (value < min || count == 0)
+		{
+			min = value;
+		}
+		count++;
+		sum += value;
+	}
+	T GetMin() {
+		return min;
+	}
+	T GetMax() {
+		return max;
+	}
+	double GetAverage()
+	{
+		return sum / double(count);
+	}
+	void PrintStats()
+	{
+		cout << "Статистика \n";
+		cout << "Минимум: " << min << '\n';
+		cout << "Максимум: " << max << '\n';
+		cout << "Сумма: " << sum << '\n';
+		cout << "Количество: " << count << '\n';
+		
+	}
+};
+
 
 
 
@@ -274,7 +436,9 @@ int main()
 	int arr1[6] = { 64, 54, 100, 54, 44, 98 };
 	int arr2[6] = { 135, 2456, 335, 2456, 54, 46 };
 	string arr3[6] = { "баребук", "World", "чернобыль", "чернобыль", "london", "Hello"};
-	string arr4[6] = { "cow","Hello", "World", "qwerty", "orel", "wasd"};
+	string arr4[6] = { "cow","Hello", "World", "qwerty123", "orel1234", "wasd"};
+	Product GPUs[6] = { {"RTX 5060", 40000.0, 1000}, {"RTX 5060 TI", 60000.0, 420}, {"RTX 5070", 110000.0, 100},
+		{"RTX 5070 TI", 140000.0, 23}, {"RTX 5080", 300000.0, 10}, {"RTX 5090", 879000.99, 5} };
 	
 	int number = 1;
 	while (number > 0 && number <= 6)
@@ -335,23 +499,54 @@ int main()
 				l1.AddFront(i);
 			}
 			l1.Print();
-
-
 			break;
 		}
 		case 3:
 		{
-			
+			Result<int> r1 = SafeDivide(18, 6);
+			Result<double> r2 = SafeDivide(14.3, 0.0);
+			cout << r1;
+			cout << r2;
 			break;
 		}
 		case 4:
 		{
-			
+			Inventory<Product, 6> DNS("DNS");
+			for (Product videocard : GPUs)
+			{
+				DNS.AddItem(videocard);
+			}
+			DNS.PrintAll();
+			cout << '\n';
+			Inventory<string, 6> strokes("Строки");
+			for (string stroke : arr3)
+			{
+				strokes.AddItem(stroke);
+			}
+			strokes.PrintAll();
 			break;
 		}
 		case 5:
 		{
-			
+			Statistics<double> temp;
+			temp.AddValue(17.5);
+			temp.AddValue(17.4);
+			temp.AddValue(16.2);
+			temp.AddValue(14.9);
+			temp.AddValue(12.8);
+			temp.AddValue(15.11);
+			temp.AddValue(12.4);
+			temp.PrintStats();
+			cout << "Среднее: " << temp.GetAverage() << '\n';
+			cout << '\n';
+			Statistics<int> res;
+			res.AddValue(4);
+			res.AddValue(1);
+			res.AddValue(6);
+			res.AddValue(2);
+			res.AddValue(7);
+			res.PrintStats();
+			cout << "Среднее: " << res.GetAverage() << '\n';
 			break;
 		}
 		case 0:
